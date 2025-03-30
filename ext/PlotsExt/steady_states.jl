@@ -241,7 +241,9 @@ Class selection done by passing `String` or `Vector{String}` as kwarg:
 
 Other kwargs are passed onto Plots.gr()
 """
-function HarmonicSteadyState.plot_phase_diagram(res::Result{D}; kwargs...)::Plots.Plot where {D}
+function HarmonicSteadyState.plot_phase_diagram(
+    res::Result{D}; kwargs...
+)::Plots.Plot where {D}
     if D == 1
         plot_phase_diagram_1D(res; _set_Plots_default..., kwargs...)
     elseif D == 2

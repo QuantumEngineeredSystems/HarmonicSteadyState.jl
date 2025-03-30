@@ -18,7 +18,9 @@ using Test
     fixed = OrderedDict{HarmonicSteadyState.Num,Float64}()
     varied = OrderedDict(μ => range(2, 3, 2))
     # method = HarmonicBalance.WarmUp(; seed=SEED)
-    prob = HarmonicSteadyState.LimitCycles.limit_cycle_problem(harmonic_eq, varied, fixed, ω_lc)
+    prob = HarmonicSteadyState.LimitCycles.limit_cycle_problem(
+        harmonic_eq, varied, fixed, ω_lc
+    )
     result = get_limit_cycles(
         harmonic_eq, WarmUp(), varied, fixed, ω_lc; show_progress=false
     )

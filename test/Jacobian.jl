@@ -3,7 +3,6 @@ using HarmonicSteadyState.QuestBase: substitute_all
 using HarmonicSteadyState: OrderedDict, Problem, _free_symbols
 using Test, TestExtras
 
-
 @variables α, ω, ω0, F, γ, t, x(t);
 diff_eq = DifferentialEquation(
     d(x, t, 2) + ω0 * x + α * x^3 + γ * d(x, t) ~ F * cos(ω * t), x

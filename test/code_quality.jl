@@ -2,21 +2,21 @@
     # CI = get(ENV, "CI", nothing) == "true" || get(ENV, "GITHUB_TOKEN", nothing) !== nothing
     # julia_version = VERSION >= v"1.11.0-DEV.0" # fails on 1.11
     # if !CI && !julia_version
-        using HarmonicSteadyState
+    using HarmonicSteadyState
 
-        using CheckConcreteStructs
+    using CheckConcreteStructs
 
-        all_concrete(HarmonicSteadyState.WarmUp)
-        all_concrete(HarmonicSteadyState.TotalDegree)
-        all_concrete(HarmonicSteadyState.Polyhedral)
-        all_concrete(HarmonicSteadyState.Result)
-        all_concrete(HarmonicSteadyState.Problem)
-        all_concrete(HarmonicSteadyState.HarmonicEquation)
-        all_concrete(HarmonicSteadyState.AdiabaticSweep)
+    all_concrete(HarmonicSteadyState.WarmUp)
+    all_concrete(HarmonicSteadyState.TotalDegree)
+    all_concrete(HarmonicSteadyState.Polyhedral)
+    all_concrete(HarmonicSteadyState.Result)
+    all_concrete(HarmonicSteadyState.Problem)
+    all_concrete(HarmonicSteadyState.HarmonicEquation)
+    all_concrete(HarmonicSteadyState.AdiabaticSweep)
 
-        all_concrete(HarmonicSteadyState.LinearResponse.Lorentzian)
-        all_concrete(HarmonicSteadyState.LinearResponse.ResponseMatrix)
-        all_concrete(HarmonicSteadyState.LinearResponse.JacobianSpectrum)
+    all_concrete(HarmonicSteadyState.LinearResponse.Lorentzian)
+    all_concrete(HarmonicSteadyState.LinearResponse.ResponseMatrix)
+    all_concrete(HarmonicSteadyState.LinearResponse.JacobianSpectrum)
     # end
 end
 
@@ -40,7 +40,7 @@ end
     using HarmonicSteadyState.HomotopyContinuation: ModelKit
     Aqua.test_all(
         HarmonicSteadyState;
-        piracies=(treat_as_own=[ModelKit.Variable,ModelKit.System],),
+        piracies=(treat_as_own=[ModelKit.Variable, ModelKit.System],),
         ambiguities=false,
     )
     for mod in [TimeEvolution, SteadyStateDiffEqExt, PlotsExt]

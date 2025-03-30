@@ -249,7 +249,6 @@ function eigenvectors(res::Result{D,S,P}, branch; class=["physical"]) where {D,S
     return eigvecs_filtered
 end
 
-
 """
 $(TYPEDSIGNATURES)
 

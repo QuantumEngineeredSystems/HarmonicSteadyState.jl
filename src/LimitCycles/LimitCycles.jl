@@ -32,9 +32,7 @@ using HarmonicSteadyState:
     promote_types,
     JacobianFunction
 
-using HarmonicSteadyState:
-    HarmonicSteadyState, Result, Problem
-
+using HarmonicSteadyState: HarmonicSteadyState, Result, Problem
 
 include("gauge_fixing.jl")
 include("analysis.jl")

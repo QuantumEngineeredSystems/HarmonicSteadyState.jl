@@ -38,7 +38,9 @@ function HomotopyContinuation.ModelKit.System(eom::HarmonicEquation)
     pars = eom.parameters
     return HC.System(eqs, vars, pars)
 end
-function HomotopyContinuation.ModelKit.System(eqs::Vector{Num}, vars::Vector{Num}, pars::Vector{Num})
+function HomotopyContinuation.ModelKit.System(
+    eqs::Vector{Num}, vars::Vector{Num}, pars::Vector{Num}
+)
     conv_vars = Num_to_Variable.(vars)
     conv_para = Num_to_Variable.(pars)
     return S = HomotopyContinuation.System(

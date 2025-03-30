@@ -153,9 +153,7 @@ $(TYPEDSIGNATURES)
 Fix the gauge in `eom` where `ω_lc` is the limit cycle frequency by constraining `fixed_var` to zero and promoting `ω_lc` to a variable.
 """
 function _fix_gauge!(eom::HarmonicEquation, ω_lc::Num, fixed_var::HarmonicVariable)
-    new_symbol = declare_variable(
-        string(ω_lc), first(get_independent_variables(eom))
-    )
+    new_symbol = declare_variable(string(ω_lc), first(get_independent_variables(eom)))
     rules = Dict(ω_lc => new_symbol, fixed_var.symbol => Num(0))
     eom.equations = expand_derivatives.(substitute_all(eom.equations, rules))
     eom.parameters = setdiff(eom.parameters, [ω_lc]) # ω_lc is now NOT a parameter anymore
