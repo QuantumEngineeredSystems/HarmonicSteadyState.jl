@@ -57,21 +57,6 @@ means only solving the equations AFTER numerical values have been plugged in, gi
 time cost per run.
 """
 
-# for implicit evaluation, the numerical values precede the rearrangement
-# for limit cycles, the zero eigenvalue causes the rearrangement to fail -> filter it out
-# THIS SETS ALL DERIVATIVES TO ZERO - assumes use for steady states
-function _get_J_matrix(eom::HarmonicEquation; order=0)
-    order > 1 && error("Cannot get a J matrix of order > 1 from the harmonic equations.\n
-                       These are by definition missing higher derivatives")
-
-    vars_simp = Dict([var => _remove_brackets(var) for var in get_variables(eom)])
-    T = get_independent_variables(eom)[1]
-    # J = Symbolics.jacobian(eom.equations, d(get_variables(eom), T, order))
-    J = get_Jacobian(eom.equations, d(get_variables(eom), T, order))
-
-    return Symbolics.expand_derivatives.(substitute_all(J, vars_simp)) # a symbolic matrix to be compiled
-end
-
 # # TODO COMPILE THIS?
 """
 $(TYPEDSIGNATURES)
@@ -94,4 +79,36 @@ function get_implicit_Jacobian(p::Problem)
     return get_implicit_Jacobian(
         p.eom; sym_order=_free_symbols(p), rules=p.fixed_parameters
     )
+end
+
+# for implicit evaluation, the numerical values precede the rearrangement
+# for limit cycles, the zero eigenvalue causes the rearrangement to fail -> filter it out
+# THIS SETS ALL DERIVATIVES TO ZERO - assumes use for steady states
+function _get_J_matrix(eom::HarmonicEquation; order=0)
+    order > 1 && error("Cannot get a J matrix of order > 1 from the harmonic equations.\n
+                       These are by definition missing higher derivatives")
+
+    vars_simp = Dict([var => _remove_brackets(var) for var in get_variables(eom)])
+    T = get_independent_variables(eom)[1]
+    # J = Symbolics.jacobian(eom.equations, d(get_variables(eom), T, order))
+    J = get_Jacobian(eom.equations, d(get_variables(eom), T, order))
+
+    return Symbolics.expand_derivatives.(substitute_all(J, vars_simp)) # a symbolic matrix to be compiled
+end
+
+# ∨ this is atm a temporary duplicate code from HarmonicBalance
+" Get the Jacobian of a set of equations `eqs` with respect to the variables `vars`. "
+function get_Jacobian(eqs::Vector{Num}, vars::Vector{Num})::Matrix{Num}
+    length(eqs) == length(vars) || error("Jacobians are only defined for square systems!")
+    M = Matrix{Num}(undef, length(vars), length(vars))
+
+    for idx in CartesianIndices(M)
+        M[idx] = Symbolics.expand_derivatives(d(eqs[idx[1]], vars[idx[2]]))
+    end
+    return M
+end # TODO should replace with Symbolics.jacobian
+
+function get_Jacobian(eqs::Vector{Symbolics.Equation}, vars::Vector{Num})::Matrix{Num}
+    expr = Num[getfield(eq, :lhs) - getfield(eq, :rhs) for eq in eqs]
+    return get_Jacobian(expr, vars)
 end

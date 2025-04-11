@@ -2,7 +2,7 @@ module LinearResponse
 
 using QuestBase: d, declare_variable
 
-using HarmonicBalance: HarmonicBalance
+# using HarmonicBalance: HarmonicBalance
 
 using Printf: Printf, @printf
 using DocStringExtensions
@@ -26,8 +26,7 @@ using QuestBase:
     DifferentialEquation,
     get_independent_variables,
     var_name,
-    substitute_all,
-    get_Jacobian
+    substitute_all
 
 include("types.jl")
 include("utils.jl")
