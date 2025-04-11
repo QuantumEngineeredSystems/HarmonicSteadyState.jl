@@ -80,14 +80,13 @@ and input frequency in the given range.
 - `nat_var::Num`: Natural variable to evaluate in the response
 - `Ω_range`: Range of frequencies to evaluate
 - `branch::Int`: Branch number to analyze
-- `order`: Order of the response to calculate
 - `show_progress=true`: Whether to show a progress bar
 
 # Returns
 - Array{P,2}: Response matrix where rows correspond to frequencies and columns to stable solutions
 """
 function get_linear_response(
-    res::Result{D,S,P}, nat_var::Num, Ω_range, branch::Int; order, show_progress=true
+    res::Result{D,S,P}, nat_var::Num, Ω_range, branch::Int; show_progress=true
 ) where {D,S,P}
     stable = get_class(res, branch, "stable") # boolean array
     !any(stable) && error("Cannot generate a spectrum - no stable solutions!")
@@ -249,54 +248,30 @@ function eigenvectors(res::Result{D,S,P}, branch; class=["physical"]) where {D,S
     return eigvecs_filtered
 end
 
-# """
-# $(TYPEDSIGNATURES)
-
-# Obtain the symbolic linear response matrix of a `diff_eq` corresponding to a perturbation frequency `freq`.
-# This routine cannot accept a `HarmonicEquation` since there, some time-derivatives are already dropped.
-# `order` denotes the highest differential order to be considered.
-
-# """
-# function get_response_matrix(diff_eq::DifferentialEquation, freq::Num; order=2)::Matrix
-#     Symbolics.@variables T, i
-#     time = get_independent_variables(diff_eq)[1]
-
-#     eom = HarmonicBalance.harmonic_ansatz(diff_eq, time)
-
-#     # replace the time-dependence of harmonic variables by slow time BUT do not drop any derivatives
-#     eom = HarmonicBalance.slow_flow(eom; fast_time=time, slow_time=T, degree=order + 1)
-
-#     eom = HarmonicBalance.fourier_transform(eom, time)
-
-#     # get the response matrix by summing the orders
-#     # M = Symbolics.jacobian(eom.equations, get_variables(eom))
-#     M = get_Jacobian(eom.equations, get_variables(eom))
-#     for n in 1:order
-#         # M += (im * freq)^n * Symbolics.jacobian(eom.equations, d(get_variables(eom), T, n))
-#         M += (im * freq)^n * get_Jacobian(eom.equations, d(get_variables(eom), T, n))
-#     end
-#     M = substitute_all(
-#         M, [var => declare_variable(var_name(var)) for var in get_variables(eom)]
-#     )
-#     return M
-# end
-
 "Get the response matrix corresponding to `res`.
 Any substitution rules not specified in `res` can be supplied in `rules`."
 function ResponseMatrix(res::Result; rules=Dict())
-
-    # get the symbolic response matrix
-    Symbolics.@variables Δ
-    M = get_response_matrix(res.problem.eom.natural_equation, Δ; order=2)
-    M = substitute_all(M, merge(res.fixed_parameters, rules))
-    symbols = _free_symbols(res)
-    compiled_M = map(M) do el
-        args = cat(symbols, [Δ]; dims=1)
-        f_re = Symbolics.build_function(el.re, args; expression=Val{false})
-        f_im = Symbolics.build_function(el.im, args; expression=Val{false})
-        (args...) -> f_re(args...) + im * f_im(args...)
+    if isnothing(Base.get_extension(HarmonicSteadyState, :HarmonicBalanceExt))
+        str = """
+        The `ResponseMatrix` method requires the HarmonicBalance.jl package to be explicitly loaded.\n
+        You can do this by simply typing `using HarmonicBalance` in your REPL,
+        or otherwise loading HarmonicBalance.jl via using or import.
+        """
+        error(str)
+    else
+        # get the symbolic response matrix
+        Symbolics.@variables Δ
+        M = get_response_matrix(res.problem.eom.natural_equation, Δ; order=2)
+        M = substitute_all(M, merge(res.fixed_parameters, rules))
+        symbols = _free_symbols(res)
+        compiled_M = map(M) do el
+            args = cat(symbols, [Δ]; dims=1)
+            f_re = Symbolics.build_function(el.re, args; expression=Val{false})
+            f_im = Symbolics.build_function(el.im, args; expression=Val{false})
+            (args...) -> f_re(args...) + im * f_im(args...)
+        end
+        return ResponseMatrix(compiled_M, symbols, res.problem.eom.variables)
     end
-    return ResponseMatrix(compiled_M, symbols, res.problem.eom.variables)
 end
 
 """Evaluate the response matrix `resp` for the steady state `s` at (lab-frame) frequency `Ω`."""

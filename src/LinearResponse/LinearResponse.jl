@@ -1,17 +1,14 @@
 module LinearResponse
 
-using QuestBase: d, declare_variable
-
-# using HarmonicBalance: HarmonicBalance
-
 using Printf: Printf, @printf
 using DocStringExtensions
 using ProgressMeter: ProgressMeter, Progress, next!
 
-using Symbolics: Symbolics, Num, unwrap, get_variables
+using Symbolics: Symbolics, Num, unwrap
 using LinearAlgebra: norm, eigen, eigvals, eigvecs
 
 using HarmonicSteadyState:
+    HarmonicSteadyState,
     Result,
     get_variable_solutions,
     _get_mask,
@@ -19,13 +16,11 @@ using HarmonicSteadyState:
     get_single_solution,
     get_class,
     swept_parameters,
-    _free_symbols
+    _free_symbols,
+    get_response_matrix
 
 using QuestBase:
     HarmonicVariable,
-    DifferentialEquation,
-    get_independent_variables,
-    var_name,
     substitute_all
 
 include("types.jl")

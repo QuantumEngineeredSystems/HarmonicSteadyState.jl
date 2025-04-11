@@ -120,6 +120,10 @@ function __init__()
             _error_hinter("Plots", :PlotsExt, func), MethodError
         )
     end
+    Base.Experimental.register_error_hint(
+        _error_hinter("HarmonicBalance", :HarmonicBalanceExt, get_response_matrix),
+        MethodError,
+    )
     return nothing
 end
 
