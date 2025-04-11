@@ -7,6 +7,7 @@ function plot_eigenvalues end
 function plot_rotframe_jacobian_response end
 function plot_phase_diagram end
 function plot_linear_response end
+function get_response_matrix end
 
 # ## Method error handling
 # We also inject a method error handler, which

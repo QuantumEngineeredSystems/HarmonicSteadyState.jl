@@ -34,7 +34,7 @@ function HarmonicSteadyState.plot_linear_response(
     C = if order == 1
         get_jacobian_response(res, nat_var, Ω_range, branch; show_progress)
     else
-        get_linear_response(res, nat_var, Ω_range, branch; order=order, show_progress)
+        get_linear_response(res, nat_var, Ω_range, branch; show_progress)
     end
     C = logscale ? log.(C) : C
 

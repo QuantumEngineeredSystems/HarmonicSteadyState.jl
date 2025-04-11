@@ -1,4 +1,4 @@
-using HarmonicSteadyState, Symbolics
+using HarmonicSteadyState, Symbolics, HarmonicBalance
 using Test
 HB = HarmonicSteadyState
 
@@ -50,7 +50,7 @@ end
     M = response_matrix.matrix
     @test M[1](ones(4)) isa Complex
 
-    plot_linear_response(result, x, 1; Ω_range=range(0.9, 1.1, 10), order=2, logscale=true)
+    plot_linear_response(result, x, 1; Ω_range=range(0.9, 1.1, 10), logscale=true)
 end
 
 @testset "second order krylov" begin
@@ -64,7 +64,7 @@ end
     result = get_steady_states(kylov_eq, varied, fixed)
 
     Ω_range = range(0.95, 1.1, 10)
-    HarmonicSteadyState.get_linear_response(result, x, Ω_range, 1; order=2)
+    HarmonicSteadyState.get_linear_response(result, x, Ω_range, 1)
 end
 
 @testset "eigenvalues" begin

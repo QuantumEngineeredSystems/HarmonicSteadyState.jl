@@ -11,8 +11,7 @@ using QuestBase:
     substitute_all,
     get_independent_variables,
     d,
-    _remove_brackets,
-    get_Jacobian
+    _remove_brackets
 
 # default global settings
 IM_TOL::Float64 = 1e-6
@@ -82,7 +81,6 @@ export phase_diagram
 export get_cycle_variables, get_limit_cycles, add_pairs!
 
 # LinearResponse
-export get_Jacobian
 export eigenvalues, eigenvectors
 
 # plotting
@@ -122,6 +120,10 @@ function __init__()
             _error_hinter("Plots", :PlotsExt, func), MethodError
         )
     end
+    Base.Experimental.register_error_hint(
+        _error_hinter("HarmonicBalance", :HarmonicBalanceExt, get_response_matrix),
+        MethodError,
+    )
     return nothing
 end
 
