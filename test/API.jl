@@ -10,7 +10,7 @@
 
     harmonic_eq = get_harmonic_equations(diff_eq)
 
-    varied = ω => range(0.7, 1.3, 100)
+    varied = ω => range(0.7, 1.3, 10)
     @test_throws MethodError get_steady_states(harmonic_eq, varied)
     @test_throws ArgumentError get_steady_states(harmonic_eq, Dict(varied))
 
@@ -24,7 +24,7 @@
     prob = HarmonicSteadyState.Problem(harmonic_eq, OrderedDict(varied), OrderedDict(fixed))
     @test_throws MethodError get_steady_states(prob, Dict())
     @test_throws MethodError get_steady_states(prob, varied, fixed)
-    r = get_steady_states(prob, HarmonicSteadyState.WarmUp())
+    r = get_steady_states(prob, HarmonicSteadyState.WarmUp(), show_progress=false)
     # ^ throws a warning that no solutions found
 
 end
