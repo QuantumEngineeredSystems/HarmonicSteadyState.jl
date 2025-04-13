@@ -29,12 +29,13 @@ Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 QuantumCumulants = "35bcea6d-e19f-57db-af74-8011de6c7255"
 SteadyStateDiffEq = "9672c7b4-1e72-59bd-8a11-6ac3964bc41f"
 
-[sources]
-HarmonicBalance = {url = "https://github.com/QuantumEngineeredSystems/HarmonicBalance.jl", rev = "QuestBase"}
+[sources.HarmonicBalance]
+rev = "QuestBase"
+url = "https://github.com/QuantumEngineeredSystems/HarmonicBalance.jl"
 
 [extensions]
-PlotsExt = "Plots"
 HarmonicBalanceExt = "HarmonicBalance"
+PlotsExt = "Plots"
 QuantumCumulantsExt = "QuantumCumulants"
 SteadyStateDiffEqExt = "SteadyStateDiffEq"
 TimeEvolution = "OrdinaryDiffEqTsit5"
@@ -69,17 +70,17 @@ Random = "1.11.0"
 SciMLBase = "2.83.1"
 SteadyStateDiffEq = "2.5"
 SymbolicUtils = "3.25"
-Symbolics = "~6.34"
+Symbolics = "~6.34, 6"
 Test = "1.11.0"
 TestExtras = "0.3"
 julia = "~1.11"
 
 [extras]
-HarmonicBalance = "e13b9ff6-59c3-11ec-14b1-f3d2cc6c135e"
 Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
 CheckConcreteStructs = "73c92db5-9da6-4938-911a-6443a7e94a58"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 ExplicitImports = "7d51a73a-1435-4ff3-83d9-f097790105c7"
+HarmonicBalance = "e13b9ff6-59c3-11ec-14b1-f3d2cc6c135e"
 JET = "c3a54625-cd67-489e-a8e7-0a5a0ff4e31b"
 LinearSolve = "7ed4a6bd-45f5-4d41-b270-4a48e9bafcae"
 ModelingToolkit = "961ee093-0014-501f-94e3-6117800e7a78"
