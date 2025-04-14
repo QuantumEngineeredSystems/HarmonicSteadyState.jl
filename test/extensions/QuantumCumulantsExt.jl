@@ -38,7 +38,7 @@ end
         eqs = meanfield(ops, H_RWA, [a]; rates=[κ], order=1)
 
         fixed = (U => 0.001, κ => 0.002)
-        varied = (Δ => range(-0.03, 0.03, 50), G => range(1e-5, 0.02, 50))
+        varied = (Δ => range(-0.03, 0.03, 10), G => range(1e-5, 0.02, 10))
         problem_c1 = HarmonicSteadyState.Problem(complete(eqs), param, varied, fixed)
     end
     @testset "@rnumbers" begin
