@@ -73,7 +73,6 @@ export set_imaginary_tolerance
 
 # Result
 export swept_parameter, swept_parameters
-export get_solutions
 export attractors
 export phase_diagram
 
@@ -82,6 +81,9 @@ export get_cycle_variables, get_limit_cycles, add_pairs!
 
 # LinearResponse
 export eigenvalues, eigenvectors
+export get_jacobian_response
+export get_linear_response
+export get_rotframe_jacobian_response
 
 # plotting
 export plot_linear_response
