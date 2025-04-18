@@ -13,12 +13,16 @@ Depth = 2:3
 
 ```@docs
 get_steady_states
+HarmonicSteadyState.SteadyStateProblem
+HarmonicSteadyState.SteadyStateMethods
 HarmonicSteadyState.Result
 ```
 
-### Homotopy Continuation methods
+### Homotopy Continuation
 
 ```@docs
+HarmonicSteadyState.HomotopyContinuationProblem
+HarmonicSteadyState.HomotopyContinuationMethods
 WarmUp
 TotalDegree
 Polyhedral
@@ -44,7 +48,7 @@ filter_result!
 phase_diagram
 ```
 
-### Plotting
+### Steady state plotting
 
 To use these plotting functions, you need to have the `Plots` package installed in the same enverionment and loaded.
 
@@ -63,7 +67,7 @@ Private = false
 Order = [:function]
 ```
 
-### Plotting
+### Linear response plotting
 
 ```@docs
 plot_eigenvalues
@@ -98,4 +102,3 @@ Order = [:function]
 ```@docs
 steady_state_sweep
 ```
-

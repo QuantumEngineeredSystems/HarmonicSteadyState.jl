@@ -106,7 +106,9 @@ function get_steady_states(
     eom::HarmonicEquation, method::SteadyStateMethod, swept, fixed; kwargs...
 )
     return get_steady_states(
-        HomotopyContinuationProblem(eom, OrderedDict(swept), OrderedDict(fixed)), method; kwargs...
+        HomotopyContinuationProblem(eom, OrderedDict(swept), OrderedDict(fixed)),
+        method;
+        kwargs...,
     )
 end
 function get_steady_states(eom::HarmonicEquation, pairs::Union{Dict,OrderedDict}; kwargs...)
@@ -126,7 +128,9 @@ function get_steady_states(
 end
 function get_steady_states(eom::HarmonicEquation, swept, fixed; kwargs...)
     return get_steady_states(
-        HomotopyContinuationProblem(eom, OrderedDict(swept), OrderedDict(fixed)), WarmUp(); kwargs...
+        HomotopyContinuationProblem(eom, OrderedDict(swept), OrderedDict(fixed)),
+        WarmUp();
+        kwargs...,
     )
 end
 
@@ -219,7 +223,10 @@ end
 
 "Uses HomotopyContinuation to solve `problem` at specified `parameter_values`."
 function _get_raw_solution(
-    problem::HomotopyContinuationProblem, method::Union{TotalDegree,Polyhedral}, parameter_values; show_progress
+    problem::HomotopyContinuationProblem,
+    method::Union{TotalDegree,Polyhedral},
+    parameter_values;
+    show_progress,
 )
     result_full = Array{Vector{Any},1}(undef, length(parameter_values))
     if show_progress

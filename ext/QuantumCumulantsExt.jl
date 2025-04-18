@@ -95,7 +95,9 @@ function compute_real_equations(eqs::MeanfieldEquations)
     return vars, eqs_real
 end # TEST: test if order of vars and eqs is correct
 
-function HarmonicSteadyState.HomotopyContinuationProblem(MFeqs::MeanfieldEquations, parameters, swept, fixed)
+function HarmonicSteadyState.HomotopyContinuationProblem(
+    MFeqs::MeanfieldEquations, parameters, swept, fixed
+)
     vars, equations = compute_real_equations(MFeqs)
 
     return HarmonicSteadyState.HomotopyContinuationProblem(
