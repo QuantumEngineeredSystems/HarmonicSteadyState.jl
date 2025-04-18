@@ -48,7 +48,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Construct a `Problem` from `eom` in the case where U(1) symmetry is present
+Construct a `HomotopyContinuationProblem` from `eom` in the case where U(1) symmetry is present
 due to having added a limit cycle frequency `ω_lc`.
 """
 function _cycle_Problem(eom::HarmonicEquation, swept, fixed, ω_lc::Num)
@@ -67,8 +67,8 @@ function _cycle_Problem(eom::HarmonicEquation, swept, fixed, ω_lc::Num)
     # to the fixed variable are removed
     _fix_gauge!(eom, ω_lc, fixed_var)
 
-    # define Problem as usual but with the Hopf Jacobian (always computed implicitly)
-    p = Problem(eom, swept, fixed; compile_jacobian=false)
+    # define HomotopyContinuationProblem as usual but with the Hopf Jacobian (always computed implicitly)
+    p = HomotopyContinuationProblem(eom, swept, fixed; compile_jacobian=false)
     return eom, p
 end
 
@@ -89,7 +89,7 @@ function limit_cycle_problem(
         sym_order=_free_symbols(prob),
         rules=fixed,
     )
-    return Problem(
+    return HomotopyContinuationProblem(
         prob.variables,
         prob.parameters,
         prob.swept_parameters,
@@ -105,7 +105,7 @@ end
 
 """
     get_limit_cycles(
-        eom::HarmonicEquation, method::HarmonicBalanceMethod, swept, fixed, ω_lc; kwargs...)
+        eom::HarmonicEquation, method::SteadyStateMethod, swept, fixed, ω_lc; kwargs...)
 
 Variant of `get_steady_states` for a limit cycle problem characterised by a Hopf frequency (usually called ω_lc)
 
@@ -116,7 +116,7 @@ function get_limit_cycles(eom::HarmonicEquation, swept, fixed, ω_lc; kwargs...)
     return get_limit_cycles(prob, WarmUp(), swept, fixed, ω_lc; kwargs...)
 end
 function get_limit_cycles(
-    eom::HarmonicEquation, method::HarmonicBalanceMethod, swept, fixed, ω_lc; kwargs...
+    eom::HarmonicEquation, method::SteadyStateMethod, swept, fixed, ω_lc; kwargs...
 )
     prob = limit_cycle_problem(eom, swept, fixed, ω_lc)
     return get_limit_cycles(prob, method, swept, fixed, ω_lc; kwargs...)
@@ -127,15 +127,15 @@ function get_limit_cycles(eom::HarmonicEquation, pairs::Dict, ω_lc; kwargs...)
     return get_limit_cycles(eom, swept, fixed, ω_lc; kwargs...)
 end
 function get_limit_cycles(
-    eom::HarmonicEquation, method::HarmonicBalanceMethod, pairs::Dict, ω_lc; kwargs...
+    eom::HarmonicEquation, method::SteadyStateMethod, pairs::Dict, ω_lc; kwargs...
 )
     swept = filter(x -> length(x[2]) > 1, pairs)
     fixed = filter(x -> length(x[2]) == 1, pairs)
     return get_limit_cycles(eom, method, swept, fixed, ω_lc; kwargs...)
 end
 function get_limit_cycles(
-    prob::Problem,
-    method::HarmonicBalanceMethod,
+    prob::HomotopyContinuationProblem,
+    method::HomotopyContinuationMethod,
     swept,
     fixed,
     ω_lc;

@@ -5,7 +5,7 @@ using Symbolics: Symbolics, parse_expr_to_symbolic, Num, expand
 using HarmonicSteadyState: HarmonicSteadyState
 using OrderedCollections: OrderedDict
 
-export Problem
+export HomotopyContinuationProblem
 
 function find_conjugate_pairs(ops)
     pairs = Tuple{Int,Int}[]
@@ -95,10 +95,12 @@ function compute_real_equations(eqs::MeanfieldEquations)
     return vars, eqs_real
 end # TEST: test if order of vars and eqs is correct
 
-function HarmonicSteadyState.Problem(MFeqs::MeanfieldEquations, parameters, swept, fixed)
+function HarmonicSteadyState.HomotopyContinuationProblem(
+    MFeqs::MeanfieldEquations, parameters, swept, fixed
+)
     vars, equations = compute_real_equations(MFeqs)
 
-    return HarmonicSteadyState.Problem(
+    return HarmonicSteadyState.HomotopyContinuationProblem(
         Num.(equations),
         Num.(vars),
         Num.(parameters),

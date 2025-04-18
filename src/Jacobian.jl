@@ -75,7 +75,7 @@ function get_implicit_Jacobian(eom::HarmonicEquation; sym_order, rules=Dict())
     return jacfunc
 end
 
-function get_implicit_Jacobian(p::Problem)
+function get_implicit_Jacobian(p::SteadyStateProblem)
     return get_implicit_Jacobian(
         p.eom; sym_order=_free_symbols(p), rules=p.fixed_parameters
     )

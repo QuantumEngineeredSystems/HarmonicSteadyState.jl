@@ -4,7 +4,6 @@ using QuestBase:
     QuestBase,
     HarmonicEquation,
     var_name,
-    HarmonicBalanceMethod,
     declare_variables,
     declare_variable,
     hasnan,

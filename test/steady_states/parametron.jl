@@ -30,7 +30,7 @@ method = HarmonicSteadyState.WarmUp(; seed=SEED)
     ) isa Number
 
     @testset "Problem" begin
-        prob = HarmonicSteadyState.Problem(
+        prob = HarmonicSteadyState.HomotopyContinuationProblem(
             harmonic_eq, OrderedDict(varied), OrderedDict(fixed)
         )
 
@@ -61,7 +61,7 @@ method = HarmonicSteadyState.WarmUp(; seed=SEED)
 
     @testset "implicit jacobian" begin
         harmonic_eq = get_harmonic_equations(dEOM; jacobian=false)
-        p = HarmonicSteadyState.Problem(harmonic_eq, varied, fixed)
+        p = HarmonicSteadyState.HomotopyContinuationProblem(harmonic_eq, varied, fixed)
         @test round.(real.(p.jacobian(zeros(3)))) == [-98.0 0.0; 0.0 -102.0]
         res = get_steady_states(p, method; show_progress=false)
     end
