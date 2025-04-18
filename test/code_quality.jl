@@ -10,7 +10,7 @@
         all_concrete(HarmonicSteadyState.TotalDegree)
         all_concrete(HarmonicSteadyState.Polyhedral)
         all_concrete(HarmonicSteadyState.Result)
-        all_concrete(HarmonicSteadyState.Problem)
+        all_concrete(HarmonicSteadyState.HomotopyContinuationProblem)
         all_concrete(HarmonicSteadyState.HarmonicEquation)
         all_concrete(HarmonicSteadyState.AdiabaticSweep)
 

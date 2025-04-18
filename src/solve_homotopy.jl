@@ -1,11 +1,12 @@
 """
-    get_steady_states(problem::HarmonicEquation,
-                        method::HarmonicBalanceMethod,
-                        swept_parameters,
-                        fixed_parameters;
-                        show_progress=true,
-                        sorting="nearest",
-                        classify_default=true)
+    get_steady_states(
+        prob::HomotopyContinuationProblem,
+        method::HomotopyContinuationMethod;
+        show_progress=true,
+        sorting="nearest",
+        classify_default=true,
+        verbose=false
+        )
 
 Solves `problem` with the `method` over the ranges specified by `swept_parameters`,
 keeping `fixed_parameters` constant.
@@ -25,7 +26,7 @@ solving a simple harmonic oscillator
 ``m \\ddot{x} + γ \\dot{x} + ω_0^2 x = F \\cos(ωt)`` to obtain the response
 as a function of ``ω``
 ```julia-repl
-# having obtained a Problem object, let's find steady states
+# having obtained a HomotopyContinuationProblem object, let's find steady states
 julia> range = (ω => range(0.8, 1.2, 100) ) # 100 parameter sets to solve
 julia> fixed = ParameterList(m => 1, γ => 0.01, F => 0.5, ω_0 => 1)
 julia> get_steady_states(problem, range, fixed)
@@ -59,8 +60,8 @@ A steady state result for 1000 parameter points
 
 """
 function get_steady_states(
-    prob::Problem,
-    method::HarmonicBalanceMethod;
+    prob::HomotopyContinuationProblem,
+    method::HomotopyContinuationMethod;
     show_progress=true,
     sorting="nearest",
     classify_default=true,
@@ -102,10 +103,10 @@ function get_steady_states(
 end
 
 function get_steady_states(
-    eom::HarmonicEquation, method::HarmonicBalanceMethod, swept, fixed; kwargs...
+    eom::HarmonicEquation, method::SteadyStateMethod, swept, fixed; kwargs...
 )
     return get_steady_states(
-        Problem(eom, OrderedDict(swept), OrderedDict(fixed)), method; kwargs...
+        HomotopyContinuationProblem(eom, OrderedDict(swept), OrderedDict(fixed)), method; kwargs...
     )
 end
 function get_steady_states(eom::HarmonicEquation, pairs::Union{Dict,OrderedDict}; kwargs...)
@@ -115,7 +116,7 @@ function get_steady_states(eom::HarmonicEquation, pairs::Union{Dict,OrderedDict}
 end
 function get_steady_states(
     eom::HarmonicEquation,
-    method::HarmonicBalanceMethod,
+    method::SteadyStateMethod,
     pairs::Union{Dict,OrderedDict};
     kwargs...,
 )
@@ -125,7 +126,7 @@ function get_steady_states(
 end
 function get_steady_states(eom::HarmonicEquation, swept, fixed; kwargs...)
     return get_steady_states(
-        Problem(eom, OrderedDict(swept), OrderedDict(fixed)), WarmUp(); kwargs...
+        HomotopyContinuationProblem(eom, OrderedDict(swept), OrderedDict(fixed)), WarmUp(); kwargs...
     )
 end
 
@@ -155,7 +156,7 @@ prepares an input vector to be parsed to the 2D phase diagram with parameters
 to sweep and kwargs
 """
 function _prepare_input_params(
-    prob::Problem, sweeps::OrderedDict, fixed_parameters::OrderedDict
+    prob::HomotopyContinuationProblem, sweeps::OrderedDict, fixed_parameters::OrderedDict
 )
     unique_fixed, permutation = unique_fixed_and_permutations(
         prob, sweeps, fixed_parameters
@@ -170,7 +171,7 @@ end
 
 "Uses HomotopyContinuation to solve `problem` at specified `parameter_values`."
 function _get_raw_solution(
-    problem::Problem, method::WarmUp, parameter_values; show_progress
+    problem::HomotopyContinuationProblem, method::WarmUp, parameter_values; show_progress
 )
     warm_up_method = method.warm_up_method
 
@@ -218,7 +219,7 @@ end
 
 "Uses HomotopyContinuation to solve `problem` at specified `parameter_values`."
 function _get_raw_solution(
-    problem::Problem, method::Union{TotalDegree,Polyhedral}, parameter_values; show_progress
+    problem::HomotopyContinuationProblem, method::Union{TotalDegree,Polyhedral}, parameter_values; show_progress
 )
     result_full = Array{Vector{Any},1}(undef, length(parameter_values))
     if show_progress
@@ -268,7 +269,7 @@ function pad_solutions(solutions::Solutions(T); padding_value=NaN) where {T}
     return padded_solutions
 end
 
-function newton(prob::Problem, soln::OrderedDict)
+function newton(prob::HomotopyContinuationProblem, soln::OrderedDict)
     vars = substitute_all(prob.variables, soln)
     pars = substitute_all(prob.parameters, soln)
 
@@ -279,7 +280,7 @@ end
     newton(res::Result, soln::OrderedDict)
     newton(res::Result; branch, index)
 
-Run a newton solver on `prob::Problem` starting from the solution `soln` (indexable by `branch` and `index`).
+Run a newton solver on `prob::HomotopyContinuationProblem` starting from the solution `soln` (indexable by `branch` and `index`).
 Any variables/parameters not present in `soln` are set to zero.
 """
 newton(res::Result, soln::OrderedDict) = newton(res.problem, soln)

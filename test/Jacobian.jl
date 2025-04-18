@@ -1,6 +1,6 @@
 using HarmonicSteadyState
 using HarmonicSteadyState.QuestBase: substitute_all
-using HarmonicSteadyState: OrderedDict, Problem, _free_symbols
+using HarmonicSteadyState: OrderedDict, HomotopyContinuationProblem, _free_symbols
 using Test, TestExtras
 
 @variables α, ω, ω0, F, γ, t, x(t);
@@ -12,7 +12,7 @@ eom = get_harmonic_equations(diff_eq)
 
 fixed = OrderedDict(α => 1, ω0 => 1.0, γ => 1e-2, F => 1e-6)
 varied = OrderedDict(ω => range(0.9, 1.1, 10))
-prob = Problem(eom, varied, fixed)
+prob = HomotopyContinuationProblem(eom, varied, fixed)
 
 @testset "Jacobian FunctionWrapper" begin
     using FunctionWrappers: FunctionWrapper

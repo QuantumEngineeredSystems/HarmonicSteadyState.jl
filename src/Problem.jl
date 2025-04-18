@@ -1,4 +1,4 @@
-# abstract type Problem end
+abstract type SteadyStateProblem end
 
 """
 $(TYPEDEF)
@@ -10,7 +10,7 @@ $(TYPEDFIELDS)
 
 #  Constructors
 ```julia
-Problem(
+HomotopyContinuationProblem(
     eom::HarmonicEquation,
     swept::AbstractDict,
     fixed::AbstractDict;
@@ -18,10 +18,10 @@ Problem(
 )
 ```
 """
-mutable struct Problem{
+mutable struct HomotopyContinuationProblem{
     ParType<:Number,
     Jac<:JacobianFunction(ComplexF64), # HC.jl only supports Float64
-} # <: Problem
+} <: SteadyStateProblem
     "The harmonic variables to be solved for."
     variables::Vector{Num}
     "All symbols which are not the harmonic variables."
@@ -37,24 +37,24 @@ mutable struct Problem{
     If `Matrix{Nan}` and implicit function is compiled when a `Result` is created.
     """
     jacobian::Jac
-    "The HarmonicEquation object used to generate this `Problem`."
+    "The HarmonicEquation object used to generate this `HomotopyContinuationProblem`."
     eom::HarmonicEquation
 
-    function Problem(
+    function HomotopyContinuationProblem(
         variables, parameters, swept::OrderedDict, fixed::OrderedDict{K,V}, system, jacobian
     ) where {K,V}
         return new{V,typeof(jacobian)}(
             variables, parameters, swept, fixed, system, jacobian
         )
     end # incomplete initialization for user-defined symbolic systems
-    function Problem(
+    function HomotopyContinuationProblem(
         variables, parameters, swept::OrderedDict, fixed::OrderedDict{K,V}, system
     ) where {K,V}
         return new{V,JacobianFunction(ComplexF64)}(
             variables, parameters, swept, fixed, system
         )
     end # incomplete initialization for user-defined symbolic systems
-    function Problem(
+    function HomotopyContinuationProblem(
         variables,
         parameters,
         swept::OrderedDict,
@@ -69,9 +69,9 @@ mutable struct Problem{
     end
 end
 
-"Constructor for the type `Problem` (to be solved by HomotopyContinuation)
+"Constructor for the type `HomotopyContinuationProblem` (to be solved by HomotopyContinuation)
 from a `HarmonicEquation`."
-function HarmonicSteadyState.Problem(
+function HarmonicSteadyState.HomotopyContinuationProblem(
     eom::HarmonicEquation, swept::AbstractDict, fixed::AbstractDict; compile_jacobian=true
 )
     S = HomotopyContinuation.System(eom)
@@ -83,14 +83,14 @@ function HarmonicSteadyState.Problem(
     if compile_jacobian
         jac = _compile_Jacobian(eom, ComplexF64, swept, fixed)
         # ^ HC.jl only supports Float64 (https://github.com/JuliaHomotopyContinuation/HomotopyContinuation.jl/issues/604)
-        return Problem(vars_new, eom.parameters, swept, fixed, S, jac, eom)
+        return HomotopyContinuationProblem(vars_new, eom.parameters, swept, fixed, S, jac, eom)
     else
-        return Problem(vars_new, eom.parameters, swept, fixed, S)
+        return HomotopyContinuationProblem(vars_new, eom.parameters, swept, fixed, S)
     end
 end # Probably should merge both constructors
 
-"A constructor for Problem from explicitly entered equations, variables and parameters."
-function HarmonicSteadyState.Problem(
+"A constructor for HomotopyContinuationProblem from explicitly entered equations, variables and parameters."
+function HarmonicSteadyState.HomotopyContinuationProblem(
     equations::Vector{Num},
     variables::Vector{Num},
     parameters::Vector{Num},
@@ -105,12 +105,12 @@ function HarmonicSteadyState.Problem(
     J = HarmonicSteadyState.compute_and_compile_Jacobian(
         equations, vars_new, ComplexF64, swept, fixed
     )
-    return Problem(vars_new, pars_new, swept, fixed, system, J)
+    return HomotopyContinuationProblem(vars_new, pars_new, swept, fixed, system, J)
 end # Probably should merge both constructors
 
-Symbolics.get_variables(p::Problem)::Vector{Num} = p.variables
+Symbolics.get_variables(p::HomotopyContinuationProblem)::Vector{Num} = p.variables
 
-function Base.show(io::IO, p::Problem)
+function Base.show(io::IO, p::HomotopyContinuationProblem)
     println(io, length(p.system.expressions), " algebraic equations for steady states")
     println(io, "Variables: ", join(string.(p.variables), ", "))
     println(io, "Parameters: ", join(string.(p.parameters), ", "))
@@ -118,16 +118,16 @@ function Base.show(io::IO, p::Problem)
 end
 
 # assume this order of variables in all compiled function (transform_solutions, Jacobians)
-function _free_symbols(p::Problem)::Vector{Num}
+function _free_symbols(p::HomotopyContinuationProblem)::Vector{Num}
     return cat(p.variables, collect(keys(p.swept_parameters)); dims=1)
 end
 
-function QuestBase.declare_variables(p::Problem)
+function QuestBase.declare_variables(p::HomotopyContinuationProblem)
     return declare_variable.(string.(cat(p.parameters, p.variables; dims=1)))
 end
 
 function check_fixed_and_sweep(
-    eom::Union{Problem,HarmonicEquation}, sweeps, fixed_parameters
+    eom::Union{HomotopyContinuationProblem,HarmonicEquation}, sweeps, fixed_parameters
 )
     # Check if any of the variables are being fixed/swept
     variable_names = var_name.([keys(fixed_parameters)..., keys(sweeps)...])
@@ -173,7 +173,7 @@ function check_fixed_and_sweep(
 end
 
 function unique_fixed_and_permutations(
-    eom::Union{Problem,HarmonicEquation}, sweeps, fixed_parameters
+    eom::Union{HomotopyContinuationProblem,HarmonicEquation}, sweeps, fixed_parameters
 )
     check_fixed_and_sweep(eom, sweeps, fixed_parameters)
 
