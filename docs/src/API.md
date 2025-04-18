@@ -14,7 +14,7 @@ Depth = 2:3
 ```@docs
 get_steady_states
 HarmonicSteadyState.SteadyStateProblem
-HarmonicSteadyState.SteadyStateMethods
+HarmonicSteadyState.SteadyStateMethod
 HarmonicSteadyState.Result
 ```
 
@@ -22,7 +22,7 @@ HarmonicSteadyState.Result
 
 ```@docs
 HarmonicSteadyState.HomotopyContinuationProblem
-HarmonicSteadyState.HomotopyContinuationMethods
+HarmonicSteadyState.HomotopyContinuationMethod
 WarmUp
 TotalDegree
 Polyhedral

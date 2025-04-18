@@ -1,3 +1,8 @@
+"""
+    SteadyStateProblem
+
+    Abstract type for steady state problems.
+"""
 abstract type SteadyStateProblem end
 
 """
