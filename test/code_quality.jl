@@ -47,6 +47,7 @@ end
         HarmonicSteadyState;
         piracies=(treat_as_own=[ModelKit.Variable, ModelKit.System],),
         ambiguities=false,
+        persistent_tasks=false,
     )
     for mod in [TimeEvolution, SteadyStateDiffEqExt, PlotsExt, HarmonicBalanceExt]
         @test check_no_stale_explicit_imports(mod) == nothing
