@@ -251,7 +251,8 @@ end
 "Get the response matrix corresponding to `res`.
 Any substitution rules not specified in `res` can be supplied in `rules`."
 function ResponseMatrix(res::Result; rules=Dict())
-    if isnothing(Base.get_extension(HarmonicSteadyState, :HarmonicBalanceExt))
+    HarmonicBalanceExt = Base.get_extension(HarmonicSteadyState, :HarmonicBalanceExt)
+    if isnothing(HarmonicBalanceExt)
         str = """
         The `ResponseMatrix` method requires the HarmonicBalance.jl package to be explicitly loaded.\n
         You can do this by simply typing `using HarmonicBalance` in your REPL,
@@ -261,7 +262,7 @@ function ResponseMatrix(res::Result; rules=Dict())
     else
         # get the symbolic response matrix
         Symbolics.@variables Δ
-        M = get_response_matrix(res.problem.eom.natural_equation, Δ; order=2)
+        M = HarmonicBalanceExt.get_response_matrix(res.problem.eom.natural_equation, Δ)
         M = substitute_all(M, merge(res.fixed_parameters, rules))
         symbols = _free_symbols(res)
         compiled_M = map(M) do el

@@ -16,8 +16,7 @@ using HarmonicSteadyState:
     get_single_solution,
     get_class,
     swept_parameters,
-    _free_symbols,
-    get_response_matrix
+    _free_symbols
 
 using QuestBase: HarmonicVariable, substitute_all
 
