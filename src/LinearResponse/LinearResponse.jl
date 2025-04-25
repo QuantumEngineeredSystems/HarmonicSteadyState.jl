@@ -15,8 +15,7 @@ using HarmonicSteadyState:
     StateDict,
     get_single_solution,
     get_class,
-    swept_parameters,
-    _free_symbols
+    swept_parameters
 
 using QuestBase: HarmonicVariable, substitute_all
 
@@ -26,10 +25,6 @@ include("Lorentzian_spectrum.jl")
 include("response.jl")
 
 export show,
-    get_jacobian_response,
-    get_linear_response,
-    get_rotframe_jacobian_response,
-    eigenvalues,
-    eigenvectors
+    get_jacobian_response, get_rotframe_jacobian_response, eigenvalues, eigenvectors
 
 end

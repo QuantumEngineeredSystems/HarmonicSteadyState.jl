@@ -122,7 +122,7 @@ function __init__()
         )
     end
     Base.Experimental.register_error_hint(
-        _error_hinter("HarmonicBalance", :HarmonicBalanceExt, get_response_matrix),
+        _error_hinter("HarmonicBalance", :HarmonicBalanceExt, get_linear_response),
         MethodError,
     )
     return nothing
