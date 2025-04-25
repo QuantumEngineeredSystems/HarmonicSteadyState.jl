@@ -1,4 +1,18 @@
 """
+    SteadyStateMethod
+
+Abstract type for steady state methods.
+"""
+abstract type SteadyStateMethod end
+
+"""
+    HomotopyContinuationMethod
+
+Abstract type for the steady state methods using HomotopyContinuation.jl.
+"""
+abstract type HomotopyContinuationMethod <: SteadyStateMethod end
+
+"""
     TotalDegree
 
 The Total Degree homotopy method performs a homotopy ``H(x, t) = γ t G(x) + (1-t) F(x)``
@@ -11,7 +25,7 @@ for more information.
 # Fields
 $(TYPEDFIELDS)
 """
-struct TotalDegree{T<:Complex} <: HarmonicBalanceMethod
+struct TotalDegree{T<:Complex} <: HomotopyContinuationMethod
     """Complex multiplying factor of the start system G(x) for the homotopy"""
     gamma::T
     """Boolean indicating if threading is enabled."""
@@ -60,7 +74,7 @@ for more information.
 # Fields
 $(TYPEDFIELDS)
 """
-struct Polyhedral{T} <: HarmonicBalanceMethod
+struct Polyhedral{T} <: HomotopyContinuationMethod
     """Boolean indicating if only non-zero solutions are considered."""
     only_non_zero::Bool
     """Boolean indicating if threading is enabled."""
@@ -116,7 +130,7 @@ for more information.
 # Fields
 $(TYPEDFIELDS)
 """
-struct WarmUp{T} <: HarmonicBalanceMethod
+struct WarmUp{T} <: HomotopyContinuationMethod
     """Method used for the warmup system."""
     warm_up_method::Union{TotalDegree{T},Polyhedral{T}}
     """Start parameters."""
@@ -186,52 +200,52 @@ struct WarmUp{T} <: HarmonicBalanceMethod
 end
 
 """
-    thread(method::HarmonicBalanceMethod) -> Bool
+    thread(method::SteadyStateMethod) -> Bool
 
 Returns whether threading is enabled for the given method. The number of available threads
 is controlled by the environment variable `JULIA_NUM_THREADS`.
 """
-thread(method::HarmonicBalanceMethod) = method.thread
+thread(method::HomotopyContinuationMethod) = method.thread
 
 """
-    tracker(method::HarmonicBalanceMethod) -> HomotopyContinuation.TrackerOptions
+    tracker(method::SteadyStateMethod) -> HomotopyContinuation.TrackerOptions
 
 Returns the tracker options for the given method. See `HomotopyContinuation.TrackerOptions`
 for the available options.
 """
-tracker(method::HarmonicBalanceMethod) = method.tracker_options
+tracker(method::HomotopyContinuationMethod) = method.tracker_options
 
 """
-    endgame(method::HarmonicBalanceMethod) -> HomotopyContinuation.EndgameOptions
+    endgame(method::SteadyStateMethod) -> HomotopyContinuation.EndgameOptions
 
 Returns the endgame options for the given method. See `HomotopyContinuation.EndgameOptions`
 for the available options.
 """
-endgame(method::HarmonicBalanceMethod) = method.endgame_options
+endgame(method::HomotopyContinuationMethod) = method.endgame_options
 
 """
-    compile(method::HarmonicBalanceMethod) -> Union{Bool,Symbol}
+    compile(method::SteadyStateMethod) -> Union{Bool,Symbol}
 
 Returns the compile options for the given method. If `true` then a system is compiled to a
 straight line program for evaluation. This induces a compilation overhead. If `false` then
 the generated program is only interpreted. This is slower than the compiled version,
 but does not introduce compilation overhead.
 """
-compile(method::HarmonicBalanceMethod) = method.compile
+compile(method::HomotopyContinuationMethod) = method.compile
 
 """
-    seed(method::HarmonicBalanceMethod) -> UInt32
+    seed(method::SteadyStateMethod) -> UInt32
 
 Returns the seed for random number generation for the given method.
 """
-seed(method::HarmonicBalanceMethod) = method.seed
+seed(method::HomotopyContinuationMethod) = method.seed
 
 """
-    alg_default_options(method::HarmonicBalanceMethod) -> NamedTuple
+    alg_default_options(method::SteadyStateMethod) -> NamedTuple
 
 Returns a named tuple of default algorithm options for the given method.
 """
-function alg_default_options(method::HarmonicBalanceMethod)
+function alg_default_options(method::HomotopyContinuationMethod)
     return (
         threading=thread(method),
         tracker_options=tracker(method),

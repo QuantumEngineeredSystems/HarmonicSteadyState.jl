@@ -8,7 +8,7 @@ using Test
     F = System([Expression("x^2")])
 
     @variables x y
-    prob = HarmonicSteadyState.Problem(
+    prob = HarmonicSteadyState.HomotopyContinuationProblem(
         [x, y],
         Num[],
         OrderedDict{Num,Vector{Float64}}(),
@@ -18,7 +18,7 @@ using Test
     )
     @test_throws UndefRefError prob.eom
 
-    prob = HarmonicSteadyState.Problem(
+    prob = HarmonicSteadyState.HomotopyContinuationProblem(
         [x, y], Num[], OrderedDict{Num,Vector{Float64}}(), OrderedDict{Num,Float64}(), F
     )
     @test_throws UndefRefError prob.jacobian
@@ -32,7 +32,7 @@ end
     pars = [Δ, F]
     fix = OrderedDict{Num,Float64}(F => 0.005)
     swept = OrderedDict{Num,Vector{Float64}}(Δ => range(0.0, 1.0; length=10))
-    prob = HarmonicSteadyState.Problem(eqs, vars, pars, swept, fix)
+    prob = HarmonicSteadyState.HomotopyContinuationProblem(eqs, vars, pars, swept, fix)
     @test all(string.(prob.variables) .== string.(vars))
     @test all(string.(prob.parameters) .== string.(pars))
     @test all(string.(prob.system.expressions) .== string.(eqs))

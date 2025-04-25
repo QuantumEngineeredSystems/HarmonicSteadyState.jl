@@ -1,7 +1,6 @@
 module LimitCycles
 
 using QuestBase:
-    HarmonicBalanceMethod,
     get_all_terms,
     substitute_all,
     DifferentialEquation,
@@ -18,7 +17,9 @@ using Symbolics: Symbolics, Num, expand_derivatives, get_variables
 using HarmonicSteadyState
 using HarmonicSteadyState:
     WarmUp,
-    Problem,
+    SteadyStateMethod,
+    HomotopyContinuationMethod,
+    HomotopyContinuationProblem,
     Result,
     get_steady_states,
     order_branches!,
@@ -32,7 +33,7 @@ using HarmonicSteadyState:
     promote_types,
     JacobianFunction
 
-using HarmonicSteadyState: HarmonicSteadyState, Result, Problem
+using HarmonicSteadyState: HarmonicSteadyState, Result, HomotopyContinuationProblem
 
 include("gauge_fixing.jl")
 include("analysis.jl")

@@ -35,7 +35,7 @@ using Test
 
         fixed = OrderedDict((α => 1.0, ω0 => 1.1, λ => 0.01, γ => 0.01))
         varied = OrderedDict((ω => range(0.9, 1.1, 20),))
-        prob = HarmonicSteadyState.Problem(harmonic_eq, varied, fixed)
+        prob = HarmonicSteadyState.HomotopyContinuationProblem(harmonic_eq, varied, fixed)
 
         unique_fixed, input_array = HarmonicSteadyState._prepare_input_params(
             prob, varied, fixed
