@@ -38,7 +38,7 @@ TimeEvolution = "OrdinaryDiffEqTsit5"
 
 [compat]
 Aqua = "0.8.11"
-BijectiveHilbert = "0.3.0"
+BijectiveHilbert = "0.3, 0.5"
 CheckConcreteStructs = "0.1.0"
 Distances = "0.10.11"
 DocStringExtensions = "0.9.4"
