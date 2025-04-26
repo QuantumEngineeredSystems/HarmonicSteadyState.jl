@@ -20,13 +20,11 @@
     end
 end
 
-@testset "Code linting" begin
-    using JET
-    rep = report_package("HarmonicSteadyState"; target_defined_modules=true)
-    @show rep
-    @test length(JET.get_reports(rep)) <= 1
-    @test_broken length(JET.get_reports(rep)) == 0
-    # JET.test_package(HarmonicSteadyState; target_defined_modules=true)
+if VERSION < v"1.12.0-beta"
+    @testset "Code linting" begin
+        using JET
+        JET.test_package(HarmonicSteadyState; target_defined_modules=true)
+    end
 end
 
 @testset "Code quality" begin

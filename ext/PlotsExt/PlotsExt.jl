@@ -21,7 +21,7 @@ using Symbolics: Num
 using LinearAlgebra: LinearAlgebra, eigvals, eigvecs
 
 using HarmonicSteadyState.LinearResponse:
-    get_jacobian_response, get_linear_response, get_rotframe_jacobian_response
+    get_jacobian_response, get_rotframe_jacobian_response
 
 using Plots: heatmap, theme_palette, scatter, RGB, cgrad
 using Symbolics.Latexify: Latexify, latexify, @L_str
