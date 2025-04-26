@@ -20,9 +20,11 @@
     end
 end
 
-@testset "Code linting" begin
-    using JET
-    JET.test_package(HarmonicSteadyState; target_defined_modules=true)
+if VERSION < v"1.12.0-beta"
+    @testset "Code linting" begin
+        using JET
+        JET.test_package(HarmonicSteadyState; target_defined_modules=true)
+    end
 end
 
 @testset "Code quality" begin
