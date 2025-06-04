@@ -65,3 +65,35 @@ end
         )
     end
 end
+
+@testset "Multiple modes" begin
+    # Hilbertspace
+    hc = FockSpace(:cavity)
+    hm = FockSpace(:motion)
+    h = hc ⊗ hm
+
+    # Operators
+    @qnumbers a::Destroy(h, 1) b::Destroy(h, 2)
+
+    # Parameters
+    @rnumbers Δ K F κ ωm g0 Γm
+
+    param = [Δ, K, F, κ, ωm, g0, Γm]
+
+    H_RWA =
+        -Δ * a' * a +
+        ωm * b' * b +
+        K/2 * (a'^2 * a^2) +
+        F * (a' + a) +
+        g0 * a' * a * (b + b')
+    ops = [a, a', b, b']
+
+    eqs_RWA = meanfield(ops, H_RWA, [a, b]; rates=[κ, Γm], order=1)
+    eqs_completed_RWA = complete(eqs_RWA)
+
+    fixed = (K => -0.001, κ => 0.002, ωm => 0.01, g0 => 0.001, Γm => 0.0001)
+    varied = (Δ => range(-0.03, 0.03, 100), F => range(1e-5, 0.02, 100))
+    problem = HarmonicSteadyState.HomotopyContinuationProblem(
+        eqs_completed_RWA, param, varied, fixed
+    )
+end

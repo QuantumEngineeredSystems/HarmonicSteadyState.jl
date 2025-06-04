@@ -25,9 +25,7 @@ function get_filtered_equations(eqs::MeanfieldEquations)
     conjugate_pairs = find_conjugate_pairs(ops)
     pairs = filter(pair -> !isequal(pair...), conjugate_pairs)
 
-    foreach(pairs) do pair
-        deleteat!(equations, pair[2])
-    end
+    deleteat!(equations, last.(pairs))
     return equations
 end
 
