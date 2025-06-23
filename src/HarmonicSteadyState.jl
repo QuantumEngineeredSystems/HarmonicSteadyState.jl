@@ -83,6 +83,7 @@ export eigenvalues, eigenvectors
 export get_jacobian_response
 export get_linear_response
 export get_rotframe_jacobian_response
+export get_linear_response_cumulants
 
 # plotting
 export plot_linear_response

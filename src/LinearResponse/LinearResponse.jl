@@ -23,8 +23,9 @@ include("types.jl")
 include("utils.jl")
 include("Lorentzian_spectrum.jl")
 include("response.jl")
+include("S21.jl")
 
 export show,
-    get_jacobian_response, get_rotframe_jacobian_response, eigenvalues, eigenvectors
+    get_jacobian_response, get_rotframe_jacobian_response, eigenvalues, eigenvectors, get_linear_response_cumulants
 
 end
