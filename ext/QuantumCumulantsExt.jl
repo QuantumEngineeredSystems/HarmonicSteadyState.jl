@@ -3,6 +3,7 @@ module QuantumCumulantsExt
 using QuantumCumulants: QuantumCumulants, average, MeanfieldEquations
 using Symbolics: Symbolics, parse_expr_to_symbolic, Num, expand
 using HarmonicSteadyState: HarmonicSteadyState
+using QuestBase: QuestBase
 using OrderedCollections: OrderedDict
 
 export HomotopyContinuationProblem
@@ -91,7 +92,7 @@ function compute_real_equations(eqs::MeanfieldEquations)
         iszero(eq_im) || push!(eqs_real, eq_im)
     end
     return vars, eqs_real
-end # TEST: test if order of vars and eqs is correct
+end # TODO: test if order of vars and eqs is correct
 
 function HarmonicSteadyState.HomotopyContinuationProblem(
     MFeqs::MeanfieldEquations, parameters, swept, fixed
@@ -104,6 +105,29 @@ function HarmonicSteadyState.HomotopyContinuationProblem(
         Num.(parameters),
         OrderedDict(swept),
         OrderedDict(fixed),
+    )
+end
+
+function HarmonicSteadyState.HarmonicEquation(
+    MFeqs::MeanfieldEquations, parameters, swept, fixed
+)
+    vars, equations_lhs = compute_real_equations(MFeqs)
+    jac = HarmonicSteadyState.get_Jacobian(equations_lhs, vars)
+
+    hvars = map(vars) do var
+        HarmonicSteadyState.QuestBase.HarmonicVariable(Num(var), "", "", Num(1), Num(0))
+    end
+
+    equations_lhs = map(enumerate(vars)) do (idx,var)
+        dvar = QuestBase.d(vars, MFeqs.iv)
+        equations_lhs ~ dvar # by convension lhs in HB
+    end
+
+    return HarmonicSteadyState.HarmonicEquation(
+        equations_lhs,
+        hvars,
+        Num.(parameters),
+        jac,
     )
 end
 
