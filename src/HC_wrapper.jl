@@ -34,14 +34,14 @@ function parse_equations(eqs)
     return [HomotopyContinuation.Expression(eval(symbol)) for symbol in parsed_strings]
 end
 
-function HomotopyContinuation.ModelKit.System(eom::HarmonicEquation)
+function HomotopyContinuation.System(eom::HarmonicEquation)
     eqs = expand_derivatives.(_remove_brackets(eom))
     vars = get_variables(eom)
     pars = eom.parameters
-    return create_modelKit_system(eqs, vars, pars)
+    return HomotopyContinuation.ModelKit.System(eqs, vars, pars)
 end
 
-function create_modelKit_system(eqs, vars, pars)
+function HomotopyContinuation.System(eqs, vars, pars)
     conv_vars = Num_to_Variable.(vars)
     conv_para = Num_to_Variable.(pars)
     return S = HomotopyContinuation.System(
