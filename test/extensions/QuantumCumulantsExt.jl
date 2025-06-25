@@ -1,5 +1,5 @@
 using QuantumCumulants, HarmonicSteadyState, Symbolics
-using Plots
+# using Plots
 
 @testset "KPO" begin
     h = FockSpace(:cavity)
@@ -32,10 +32,9 @@ using Plots
     end
 
     @testset "HarmonicEquation" begin
-       harmonic_eq = HarmonicSteadyState.HarmonicEquation(
-            eqs_completed_RWA, [Δ, U, G, κ], varied, fixed
-        );
-        # TODO: fix show rule
+        harmonic_eq = HarmonicSteadyState.HarmonicEquation(eqs_completed_RWA, [Δ, U, G, κ]);
+        result = get_steady_states(harmonic_eq, varied, fixed)
+        @test sum(any.(get_class(result, "stable"))) == 3
     end
 end
 
