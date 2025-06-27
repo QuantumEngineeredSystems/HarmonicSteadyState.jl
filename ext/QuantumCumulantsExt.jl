@@ -132,7 +132,7 @@ function HarmonicSteadyState.HarmonicEquation(MFeqs::MeanfieldEquations, paramet
 
     equations_lhs = map(enumerate(vars)) do (idx, var)
         dvar = QuestBase.d(var, MFeqs.iv)
-        equations_lhs[idx] ~ dvar # by convension lhs in HB
+        equations_lhs[idx] ~ dvar # by convention lhs in HB
     end
 
     return HarmonicSteadyState.HarmonicEquation(equations_lhs, hvars, Num.(parameters), jac)
