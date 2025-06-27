@@ -100,14 +100,14 @@ function add_iv(eqs, vars, iv)
     end
     subs = Dict(zip(vars, var_new))
     eqs_new = QuestBase.substitute_all(eqs, subs)
-    eqs_new, var_new
+    return eqs_new, var_new
 end
 # # TODO: try something declare_iv_variable
 
 function HarmonicSteadyState.HomotopyContinuationProblem(
     MFeqs::MeanfieldEquations, parameters, swept, fixed
 )
-    vars, equations = compute_real_equations(MFeqs)
+    equations, vars = compute_real_equations(MFeqs)
 
     return HarmonicSteadyState.HomotopyContinuationProblem(
         Num.(equations),
