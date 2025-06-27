@@ -1,5 +1,5 @@
-using QuantumCumulants, HarmonicSteadyState
-using Plots
+using QuantumCumulants, HarmonicSteadyState, Symbolics
+# using Plots
 
 @testset "KPO" begin
     h = FockSpace(:cavity)
@@ -14,19 +14,28 @@ using Plots
 
     fixed = (U => 0.001, κ => 0.00, Δ => 0.0)
     varied = (G => range(0.01, 0.02, 10))
-    problem = HarmonicSteadyState.HomotopyContinuationProblem(
-        eqs_completed_RWA, [Δ, U, G, κ], varied, fixed
-    )
-    result = get_steady_states(problem, TotalDegree())
-    @test sum(all.(get_class(result, "stable"))) == 2
 
-    fixed = (U => 0.001, κ => 0.00, G => 0.01)
-    varied = (Δ => range(-0.03, 0.03, 10))
-    problem = HarmonicSteadyState.HomotopyContinuationProblem(
-        eqs_completed_RWA, [Δ, U, G, κ], varied, fixed
-    )
-    result = get_steady_states(problem, TotalDegree())
-    @test sum(any.(get_class(result, "stable"))) == 3
+    @testset "HomotopyContinuationProblem" begin
+        problem = HarmonicSteadyState.HomotopyContinuationProblem(
+            eqs_completed_RWA, [Δ, U, G, κ], varied, fixed
+        )
+        result = get_steady_states(problem, TotalDegree())
+        @test sum(all.(get_class(result, "stable"))) == 2
+
+        fixed = (U => 0.001, κ => 0.00, G => 0.01)
+        varied = (Δ => range(-0.03, 0.03, 10))
+        problem = HarmonicSteadyState.HomotopyContinuationProblem(
+            eqs_completed_RWA, [Δ, U, G, κ], varied, fixed
+        )
+        result = get_steady_states(problem, TotalDegree())
+        @test sum(any.(get_class(result, "stable"))) == 3
+    end
+
+    @testset "HarmonicEquation" begin
+        harmonic_eq = HarmonicSteadyState.HarmonicEquation(eqs_completed_RWA, [Δ, U, G, κ]);
+        result = get_steady_states(harmonic_eq, varied, fixed)
+        @test sum(any.(get_class(result, "stable"))) == 3
+    end
 end
 
 @testset "work with rnumbers and cumber" begin
@@ -83,7 +92,7 @@ end
     H_RWA =
         -Δ * a' * a +
         ωm * b' * b +
-        K/2 * (a'^2 * a^2) +
+        K / 2 * (a'^2 * a^2) +
         F * (a' + a) +
         g0 * a' * a * (b + b')
     ops = [a, a', b, b']

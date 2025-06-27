@@ -25,11 +25,11 @@ end
 
 "Converts a Num dictionary into a Variable dictionary."
 function Num_to_Variable(dict::Dict{Num,T}) where {T<:Number}
-    Dict{HC.Variable,T}([[HC.Variable(key), dict[key]] for key in keys(dict)])
+    return Dict{HC.Variable,T}([[HC.Variable(key), dict[key]] for key in keys(dict)])
 end # for the parameter assignments
 
 "Parse symbolic expressions as the Expression type in HomotopyContinuation."
-function parse_equations(eqs::Vector{Num})
+function parse_equations(eqs)
     parsed_strings = [Meta.parse(s) for s in string.(eqs)]
     return [HomotopyContinuation.Expression(eval(symbol)) for symbol in parsed_strings]
 end
@@ -40,9 +40,7 @@ function HomotopyContinuation.ModelKit.System(eom::HarmonicEquation)
     pars = eom.parameters
     return HC.System(eqs, vars, pars)
 end
-function HomotopyContinuation.ModelKit.System(
-    eqs::Vector{Num}, vars::Vector{Num}, pars::Vector{Num}
-)
+function HomotopyContinuation.ModelKit.System(eqs, vars, pars)
     conv_vars = Num_to_Variable.(vars)
     conv_para = Num_to_Variable.(pars)
     return S = HomotopyContinuation.System(
