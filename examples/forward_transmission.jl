@@ -21,7 +21,7 @@ ops = [m, m', c, c'] # Operators for meanfield evolution
 eqs_RWA = meanfield(ops, H_RWA_sym, [m, c]; rates=[γm, γk], order=1)
 eqs_completed_RWA = complete(eqs_RWA) # Meanfield equations using QuantumCumulants.jl
 
-# We can use this meanfield equations to construct a `HarmonicEquation` object in HarmonicSteadyState.jl. In the contructions, additional information is computed, such as the Jacobian of the equations, which is used to determine the stability if the the steady states.
+# We can use this meanfield equations to construct a `HarmonicEquation` object in HarmonicSteadyState.jl. In the construction, additional information is computed, such as the Jacobian of the equations, which is used to determine the stability if the the steady states.
 harmonic_eq = HarmonicEquation(eqs_completed_RWA, param)
 
 # Let's sweep the power of the drive $\Omega_d$, with $\Delta=0$, and solve for the steady state. The steady-state solutions show that the FMR mode saturates after a threshold power, followed by the coherent excitation of the parametrically induced counter-propagating modes.
