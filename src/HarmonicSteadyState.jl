@@ -54,7 +54,7 @@ using .LinearResponse
 include("LimitCycles/LimitCycles.jl")
 using .LimitCycles
 
-# Eqaution
+# Equation
 export HarmonicEquation # for Meanfield equations
 
 # methods

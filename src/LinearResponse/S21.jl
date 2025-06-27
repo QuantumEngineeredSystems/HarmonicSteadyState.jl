@@ -45,6 +45,8 @@ function make_D(eqs::HarmonicEquation, varied, fixed)
 end
 
 """
+$(TYPEDSIGNATURES)
+
 Compute the forward_transmission response spectrum, i.e, how much of an input signal applied
 at port 1 emerges at port 2. Colloquially known as S21 parameter in microwave engineering.
 The amplitude and phase of S21 tell you how much signal is transmitted and with what delay
@@ -53,15 +55,14 @@ or phase shift:
 - If S21 ≈ 0 (or very negative dB), very little signal is transmitted.
 
 # Arguments
-- `eqs::MeanfieldEquations`: Mean field equations of the system
-- `res::Result`: Result object containing the system's solutions
+- `res::Result`: Result object containing the system's steady state solutions
 - `Ω_range`: Range of frequencies to evaluate
 - `branch::Int`: Branch number to analyze
 - `op_index::Int=1`: Index of operator in mean field equations to evaluate response for
 - `use_stable=true`: Evaluate response only for stable steady states, or also for any physical solutions
 
 # Returns
-- `χ`: Complex response matrix where rows correspond to frequencies and columns to solutions
+- `χ`: Complex response matrix
 
 # Example
 ```julia
@@ -75,7 +76,11 @@ S21_log = 20 .* log10.(abs.(S21)) # expressed in dB
 ```
 """
 function get_forward_transmission_response(
-    res::HarmonicSteadyState.Result, Ω_range, branch::Int; op_index::Int=1, use_stable=true
+    res::HarmonicSteadyState.Result,
+    Ω_range,
+    branch::Int;
+    op_index::Int=1,
+    use_stable::Bool=true,
 )
     D_func = make_D(res.problem.eom, res.swept_parameters, res.fixed_parameters)
 

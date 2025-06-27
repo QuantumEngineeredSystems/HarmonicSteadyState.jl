@@ -8,7 +8,7 @@ EditURL = "../../../examples/forward_transmission.jl"
 using HarmonicSteadyState, QuantumCumulants, Plots
 ````
 
-Consider a model of nonlinear magnon-magnon coupling, as described in [this](https://arxiv.org/abs/2506.11527) paper. The model describes  a three-wave mixing intercation between a strongly driven $k=0$ FMR mode and two parametricallly excited propagating modes with opposite momentum $\pm k$ and at half frequency. In this notebook, we will show how the cumulant approximation can be used to calculate steady states, and to calculate the $S_{21}$ transmission coefficient.
+Consider a model of nonlinear magnon-magnon coupling, as described in [this](https://arxiv.org/abs/2506.11527) paper. The model describes  a three-wave mixing interaction between a strongly driven $k=0$ FMR mode and two parametricallly excited propagating modes with opposite momentum $\pm k$ and at half frequency. In this notebook, we will show how the cumulant approximation can be used to calculate steady states, and to calculate the $S_{21}$ transmission coefficient.
 
 ````@example forward_transmission
 hm = FockSpace(:magnon)
@@ -47,7 +47,7 @@ plot(plot(result; y="1/sqrt(2)*(mᵣ+ mᵢ)"), plot(result; y="1/sqrt(2)*(cᵣ +
 # Linear response and S21
 ````
 
-To find the response of the driven system to a second, weak probe, we use the method described [here](https://quantumengineeredsystems.github.io/HarmonicBalance.jl/stable/background/stability_response#linresp_background). Here, we calculate the response in the same rotating frame as the Hamiltonian. The linear response is related to the scattering paramter $S_{21}$ by
+To find the response of the driven system to a second, weak probe, we use the method described [here](https://quantumengineeredsystems.github.io/HarmonicBalance.jl/stable/background/stability_response#linresp_background). Here, we calculate the response in the same rotating frame as the Hamiltonian. The linear response is related to the scattering parameter $S_{21}$ by
 $$S_{21}=1-\frac{\kappa_{ext}}{2} \chi,$$
 where $\kappa_{ext}$ is the coupling of the system to the measurement apparatus.
 
