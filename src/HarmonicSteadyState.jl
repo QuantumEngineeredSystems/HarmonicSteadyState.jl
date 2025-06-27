@@ -54,6 +54,9 @@ using .LinearResponse
 include("LimitCycles/LimitCycles.jl")
 using .LimitCycles
 
+# Eqaution
+export HarmonicEquation # for Meanfield equations
+
 # methods
 export WarmUp
 export TotalDegree
@@ -83,7 +86,7 @@ export eigenvalues, eigenvectors
 export get_jacobian_response
 export get_linear_response
 export get_rotframe_jacobian_response
-export get_linear_response_cumulants
+export get_forward_transmission_response
 
 # plotting
 export plot_linear_response
