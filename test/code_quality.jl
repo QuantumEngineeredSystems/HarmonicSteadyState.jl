@@ -27,8 +27,21 @@ if VERSION < v"1.12.0-beta"
     end
 end
 
+@testset "ExplicitImports" begin
+    using ExplicitImports
+
+    @test check_no_implicit_imports(HarmonicSteadyState) == nothing
+    @test check_all_explicit_imports_via_owners(HarmonicSteadyState) == nothing
+    @test check_all_explicit_imports_are_public(KeldyshContraction) == nothing
+    @test check_no_stale_explicit_imports(HarmonicSteadyState) == nothing
+    @test check_all_qualified_accesses_via_owners(HarmonicSteadyState) == nothing
+    # @test check_all_qualified_accesses_are_public(KeldyshContraction) == nothing
+    @test check_no_self_qualified_accesses(HarmonicSteadyState) == nothing
+end
+
+
 @testset "Code quality" begin
-    using ExplicitImports, Aqua
+    using Aqua
     using OrdinaryDiffEqTsit5, SteadyStateDiffEq, Plots, HarmonicBalance
 
     TimeEvolution = Base.get_extension(HarmonicSteadyState, :TimeEvolution)
@@ -36,10 +49,7 @@ end
     PlotsExt = Base.get_extension(HarmonicSteadyState, :PlotsExt)
     HarmonicBalanceExt = Base.get_extension(HarmonicSteadyState, :HarmonicBalanceExt)
 
-    @test check_no_stale_explicit_imports(HarmonicSteadyState) == nothing
-    @test check_all_explicit_imports_via_owners(HarmonicSteadyState) == nothing
     Aqua.test_ambiguities([HarmonicSteadyState])
-
     using HarmonicSteadyState.HomotopyContinuation: ModelKit
     Aqua.test_all(
         HarmonicSteadyState;
