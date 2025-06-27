@@ -3,6 +3,7 @@ module QuantumCumulantsExt
 using QuantumCumulants: QuantumCumulants, average, MeanfieldEquations
 using Symbolics: Symbolics, parse_expr_to_symbolic, Num, expand
 using HarmonicSteadyState: HarmonicSteadyState
+using QuestBase: QuestBase
 using OrderedCollections: OrderedDict
 
 export HomotopyContinuationProblem
@@ -90,13 +91,23 @@ function compute_real_equations(eqs::MeanfieldEquations)
         iszero(eq_re) || push!(eqs_real, eq_re)
         iszero(eq_im) || push!(eqs_real, eq_im)
     end
-    return vars, eqs_real
-end # TEST: test if order of vars and eqs is correct
+    return eqs_real, Num.(vars)
+end # TODO: test if order of vars and eqs is correct
+
+function add_iv(eqs, vars, iv)
+    var_new = map(vars) do var
+        QuestBase.declare_variable(string(var), iv)
+    end
+    subs = Dict(zip(vars, var_new))
+    eqs_new = QuestBase.substitute_all(eqs, subs)
+    return eqs_new, var_new
+end
+# # TODO: try something declare_iv_variable
 
 function HarmonicSteadyState.HomotopyContinuationProblem(
     MFeqs::MeanfieldEquations, parameters, swept, fixed
 )
-    vars, equations = compute_real_equations(MFeqs)
+    equations, vars = compute_real_equations(MFeqs)
 
     return HarmonicSteadyState.HomotopyContinuationProblem(
         Num.(equations),
@@ -105,6 +116,26 @@ function HarmonicSteadyState.HomotopyContinuationProblem(
         OrderedDict(swept),
         OrderedDict(fixed),
     )
+end
+
+function HarmonicSteadyState.HarmonicEquation(MFeqs::MeanfieldEquations, parameters)
+    equations_lhs, vars = compute_real_equations(MFeqs)
+    # equations_lhs, vars = reparse_with_iv(equations_lhs, vars, MFeqs.iv)
+    equations_lhs, vars = add_iv(equations_lhs, vars, MFeqs.iv)
+
+    eqs_jac, vars_jac = QuestBase._remove_brackets(equations_lhs, vars)
+    jac = HarmonicSteadyState.get_Jacobian(eqs_jac, vars_jac)
+
+    hvars = map(vars) do var
+        HarmonicSteadyState.QuestBase.HarmonicVariable(Num(var), "", "", Num(1), Num(0))
+    end
+
+    equations_lhs = map(enumerate(vars)) do (idx, var)
+        dvar = QuestBase.d(var, MFeqs.iv)
+        equations_lhs[idx] ~ dvar # by convention lhs in HB
+    end
+
+    return HarmonicSteadyState.HarmonicEquation(equations_lhs, hvars, Num.(parameters), jac)
 end
 
 end
