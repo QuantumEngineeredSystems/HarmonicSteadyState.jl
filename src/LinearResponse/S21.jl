@@ -62,7 +62,7 @@ or phase shift:
 - `use_stable=true`: Evaluate response only for stable steady states, or also for any physical solutions
 
 # Returns
-- `χ`: Complex response matrix
+- `χ`: Complex response matrix where rows correspond to frequencies and columns to solutions
 
 # Example
 ```julia
