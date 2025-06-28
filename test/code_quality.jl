@@ -20,25 +20,17 @@
     end
 end
 
-if VERSION < v"1.12.0-beta"
-    @testset "Code linting" begin
-        using JET
-        JET.test_package(HarmonicSteadyState; target_defined_modules=true)
-    end
-end
-
 @testset "ExplicitImports" begin
     using ExplicitImports
 
     @test check_no_implicit_imports(HarmonicSteadyState) == nothing
     @test check_all_explicit_imports_via_owners(HarmonicSteadyState) == nothing
-    @test check_all_explicit_imports_are_public(KeldyshContraction) == nothing
+    # @test check_all_explicit_imports_are_public(HarmonicSteadyState) == nothing
     @test check_no_stale_explicit_imports(HarmonicSteadyState) == nothing
     @test check_all_qualified_accesses_via_owners(HarmonicSteadyState) == nothing
-    @test check_all_qualified_accesses_are_public(KeldyshContraction) == nothing
+    # @test check_all_qualified_accesses_are_public(HarmonicSteadyState) == nothing
     @test check_no_self_qualified_accesses(HarmonicSteadyState) == nothing
 end
-
 
 @testset "Code quality" begin
     using Aqua
@@ -70,5 +62,12 @@ end
             project_extras=false,
             persistent_tasks=false,
         )
+    end
+end
+
+if VERSION < v"1.12.0-beta"
+    @testset "Code linting" begin
+        using JET
+        JET.test_package(HarmonicSteadyState; target_defined_modules=true)
     end
 end

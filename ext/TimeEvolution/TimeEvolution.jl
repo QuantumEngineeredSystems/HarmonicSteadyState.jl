@@ -1,6 +1,6 @@
 module TimeEvolution
 
-using DocStringExtensions
+using DocStringExtensions: TYPEDSIGNATURES
 using Symbolics: Num, substitute, unwrap, get_variables
 using OrdinaryDiffEqTsit5: OrdinaryDiffEqTsit5
 
