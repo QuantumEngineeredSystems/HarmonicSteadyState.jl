@@ -109,9 +109,7 @@ function HomotopyContinuationProblem(
     pars_new = declare_variable.(string.(parameters))
 
     system = HomotopyContinuation.System(equations, vars_new, pars_new)
-    J = compute_and_compile_Jacobian(
-        equations, vars_new, ComplexF64, swept, fixed
-    )
+    J = compute_and_compile_Jacobian(equations, vars_new, ComplexF64, swept, fixed)
     return HomotopyContinuationProblem(vars_new, pars_new, swept, fixed, system, J)
 end # Probably should merge both constructors
 
