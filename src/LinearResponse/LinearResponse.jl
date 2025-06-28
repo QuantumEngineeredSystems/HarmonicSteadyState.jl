@@ -1,7 +1,7 @@
 module LinearResponse
 
 using Printf: Printf, @printf
-using DocStringExtensions
+using DocStringExtensions: TYPEDFIELDS, TYPEDSIGNATURES, TYPEDEF
 using ProgressMeter: ProgressMeter, Progress, next!
 
 using Symbolics: Symbolics, Num, unwrap

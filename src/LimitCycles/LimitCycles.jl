@@ -10,7 +10,7 @@ using QuestBase:
     declare_variable,
     _remove_brackets
 
-using DocStringExtensions
+using DocStringExtensions: TYPEDSIGNATURES
 
 using Symbolics: Symbolics, Num, expand_derivatives, get_variables
 
