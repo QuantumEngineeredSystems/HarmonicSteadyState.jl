@@ -102,7 +102,6 @@ function add_iv(eqs, vars, iv)
     eqs_new = QuestBase.substitute_all(eqs, subs)
     return eqs_new, var_new
 end
-# # TODO: try something declare_iv_variable
 
 function HarmonicSteadyState.HomotopyContinuationProblem(
     MFeqs::MeanfieldEquations, parameters, swept, fixed
