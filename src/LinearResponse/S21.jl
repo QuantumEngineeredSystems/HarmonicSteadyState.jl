@@ -19,6 +19,7 @@ function make_S(N::Int)
 end
 
 """
+NO LONGER USED
 Construct compiled function for the dynamical matrix of the system.
 
 # Arguments
@@ -55,11 +56,11 @@ or phase shift:
 - If S21 ≈ 0 (or very negative dB), very little signal is transmitted.
 
 # Arguments
-- `res::Result`: Result object containing the system's steady state solutions
+- `res::Result`: Result object containing the system's solutions
+- `natvar::Symbol`: Operator for which to calculate the resonse function
 - `Ω_range`: Range of frequencies to evaluate
 - `branch::Int`: Branch number to analyze
-- `op_index::Int=1`: Index of operator in mean field equations to evaluate response for
-- `use_stable=true`: Evaluate response only for stable steady states, or also for any physical solutions
+- `class="stable"`: Class of solutions to evaluate response for
 
 # Returns
 - `χ`: Complex response matrix where rows correspond to frequencies and columns to solutions
@@ -76,43 +77,42 @@ S21_log = 20 .* log10.(abs.(S21)) # expressed in dB
 ```
 """
 function get_forward_transmission_response(
-    res::HarmonicSteadyState.Result,
-    Ω_range,
-    branch::Int;
-    op_index::Int=1,
-    use_stable::Bool=true,
+	res::HarmonicSteadyState.Result, 
+	natvar::Symbol, 
+	Ω_range, branch::Int; 
+	class = "stable"
 )
-    D_func = make_D(res.problem.eom, res.swept_parameters, res.fixed_parameters)
 
-    if use_stable
-        stable = get_class(res, branch, "stable")
-        !any(stable) && error("Cannot generate a spectrum - no stable solutions!")
-    else
-        stable = get_class(res, branch, "physical")
-    end
+	vars = result.problem.variables
+	S, Sinv = make_S_Sinv(length(vars))
 
-    χ = Matrix{ComplexF64}(undef, length(Ω_range), length(findall(stable)))
+	op_index = findall(var -> occursin(string(natvar), string(var)), vars)[1]
 
-    Symbolics.@variables Ω
+	inclass = get_class(res, branch, class)
+	!any(inclass) && error("Cannot generate a spectrum - no $class solutions!")
+	
+    inds = findall(inclass)
 
-    for (i, ind) in enumerate(findall(stable))
-        sol = HarmonicSteadyState.get_variable_solutions(res; branch=branch, index=ind)
+	χ = Matrix{ComplexF64}(undef, length(Ω_range), length(inds))
 
-        D = D_func(real.(sol))
-        eig = eigen(D)
+	@variables Ω
 
-        χ_mat =
-            -eig.vectors *
-            LinearAlgebra.Diagonal(1 ./ (eig.values .- im * Ω)) *
-            LinearAlgebra.inv(eig.vectors)
+	for (i, ind) in enumerate(inds)
+		sol = get_single_solution(res; branch = branch, index = ind)
+        
+        jac = result.jacobian(collect(values(sol)))
 
-        χ_func = Symbolics.build_function(
-            χ_mat[op_index, op_index], Ω; expression=Val{false}
-        )
+        D = S * jac * Sinv
+		
+		eig = eigen(D)
 
-        for (j, Ω) in enumerate(Ω_range)
-            @inbounds χ[j, i] = χ_func(Ω)
-        end
-    end
-    return χ
+		χ_mat = -eig.vectors * Diagonal(1 ./ (eig.values .- im*Ω)) * inv(eig.vectors)
+
+		χ_func = Symbolics.build_function(χ_mat[op_index, op_index], Ω; expression = Val{false})
+
+		for (j, Ω) in enumerate(Ω_range)
+			@inbounds χ[j, i] = χ_func(Ω)
+		end
+	end
+	return χ
 end
