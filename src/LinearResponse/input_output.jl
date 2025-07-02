@@ -57,7 +57,7 @@ or phase shift:
 
 # Arguments
 - `result::Result`: Result object containing the system's solutions
-- `op_index::Int=1`: Index of operator in mean field equations to evaluate response for
+- `op_index::Int`: Index of operator in mean field equations to evaluate response for
 - `Ω_range`: Range of frequencies to evaluate
 - `branch::Int`: Branch number to analyze
 - `class="stable"`: Class of solutions to evaluate response for
@@ -69,7 +69,7 @@ or phase shift:
 ```julia
 Ω_range = range(-0.2, 0.2, 500)
 
-χ = get_susceptibility(result, Ω_range, 3 #=branch=#);
+χ = get_susceptibility(result, 1#=variable=#, Ω_range, 3 #=branch=#);
 
 κ_ext = 0.05
 S21 = 1 .- χ*κ_ext/2
@@ -89,8 +89,6 @@ function get_susceptibility(
 
     χ = Matrix{ComplexF64}(undef, length(Ω_range), length(inds))
 
-    Symbolics.@variables Ω
-
     for (i, index) in enumerate(inds)
         sol = get_single_solution(result; branch, index)
 
@@ -100,17 +98,19 @@ function get_susceptibility(
 
         eig = eigen(D)
 
-        χ_mat =
-            -eig.vectors *
-            LinearAlgebra.Diagonal(1 ./ (eig.values .- im * Ω)) *
-            LinearAlgebra.inv(eig.vectors)
+        # Pre-compute the matrix decomposition
+        V = eig.vectors
+        Vinv = LinearAlgebra.inv(V)
+        λ = eig.values
 
-        χ_func = Symbolics.build_function(
-            χ_mat[op_index, op_index], Ω; expression=Val{false}
-        )
-
-        for (j, Ω) in enumerate(Ω_range)
-            @inbounds χ[j, i] = χ_func(Ω)
+        # Extract only the needed element from the matrix multiplication
+        # χ_ij = -sum_k V[i,k] * (1/(λ[k] - im*Ω)) * Vinv[k,j]
+        for (j, Ω_val) in enumerate(Ω_range)
+            χ_val = zero(ComplexF64)
+            for k in eachindex(λ)
+                χ_val += V[op_index, k] * (1 / (λ[k] - im * Ω_val)) * Vinv[k, op_index]
+            end
+            @inbounds χ[j, i] = -χ_val
         end
     end
     return χ

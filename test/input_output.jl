@@ -31,7 +31,7 @@ using HarmonicSteadyState, QuantumCumulants, Test
     Ω_range = range(-0.2, 0.2, 500)
 
     @testset "S21" begin
-        m= result.problem.variables[1]
+        m = result.problem.variables[1]
         χ = get_susceptibility(result, 1, Ω_range, 3)
 
         κ_ext = 0.05
@@ -39,5 +39,24 @@ using HarmonicSteadyState, QuantumCumulants, Test
 
         @test minimum(abs.(S21)) > 0
         @test maximum(abs.(S21)) < 1
+
+        @test all(iszero, real(S21[1:250, :] - reverse(S21[251:end, :]; dims=1)))
+        @test all(iszero, imag(S21[1:250, :] + reverse(S21[251:end, :]; dims=1)))
+    end
+
+    @testset "make_S transformation" begin
+        using HarmonicSteadyState.LinearResponse: make_S
+        using LinearAlgebra: I
+        # Test S matrix properties
+        N = 4  # Even number
+        S, Sinv = make_S(N)
+
+        @test size(S) == (N, N)
+        @test size(Sinv) == (N, N)
+        @test S * Sinv ≈ I(N) rtol = 1e-12  # Should be inverse
+        @test Sinv * S ≈ I(N) rtol = 1e-12
+
+        # Test assertion for odd N
+        @test_throws AssertionError make_S(3)
     end
 end
