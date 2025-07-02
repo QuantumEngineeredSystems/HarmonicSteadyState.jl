@@ -33,7 +33,7 @@ Construct compiled function for the dynamical matrix of the system.
 function make_D(eqs::HarmonicEquation, varied, fixed)
     jac = eqs.jacobian
 
-    variables = QuestBase._remove_brackets(QuestBase.get_variables(eqs))
+    variables = QuestBase._remove_brackets(Symbolics.get_variables(eqs))
     S, Sinv = make_S(length(variables))
     Duv = expand.(S * jac * Sinv)
 
@@ -100,7 +100,7 @@ function get_susceptibility(
 
         # Pre-compute the matrix decomposition
         V = eig.vectors
-        Vinv = LinearAlgebra.inv(V)
+        Vinv = inv(V)
         λ = eig.values
 
         # Extract only the needed element from the matrix multiplication
