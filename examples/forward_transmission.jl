@@ -42,7 +42,7 @@ plot(plot(result; y="1/sqrt(2)*(mᵣ+ mᵢ)"), plot(result; y="1/sqrt(2)*(cᵣ +
 # The result below shows the characteristic splitting of the magnon resonance above the power threshold, which matches the experiment.
 
 Ω_range = range(-0.2, 0.2, 500)
-χ = get_forward_transmission_response(result, m, Ω_range, 3);
+χ = get_susceptibility(result, 1, Ω_range, 3);
 result.problem.eom
 κ_ext = 0.05
 S21 = 1 .- χ * κ_ext / 2

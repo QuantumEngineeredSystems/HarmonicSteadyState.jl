@@ -55,7 +55,7 @@ The result below shows the characteristic splitting of the magnon resonance abov
 
 ````@example forward_transmission
 Ω_range = range(-0.2, 0.2, 500)
-χ = get_forward_transmission_response(result, Ω_range, 3);
+χ = get_susceptibility(result, 1, Ω_range, 3);
 
 κ_ext = 0.05
 S21 = 1 .- χ*κ_ext/2

@@ -56,8 +56,8 @@ or phase shift:
 - If S21 ≈ 0 (or very negative dB), very little signal is transmitted.
 
 # Arguments
-- `res::Result`: Result object containing the system's solutions
-- `natvar::Symbol`: Operator for which to calculate the resonse function
+- `result::Result`: Result object containing the system's solutions
+- `op_index::Int=1`: Index of operator in mean field equations to evaluate response for
 - `Ω_range`: Range of frequencies to evaluate
 - `branch::Int`: Branch number to analyze
 - `class="stable"`: Class of solutions to evaluate response for
@@ -69,50 +69,49 @@ or phase shift:
 ```julia
 Ω_range = range(-0.2, 0.2, 500)
 
-χ = get_forward_transmission_response(result, Ω_range, 3 #=branch=#);
+χ = get_susceptibility(result, Ω_range, 3 #=branch=#);
 
 κ_ext = 0.05
 S21 = 1 .- χ*κ_ext/2
 S21_log = 20 .* log10.(abs.(S21)) # expressed in dB
 ```
 """
-function get_forward_transmission_response(
-	res::HarmonicSteadyState.Result, 
-	natvar::Symbol, 
-	Ω_range, branch::Int; 
-	class = "stable"
+function get_susceptibility(
+    result::HarmonicSteadyState.Result, op_index::Int, Ω_range, branch::Int; class="stable"
 )
+    vars = result.problem.variables
+    S, Sinv = make_S(length(vars))
 
-	vars = result.problem.variables
-	S, Sinv = make_S_Sinv(length(vars))
+    inclass = get_class(result, branch, class)
+    !any(inclass) && error("Cannot generate a spectrum - no $class solutions!")
 
-	op_index = findall(var -> occursin(string(natvar), string(var)), vars)[1]
-
-	inclass = get_class(res, branch, class)
-	!any(inclass) && error("Cannot generate a spectrum - no $class solutions!")
-	
     inds = findall(inclass)
 
-	χ = Matrix{ComplexF64}(undef, length(Ω_range), length(inds))
+    χ = Matrix{ComplexF64}(undef, length(Ω_range), length(inds))
 
-	@variables Ω
+    Symbolics.@variables Ω
 
-	for (i, ind) in enumerate(inds)
-		sol = get_single_solution(res; branch = branch, index = ind)
-        
+    for (i, index) in enumerate(inds)
+        sol = get_single_solution(result; branch, index)
+
         jac = result.jacobian(collect(values(sol)))
 
         D = S * jac * Sinv
-		
-		eig = eigen(D)
 
-		χ_mat = -eig.vectors * Diagonal(1 ./ (eig.values .- im*Ω)) * inv(eig.vectors)
+        eig = eigen(D)
 
-		χ_func = Symbolics.build_function(χ_mat[op_index, op_index], Ω; expression = Val{false})
+        χ_mat =
+            -eig.vectors *
+            LinearAlgebra.Diagonal(1 ./ (eig.values .- im * Ω)) *
+            LinearAlgebra.inv(eig.vectors)
 
-		for (j, Ω) in enumerate(Ω_range)
-			@inbounds χ[j, i] = χ_func(Ω)
-		end
-	end
-	return χ
+        χ_func = Symbolics.build_function(
+            χ_mat[op_index, op_index], Ω; expression=Val{false}
+        )
+
+        for (j, Ω) in enumerate(Ω_range)
+            @inbounds χ[j, i] = χ_func(Ω)
+        end
+    end
+    return χ
 end

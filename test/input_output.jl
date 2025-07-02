@@ -1,4 +1,4 @@
-using HarmonicSteadyState, QuantumCumulants
+using HarmonicSteadyState, QuantumCumulants, Test
 
 @testset "magnon-polariton" begin
     # Hilbertspace
@@ -31,7 +31,8 @@ using HarmonicSteadyState, QuantumCumulants
     Ω_range = range(-0.2, 0.2, 500)
 
     @testset "S21" begin
-        χ = get_forward_transmission_response(result, Ω_range, 3)
+        m= result.problem.variables[1]
+        χ = get_susceptibility(result, 1, Ω_range, 3)
 
         κ_ext = 0.05
         S21 = 1 .- χ * κ_ext / 2
