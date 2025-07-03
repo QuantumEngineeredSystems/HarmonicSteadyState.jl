@@ -117,7 +117,7 @@ function HarmonicSteadyState.HomotopyContinuationProblem(
     )
 end
 
-function HarmonicSteadyState.HarmonicEquation(MFeqs::MeanfieldEquations, parameters)
+function QuestBase.HarmonicEquation(MFeqs::MeanfieldEquations, parameters)
     equations_lhs, vars = compute_real_equations(MFeqs)
     # equations_lhs, vars = reparse_with_iv(equations_lhs, vars, MFeqs.iv)
     equations_lhs, vars = add_iv(equations_lhs, vars, MFeqs.iv)
@@ -134,7 +134,7 @@ function HarmonicSteadyState.HarmonicEquation(MFeqs::MeanfieldEquations, paramet
         equations_lhs[idx] ~ dvar # by convention lhs in HB
     end
 
-    return HarmonicSteadyState.HarmonicEquation(equations_lhs, hvars, Num.(parameters), jac)
+    return QuestBase.HarmonicEquation(equations_lhs, hvars, Num.(parameters), jac)
 end
 
 end
