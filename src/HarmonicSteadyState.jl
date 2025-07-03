@@ -18,7 +18,7 @@ function set_imaginary_tolerance(x::Float64)
     @eval(IM_TOL::Float64 = $x)
 end
 
-using DocStringExtensions
+using DocStringExtensions: TYPEDSIGNATURES, TYPEDEF, TYPEDFIELDS
 using OrderedCollections: OrderedDict
 using ProgressMeter: ProgressMeter, Progress
 using LinearAlgebra: LinearAlgebra, eigvals
@@ -30,6 +30,7 @@ using HomotopyContinuation: HomotopyContinuation
 using Symbolics: Symbolics, unwrap, wrap, Num, get_variables
 const HC = HomotopyContinuation
 import FunctionWrappers: FunctionWrapper
+using RuntimeGeneratedFunctions: RuntimeGeneratedFunction
 
 include("extension_functions.jl")
 

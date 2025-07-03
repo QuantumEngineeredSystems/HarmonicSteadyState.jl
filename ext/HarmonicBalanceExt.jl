@@ -1,9 +1,10 @@
 module HarmonicBalanceExt
 
-using DocStringExtensions
+using DocStringExtensions: TYPEDSIGNATURES
 using Symbolics: Symbolics, get_variables, Num
 using HarmonicBalance: HarmonicBalance, get_Jacobian
 using QuestBase:
+    QuestBase,
     DifferentialEquation,
     declare_variable,
     get_independent_variables,
@@ -55,7 +56,7 @@ function HarmonicSteadyState.LinearResponse.ResponseMatrix(
     # get the symbolic response matrix
     Symbolics.@variables Δ
     M = get_response_matrix(res.problem.eom.natural_equation, Num(Δ))
-    M = HarmonicSteadyState.QuestBase.substitute_all(M, merge(res.fixed_parameters, rules))
+    M = QuestBase.substitute_all(M, merge(res.fixed_parameters, rules))
     symbols = HarmonicSteadyState._free_symbols(res)
 
     compiled_M = map(M) do el

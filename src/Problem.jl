@@ -76,7 +76,7 @@ end
 
 "Constructor for the type `HomotopyContinuationProblem` (to be solved by HomotopyContinuation)
 from a `HarmonicEquation`."
-function HarmonicSteadyState.HomotopyContinuationProblem(
+function HomotopyContinuationProblem(
     eom::HarmonicEquation, swept::AbstractDict, fixed::AbstractDict; compile_jacobian=true
 )
     S = HomotopyContinuation.System(eom)
@@ -97,7 +97,7 @@ function HarmonicSteadyState.HomotopyContinuationProblem(
 end # Probably should merge both constructors
 
 "A constructor for HomotopyContinuationProblem from explicitly entered equations, variables and parameters."
-function HarmonicSteadyState.HomotopyContinuationProblem(
+function HomotopyContinuationProblem(
     equations::Vector{Num},
     variables::Vector{Num},
     parameters::Vector{Num},
@@ -109,9 +109,7 @@ function HarmonicSteadyState.HomotopyContinuationProblem(
     pars_new = declare_variable.(string.(parameters))
 
     system = HomotopyContinuation.System(equations, vars_new, pars_new)
-    J = HarmonicSteadyState.compute_and_compile_Jacobian(
-        equations, vars_new, ComplexF64, swept, fixed
-    )
+    J = compute_and_compile_Jacobian(equations, vars_new, ComplexF64, swept, fixed)
     return HomotopyContinuationProblem(vars_new, pars_new, swept, fixed, system, J)
 end # Probably should merge both constructors
 
