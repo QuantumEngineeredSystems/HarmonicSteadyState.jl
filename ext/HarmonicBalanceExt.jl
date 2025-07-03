@@ -53,9 +53,16 @@ Any substitution rules not specified in `res` can be supplied in `rules`."
 function HarmonicSteadyState.LinearResponse.ResponseMatrix(
     res::HarmonicSteadyState.Result; rules=Dict()
 )
+    eom = source(res.problem)
+    if isnothing(eom)
+        error("Cannot get the response matrix of the second order natural differential equations of a result with a problem with no source.")
+    elseif !isa(source(eom),QuestBase.DifferentialEquation)
+        error("Cannot get the response matrix the second order natural differential equations of a result where the source system is not second order differential equation.")
+    end
+
     # get the symbolic response matrix
     Symbolics.@variables Δ
-    M = get_response_matrix(res.problem.eom.natural_equation, Num(Δ))
+    M = get_response_matrix(source(eom), Num(Δ))
     M = QuestBase.substitute_all(M, merge(res.fixed_parameters, rules))
     symbols = HarmonicSteadyState._free_symbols(res)
 
@@ -65,7 +72,7 @@ function HarmonicSteadyState.LinearResponse.ResponseMatrix(
         f_im = Symbolics.build_function(el.im, args; expression=Val{false})
         (args...) -> f_re(args...) + im * f_im(args...)
     end
-    return ResponseMatrix(compiled_M, symbols, res.problem.eom.variables)
+    return ResponseMatrix(compiled_M, symbols, eom.variables)
 end
 
 """

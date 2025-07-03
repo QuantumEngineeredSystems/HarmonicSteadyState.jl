@@ -7,7 +7,7 @@ Stores the steady states of a HarmonicEquation.
 $(TYPEDFIELDS)
 
 """
-mutable struct Result{D,SolType<:Number,ParType<:Number,F<:JacobianFunction(SolType)}
+mutable struct Result{D,SolType<:Number,ParType<:Number,F<:JacobianFunction(SolType), Source}
     "The variable values of steady-state solutions."
     solutions::Array{Vector{Vector{SolType}},D}
     "Values of all parameters for all solutions."
@@ -15,7 +15,7 @@ mutable struct Result{D,SolType<:Number,ParType<:Number,F<:JacobianFunction(SolT
     "The parameters fixed throughout the solutions."
     fixed_parameters::OrderedDict{Num,ParType}
     "The `HomotopyContinuationProblem` used to generate this."
-    problem::HomotopyContinuationProblem{ParType,F}
+    problem::HomotopyContinuationProblem{ParType,F, Source}
     """
     Maps strings such as \"stable\", \"physical\" etc to arrays of values,
     classifying the solutions (see method `classify_solutions!`).
@@ -52,8 +52,9 @@ function Result(
     soltype = solution_type(solutions)
     partype = parameter_type(swept_parameters, fixed_parameters)
     dim = ndims(solutions)
+    Source = source_type(problem)
 
-    return Result{dim,soltype,partype,typeof(jacobian)}(
+    return Result{dim,soltype,partype,typeof(jacobian),Source}(
         solutions,
         swept_parameters,
         fixed_parameters,

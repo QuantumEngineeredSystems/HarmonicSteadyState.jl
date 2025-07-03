@@ -17,7 +17,7 @@ using HarmonicSteadyState:
     get_class,
     swept_parameters
 
-using QuestBase: HarmonicVariable, substitute_all
+using QuestBase: QuestBase, HarmonicVariable, substitute_all
 
 include("types.jl")
 include("utils.jl")

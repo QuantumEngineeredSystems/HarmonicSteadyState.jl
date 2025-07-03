@@ -5,7 +5,7 @@ function classify_unique!(res::Result, Δω; class_name="unique_cycle")
     c1 = classify_solutions(res, soln -> _is_physical(soln) && real(soln[i1]) >= 0)
 
     # 2nd degeneracy: ambiguity in the fixed phase, manifests as the sign of var
-    var = _remove_brackets(get_cycle_variables(res.problem.eom, Δω)[1])
+    var = _remove_brackets(get_cycle_variables(source(res.problem), Δω)[1])
     i2 = _symidx(var, res)
     c2 = classify_solutions(res, soln -> _is_physical(soln) && real(soln[i2]) >= 0)
 
