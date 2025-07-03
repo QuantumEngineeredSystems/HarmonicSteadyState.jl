@@ -123,8 +123,8 @@ function Base.show(io::IO, p::HomotopyContinuationProblem)
     return nothing
 end
 
-source(p::HomotopyContinuationProblem) = p.source
-source_type(p::HomotopyContinuationProblem{P,J,Source}) where {P,J,Source} = Source
+QuestBase.source(p::HomotopyContinuationProblem) = p.source
+QuestBase.source_type(p::HomotopyContinuationProblem{P,J,Source}) where {P,J,Source} = Source
 
 # assume this order of variables in all compiled function (transform_solutions, Jacobians)
 function _free_symbols(p::HomotopyContinuationProblem)::Vector{Num}

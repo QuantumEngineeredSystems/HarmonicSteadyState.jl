@@ -10,7 +10,9 @@ using QuestBase:
     substitute_all,
     get_independent_variables,
     d,
-    _remove_brackets
+    _remove_brackets,
+    source,
+    source_type
 
 # default global settings
 IM_TOL::Float64 = 1e-6
