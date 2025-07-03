@@ -77,7 +77,7 @@ end
 
 function get_implicit_Jacobian(p::SteadyStateProblem)
     return get_implicit_Jacobian(
-        p.eom; sym_order=_free_symbols(p), rules=p.fixed_parameters
+        source(p); sym_order=_free_symbols(p), rules=p.fixed_parameters
     )
 end
 

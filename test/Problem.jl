@@ -16,7 +16,7 @@ using Test
         F,
         HarmonicSteadyState.JacobianFunction(ComplexF64)(x -> x),
     )
-    @test_throws UndefRefError prob.eom
+    @test isnothing(HarmonicSteadyState.source(prob))
 
     prob = HarmonicSteadyState.HomotopyContinuationProblem(
         [x, y], Num[], OrderedDict{Num,Vector{Float64}}(), OrderedDict{Num,Float64}(), F

@@ -253,7 +253,11 @@ function to_lab_frame(soln::OrderedDict, res::Result, nat_var::Num, times)
     else
         nat_var
     end
-    vars = filter(x -> isequal(x.natural_variable, var), res.problem.eom.variables)
+    eom = source(res.problem)
+    if !isa(source(eom), QuestBase.DifferentialEquation)
+        error("Cannot transform to lab frame for a equations of motion with a source not coming from the lab frame.")
+    end
+    vars = filter(x -> isequal(x.natural_variable, var), eom.variables)
 
     return if Symbolics.is_derivative(unwrap(nat_var))
         _to_lab_frame_velocity(soln, vars, times)

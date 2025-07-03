@@ -26,6 +26,7 @@ HomotopyContinuationProblem(
 mutable struct HomotopyContinuationProblem{
     ParType<:Number,
     Jac<:JacobianFunction(ComplexF64), # HC.jl only supports Float64
+    Source
 } <: SteadyStateProblem
     "The harmonic variables to be solved for."
     variables::Vector{Num}
@@ -43,19 +44,19 @@ mutable struct HomotopyContinuationProblem{
     """
     jacobian::Jac
     "The HarmonicEquation object used to generate this `HomotopyContinuationProblem`."
-    eom::HarmonicEquation
+    source::Source
 
     function HomotopyContinuationProblem(
         variables, parameters, swept::OrderedDict, fixed::OrderedDict{K,V}, system, jacobian
     ) where {K,V}
-        return new{V,typeof(jacobian)}(
+        return new{V,typeof(jacobian), Nothing}(
             variables, parameters, swept, fixed, system, jacobian
         )
     end # incomplete initialization for user-defined symbolic systems
     function HomotopyContinuationProblem(
         variables, parameters, swept::OrderedDict, fixed::OrderedDict{K,V}, system
     ) where {K,V}
-        return new{V,JacobianFunction(ComplexF64)}(
+        return new{V,JacobianFunction(ComplexF64), Nothing}(
             variables, parameters, swept, fixed, system
         )
     end # incomplete initialization for user-defined symbolic systems
@@ -66,9 +67,9 @@ mutable struct HomotopyContinuationProblem{
         fixed::OrderedDict{K,V},
         system,
         jacobian,
-        eom,
-    ) where {K,V}
-        return new{V,typeof(jacobian)}(
+        eom::T,
+    ) where {K,V, T}
+        return new{V,typeof(jacobian), T}(
             variables, parameters, swept, fixed, system, jacobian, eom
         )
     end
@@ -121,6 +122,9 @@ function Base.show(io::IO, p::HomotopyContinuationProblem)
     println(io, "Parameters: ", join(string.(p.parameters), ", "))
     return nothing
 end
+
+source(p::HomotopyContinuationProblem) = p.source
+source_type(p::HomotopyContinuationProblem{P,J,Source}) where {P,J,Source} = Source
 
 # assume this order of variables in all compiled function (transform_solutions, Jacobians)
 function _free_symbols(p::HomotopyContinuationProblem)::Vector{Num}
