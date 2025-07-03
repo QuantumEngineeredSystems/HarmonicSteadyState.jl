@@ -36,16 +36,16 @@ plot(plot(result; y="1/sqrt(2)*(mᵣ+ mᵢ)"), plot(result; y="1/sqrt(2)*(cᵣ +
 ## Linear response and S21
 
 # To find the response of the driven system to a second, weak probe, we use the method described [here](https://quantumengineeredsystems.github.io/HarmonicBalance.jl/stable/background/stability_response#linresp_background). Here, we calculate the response in the same rotating frame as the Hamiltonian. The linear response is related to the scattering parameter $S_{21}$ by
-# $$S_{21}=1-\frac{\kappa_{ext}}{2} \chi,$$
+# $$S_{21}(\omega)=1-\sqrt{\kappa_{ext}} \chi(\omega),$$
 # where $\kappa_{ext}$ is the coupling of the system to the measurement apparatus.
 
 # The result below shows the characteristic splitting of the magnon resonance above the power threshold, which matches the experiment.
 
 Ω_range = range(-0.2, 0.2, 500)
-χ = get_susceptibility(result, 1, Ω_range, 3);
+χ = get_forward_transmission_response(result, m, Ω_range, 3);
 result.problem.eom
 κ_ext = 0.05
-S21 = 1 .- χ * κ_ext / 2
+S21 = 1 .- χ * sqrt(κ_ext)
 S21_log = 20 .* log10.(abs.(S21))
 
 stable = get_class(result, 3, "physical")
