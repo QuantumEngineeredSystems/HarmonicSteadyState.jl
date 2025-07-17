@@ -4,6 +4,7 @@ authors = ["Orjan Ameye <orjan.ameye@hotmail.com>", "Jan Kosata <kosataj@phys.et
 version = "0.2.8"
 
 [deps]
+Attractors = "f3fd9213-ca85-4dba-9dfd-7fc91308fec7"
 BijectiveHilbert = "91e7fc40-53cd-4118-bd19-d7fcd1de2a54"
 Distances = "b4f34e82-e78d-54a5-968a-f98e89d6e8f7"
 DocStringExtensions = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
