@@ -70,6 +70,7 @@ export get_class
 export filter_result!
 export get_single_solution
 export get_solutions
+export get_branches
 export transform_solutions
 export IM_TOL
 export set_imaginary_tolerance
