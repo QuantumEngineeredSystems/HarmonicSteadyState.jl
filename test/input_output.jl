@@ -37,11 +37,24 @@ using HarmonicSteadyState, QuantumCumulants, Test
         κ_ext = 0.05
         S21 = 1 .- χ * κ_ext / 2
 
+        S21_test = get_forward_transmission_response(
+            result, 1, Ω_range, 3, κ_ext; class="stable"
+        )
+
         @test minimum(abs.(S21)) > 0
         @test maximum(abs.(S21)) < 1
 
         @test all(iszero, real(S21[1:250, :] - reverse(S21[251:end, :]; dims=1)))
         @test all(iszero, imag(S21[1:250, :] + reverse(S21[251:end, :]; dims=1)))
+
+        @test all(iszero, S21_test - S21)
+
+        @testset "peaks" begin
+            using Peaks
+            absline = -1 .* abs.(S21[:,end])
+            idxs, _ = findmaxima(absline)
+            @test length(idxs) == 2
+        end
     end
 
     @testset "make_S transformation" begin

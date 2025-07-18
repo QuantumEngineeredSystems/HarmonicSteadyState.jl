@@ -4,7 +4,7 @@ using Printf: Printf, @printf
 using DocStringExtensions: TYPEDFIELDS, TYPEDSIGNATURES, TYPEDEF
 using ProgressMeter: ProgressMeter, Progress, next!
 
-using Symbolics: Symbolics, Num, unwrap, expand
+using Symbolics: Symbolics, Num, unwrap
 using LinearAlgebra: LinearAlgebra, norm, eigen, eigvals, eigvecs, I
 
 using HarmonicSteadyState:
@@ -17,7 +17,7 @@ using HarmonicSteadyState:
     get_class,
     swept_parameters
 
-using QuestBase: QuestBase, HarmonicVariable, substitute_all, HarmonicEquation
+using QuestBase: QuestBase, HarmonicVariable, substitute_all
 
 include("types.jl")
 include("utils.jl")
@@ -30,6 +30,7 @@ export show,
     get_rotframe_jacobian_response,
     eigenvalues,
     eigenvectors,
-    get_susceptibility
+    get_susceptibility,
+    get_forward_transmission_response
 
 end

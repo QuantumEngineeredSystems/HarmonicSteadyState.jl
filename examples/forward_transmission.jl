@@ -26,7 +26,7 @@ harmonic_eq = HarmonicEquation(eqs_completed_RWA, param)
 
 # Let's sweep the power of the drive $\Omega_d$, with $\Delta=0$, and solve for the steady state. The steady-state solutions show that the FMR mode saturates after a threshold power, followed by the coherent excitation of the parametrically induced counter-propagating modes.
 
-drive_range = range(0, 1, 100)
+drive_range = range(0, 1.8, 100)
 fixed = (Δ => 0, Vk => 0.0002, γm => 0.1, γk => 0.01)
 varied = (Ωd => drive_range)
 result = get_steady_states(harmonic_eq, TotalDegree(), varied, fixed)
@@ -41,15 +41,18 @@ plot(plot(result; y="1/sqrt(2)*(mᵣ+ mᵢ)"), plot(result; y="1/sqrt(2)*(cᵣ +
 
 # The result below shows the characteristic splitting of the magnon resonance above the power threshold, which matches the experiment.
 
-Ω_range = range(-0.2, 0.2, 500)
-χ = get_forward_transmission_response(result, m, Ω_range, 3);
-result.problem.eom
+Ω_range = range(-0.1, 0.1, 500)
+χ3 = get_susceptibility(result, 1, Ω_range, 3);
+χ1 = get_susceptibility(result, 1, Ω_range, 1);
 κ_ext = 0.05
-S21 = 1 .- χ * sqrt(κ_ext)
-S21_log = 20 .* log10.(abs.(S21))
+S21_3 = 1 .- χ3 * κ_ext / 2
+S21_log_3 = 20 .* log10.(abs.(S21_3)) # expressed in dB
+S21_1 = 1 .- χ1 * κ_ext / 2
+S21_log_1 = 20 .* log10.(abs.(S21_1)) # expressed in dB
+
+ # Compare the two branches
 
 stable = get_class(result, 3, "physical")
-y = drive_range[stable]
-heatmap(Ω_range, y, transpose(S21_log); c=:matter, cbar_title="S21 (dB)")
+heatmap(Ω_range, drive_range, vcat(S21_log_1', S21_log_3'); c=:matter, cbar_title="S21 (dB)")
 ylabel!("Ω_d")
 xlabel!("Probe detuning")

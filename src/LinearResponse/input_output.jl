@@ -112,7 +112,7 @@ or phase shift:
 external_damping=0.05
 
 S21 = get_forward_transmission_response(
-        result, 1#=variable=#, Ω_range, 3 #=branch=#; external_damping);
+        result, 1 #=variable=#, Ω_range, 3 #=branch=#; external_damping);
 
 S21_log = 20 .* log10.(abs.(S21)) # expressed in dB
 ```
@@ -122,7 +122,6 @@ function get_forward_transmission_response(
 )
 
     χ = get_susceptibility(result, op_index, Ω_range, branch; class)
-    external_damping
     S21 = 1 .- χ * external_damping / 2
     return S21
 end
