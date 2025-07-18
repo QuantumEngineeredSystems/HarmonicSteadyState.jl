@@ -50,9 +50,11 @@ S21_log_3 = 20 .* log10.(abs.(S21_3)) # expressed in dB
 S21_1 = 1 .- χ1 * κ_ext / 2
 S21_log_1 = 20 .* log10.(abs.(S21_1)) # expressed in dB
 
- # Compare the two branches
+# Compare the two branches
 
 stable = get_class(result, 3, "physical")
-heatmap(Ω_range, drive_range, vcat(S21_log_1', S21_log_3'); c=:matter, cbar_title="S21 (dB)")
+heatmap(
+    Ω_range, drive_range, vcat(S21_log_1', S21_log_3'); c=:matter, cbar_title="S21 (dB)"
+)
 ylabel!("Ω_d")
 xlabel!("Probe detuning")

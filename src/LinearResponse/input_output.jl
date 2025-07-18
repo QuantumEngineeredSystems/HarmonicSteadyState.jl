@@ -18,7 +18,6 @@ function make_S(N::Int)
     return S, Sinv
 end
 
-
 """
 $(TYPEDSIGNATURES)
 
@@ -118,14 +117,17 @@ S21_log = 20 .* log10.(abs.(S21)) # expressed in dB
 ```
 """
 function get_forward_transmission_response(
-    result::HarmonicSteadyState.Result, op_index::Int, Ω_range, branch::Int, external_damping; class="stable"
+    result::HarmonicSteadyState.Result,
+    op_index::Int,
+    Ω_range,
+    branch::Int,
+    external_damping;
+    class="stable",
 )
-
     χ = get_susceptibility(result, op_index, Ω_range, branch; class)
     S21 = 1 .- χ * external_damping / 2
     return S21
 end
-
 
 # """
 # Construct compiled function for the dynamical matrix of the system.

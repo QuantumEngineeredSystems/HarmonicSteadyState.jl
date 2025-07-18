@@ -51,7 +51,7 @@ using HarmonicSteadyState, QuantumCumulants, Test
 
         @testset "peaks" begin
             using Peaks
-            absline = -1 .* abs.(S21[:,end])
+            absline = -1 .* abs.(S21[:, end])
             idxs, _ = findmaxima(absline)
             @test length(idxs) == 2
         end
