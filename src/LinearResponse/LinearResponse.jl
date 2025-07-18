@@ -5,7 +5,7 @@ using DocStringExtensions: TYPEDFIELDS, TYPEDSIGNATURES, TYPEDEF
 using ProgressMeter: ProgressMeter, Progress, next!
 
 using Symbolics: Symbolics, Num, unwrap
-using LinearAlgebra: norm, eigen, eigvals, eigvecs
+using LinearAlgebra: LinearAlgebra, norm, eigen, eigvals, eigvecs, I
 
 using HarmonicSteadyState:
     HarmonicSteadyState,
@@ -17,14 +17,20 @@ using HarmonicSteadyState:
     get_class,
     swept_parameters
 
-using QuestBase: HarmonicVariable, substitute_all
+using QuestBase: QuestBase, HarmonicVariable, substitute_all
 
 include("types.jl")
 include("utils.jl")
 include("Lorentzian_spectrum.jl")
 include("response.jl")
+include("input_output.jl")
 
 export show,
-    get_jacobian_response, get_rotframe_jacobian_response, eigenvalues, eigenvectors
+    get_jacobian_response,
+    get_rotframe_jacobian_response,
+    eigenvalues,
+    eigenvectors,
+    get_susceptibility,
+    get_forward_transmission_response
 
 end

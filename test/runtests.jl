@@ -34,6 +34,7 @@ end
 
 @testset "Linear response" begin
     include("linear_response.jl")
+    include("input_output.jl")
 end
 
 @testset "Limit cycle" begin
