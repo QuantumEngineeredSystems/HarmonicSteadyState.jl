@@ -3,7 +3,7 @@
         prob::HomotopyContinuationProblem,
         method::HomotopyContinuationMethod;
         show_progress=true,
-        sorting="nearest",
+        sorting=:nearest,
         classify_default=true,
         verbose=false
         )
@@ -16,8 +16,8 @@ keeping `fixed_parameters` constant.
 ### Keyword arguments
 - `show_progress`: Indicate whether a progress bar should be displayed.
 - `sorting`: the method used by `sort_solutions` to get continuous solutions branches.
-    The current options are `"hilbert"` (1D sorting along a Hilbert curve), `"nearest"`
-    (nearest-neighbor sorting) and `"none"`.
+    The current options are `:hilbert` (1D sorting along a Hilbert curve), `:nearest`
+    (nearest-neighbor sorting) and `:none`.
 - `classify_default`: If `true`, the solutions will be classified using the default
     classification method.
 
@@ -63,7 +63,7 @@ function get_steady_states(
     prob::HomotopyContinuationProblem,
     method::HomotopyContinuationMethod;
     show_progress=true,
-    sorting="nearest",
+    sorting=:nearest,
     classify_default=true,
     verbose=false,
 )
@@ -92,7 +92,7 @@ function get_steady_states(
     )
 
     verbose && @info "Sort solutions"
-    if sorting != "no_sorting"
+    if sorting != :none
         sort_solutions!(result; sorting, show_progress)
     end
 
