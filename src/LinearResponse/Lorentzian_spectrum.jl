@@ -88,7 +88,8 @@ these are peaked far from the drive frequency.
 function JacobianSpectrum(
     res::Result{D,S,P}; index::Int, branch::Int, force=false
 ) where {D,S,P}
-    hvars = res.problem.eom.variables # fetch the vector of HarmonicVariable
+    eom = QuestBase.source(res.problem)
+    hvars = eom.variables # fetch the vector of HarmonicVariable
     # blank JacobianSpectrum for each variable
     all_spectra = Dict{Num,JacobianSpectrum{P}}([
         [nvar, JacobianSpectrum{P}()] for nvar in getfield.(hvars, :natural_variable)
