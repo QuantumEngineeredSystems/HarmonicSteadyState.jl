@@ -28,6 +28,8 @@ using Distances: Distances
 using BijectiveHilbert: BijectiveHilbert, Simple2D, decode_hilbert!, encode_hilbert
 using HomotopyContinuation: HomotopyContinuation
 using Symbolics: Symbolics, unwrap, wrap, Num, get_variables
+using SymbolicUtils: SymbolicUtils
+
 const HC = HomotopyContinuation
 import FunctionWrappers: FunctionWrapper
 using RuntimeGeneratedFunctions: RuntimeGeneratedFunction
