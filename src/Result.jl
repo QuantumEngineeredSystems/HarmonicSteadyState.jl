@@ -114,6 +114,7 @@ function swept_parameters(res::Result{D}) where {D}
 end
 
 swept_parameter(res::Result, x::Num) = res.swept_parameters[x]
+swept_parameter(res::Result, x::SymbolicUtils.BasicSymbolic) = res.swept_parameters[Num(x)]
 function swept_parameter(res::Result, x::String)
     is_swept_parameter(res, x)
     return res.swept_parameters[_parse_expression(x)]
@@ -160,3 +161,6 @@ function is_swept_parameter(res::Result, z::String)
     return true
 end
 is_swept_parameter(res::Result, z::Num) = is_swept_parameter(res::Result, string(z))
+function is_swept_parameter(res::Result, z::SymbolicUtils.BasicSymbolic)
+    return is_swept_parameter(res, string(z))
+end
