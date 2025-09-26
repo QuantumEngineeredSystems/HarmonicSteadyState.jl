@@ -107,7 +107,7 @@ function HarmonicSteadyState.HomotopyContinuationProblem(
     MFeqs::MeanfieldEquations, parameters, swept, fixed
 )
     equations, vars = compute_real_equations(MFeqs)
-
+    @assert length(equations) == length(vars) "After conversion to real equations, the number of equations and variables are not the same. Please report an issue with a minimal working example."
     return HarmonicSteadyState.HomotopyContinuationProblem(
         Num.(equations),
         Num.(vars),
