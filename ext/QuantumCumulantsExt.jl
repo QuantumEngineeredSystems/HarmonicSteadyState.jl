@@ -48,9 +48,9 @@ function replace_to_reals(eqs::Vector{String}, ops_av::Vector{String}, conjugate
         conj_replace = map(eachindex(pair)) do i
             op = ops_av[pair[i]] # ∨ f(i) contains "+" or "-"
             op => if is_real
-                "((" * op_r * ") / √(2))"
+                "(" * op_r * ")"
             else
-                "((" * op_r * " $(f(i)) im*" * op_i * ") / √(2))"
+                "(" * op_r * " $(f(i)) im*" * op_i * ")"
             end
         end
         if isequal(pair...)
@@ -86,8 +86,8 @@ function compute_real_equations(eqs::MeanfieldEquations)
     eqs_complex = expand.(eqs_complex)
     eqs_real = Num[]
     foreach(eqs_complex) do eq
-        eq_re = √(2) * real(eq) # the factor of √(2) is needed to have Q to C limit.
-        eq_im = -√(2) * imag(eq)
+        eq_re = real(eq) # the factor of √(2) is needed to have Q to C limit.
+        eq_im = - imag(eq)
         iszero(eq_re) || push!(eqs_real, eq_re)
         iszero(eq_im) || push!(eqs_real, eq_im)
     end
@@ -107,7 +107,7 @@ function HarmonicSteadyState.HomotopyContinuationProblem(
     MFeqs::MeanfieldEquations, parameters, swept, fixed
 )
     equations, vars = compute_real_equations(MFeqs)
-
+    @assert length(equations) == length(vars) "After conversion to real equations, the number of equations and variables are not the same. Please report an issue with a minimal working example."
     return HarmonicSteadyState.HomotopyContinuationProblem(
         Num.(equations),
         Num.(vars),
