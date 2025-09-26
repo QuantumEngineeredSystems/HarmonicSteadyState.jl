@@ -40,17 +40,15 @@ using Test
 
     @testset "second order cumulant" begin
         eqs_RWA = meanfield(ops, H_RWA, [a]; rates=[κ], order=2)
-        eqs_c2 = complete(eqs_RWA)
-        problem_c2 = HarmonicSteadyState.HomotopyContinuationProblem(
-            eqs_c2, param, varied, fixed
-        )
-        @test length(problem_c2.variables) == 5
+        eqs_completed_RWA = complete(eqs_RWA)
 
         fixed = (U => 0.001, κ => 0.002, G => 0.01)
         varied = (Δ => range(-0.03, 0.01, 100))
         problem_c2 = HarmonicSteadyState.HomotopyContinuationProblem(
-            eqs_c2, param, varied, fixed
+            eqs_completed_RWA, [Δ, U, G, κ], varied, fixed
         )
+        @test length(problem_c2.variables) == 5
+
         result = get_steady_states(problem_c2, TotalDegree())
         @test sum(any.(get_class(result, "stable"))) == 5
         classify_solutions!(result, "a⁺aᵣ < 0", "neg photon number")

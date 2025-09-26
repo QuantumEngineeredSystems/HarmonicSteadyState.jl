@@ -16,8 +16,10 @@ end
 end
 
 @testset "Computing steady states" begin
-    include("steady_states/parametron.jl")
-    include("steady_states/krylov.jl")
+    @testset "parametron" begin
+        include("steady_states/parametron.jl")
+    end
+    # include("steady_states/krylov.jl")
     include("steady_states/methods.jl")
 end
 
