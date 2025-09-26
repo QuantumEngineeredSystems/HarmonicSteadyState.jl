@@ -1,5 +1,6 @@
 using QuantumCumulants, HarmonicSteadyState, Symbolics
 # using Plots
+using Test
 
 @testset "KPO" begin
     h = FockSpace(:cavity)
@@ -32,9 +33,30 @@ using QuantumCumulants, HarmonicSteadyState, Symbolics
     end
 
     @testset "HarmonicEquation" begin
-        harmonic_eq = HarmonicSteadyState.HarmonicEquation(eqs_completed_RWA, [Δ, U, G, κ]);
+        harmonic_eq = HarmonicSteadyState.HarmonicEquation(eqs_completed_RWA, [Δ, U, G, κ])
         result = get_steady_states(harmonic_eq, varied, fixed)
         @test sum(any.(get_class(result, "stable"))) == 3
+    end
+
+    @testset "second order cumulant" begin
+        eqs_RWA = meanfield(ops, H_RWA, [a]; rates=[κ], order=2)
+        eqs_c2 = complete(eqs_RWA)
+        problem_c2 = HarmonicSteadyState.HomotopyContinuationProblem(
+            eqs_c2, param, varied, fixed
+        )
+        @test length(problem_c2.variables) == 5
+
+        fixed = (U => 0.001, κ => 0.002, G => 0.01)
+        varied = (Δ => range(-0.03, 0.01, 100))
+        problem_c2 = HarmonicSteadyState.HomotopyContinuationProblem(
+            eqs_c2, param, varied, fixed
+        )
+        result = get_steady_states(problem_c2, TotalDegree())
+        @test sum(any.(get_class(result, "stable"))) == 5
+        classify_solutions!(result, "a⁺aᵣ < 0", "neg photon number")
+        @test maximum(
+            phase_diagram(result; not_class="neg photon number", class="stable")
+        ) == 3
     end
 end
 
