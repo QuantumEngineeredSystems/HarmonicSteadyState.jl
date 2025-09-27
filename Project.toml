@@ -1,7 +1,7 @@
 name = "HarmonicSteadyState"
 uuid = "1158f75c-a779-4b85-8bfb-8fcf6bf02ced"
 authors = ["Orjan Ameye <orjan.ameye@hotmail.com>", "Jan Kosata <kosataj@phys.ethz.ch>", "Javier del Pino <jdelpino@phys.ethz.ch>"]
-version = "0.3.1"
+version = "0.3.2"
 
 [deps]
 BijectiveHilbert = "91e7fc40-53cd-4118-bd19-d7fcd1de2a54"
