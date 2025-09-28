@@ -1,6 +1,6 @@
 module PlotsExt
 
-using DocStringExtensions
+using DocStringExtensions: TYPEDSIGNATURES
 using Plots
 using QuestBase: QuestBase
 using HarmonicSteadyState

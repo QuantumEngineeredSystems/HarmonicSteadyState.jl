@@ -10,6 +10,12 @@ PlotsExt = Base.get_extension(HarmonicSteadyState, :PlotsExt)
 
 include("pages.jl")
 
+if CI
+    include("make_md_examples.jl")
+else
+    nothing
+end
+
 makedocs(;
     sitename="HarmonicSteadyState.jl",
     authors="Quest group",

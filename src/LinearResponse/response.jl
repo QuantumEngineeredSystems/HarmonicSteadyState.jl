@@ -9,7 +9,6 @@ Calculate the Jacobian response spectrum for a given system. Computes the magnit
 - `Ω_range`: Range of frequencies to evaluate
 - `branch::Int` or `followed_branches::Vector{Int}`: Branch number(s) to analyze
 - `show_progress=true`: Whether to show a progress bar
-- `force=false`: Force recalculation of spectrum even if already exists
 
 # Returns
 - Array{P,2}: Complex response matrix where rows correspond to frequencies and columns to solutions

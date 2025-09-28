@@ -1,3 +1,5 @@
+using HarmonicBalance, Test
+
 @testset "get_steady_states API" begin
     using HarmonicSteadyState: OrderedDict
 

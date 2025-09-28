@@ -233,6 +233,44 @@ function get_solutions(
     return Y
 end
 
+"""
+    get_branches(
+        res::Result, x::String;
+        branches=1:branch_count(res), realify=false, class=["stable"], not_class=[]
+        )
+    get_solutions(res::Result; branches=1:branch_count(res), class=["stable"], not_class=[])
+
+Extract solution vectors from a `Result` object based on specified filtering criteria given
+by the `class` keywords. It allows extracting a specific solution component by
+name `x`.
+
+# Keyword arguments
+- `branches=1:branch_count(res)`: Range of branches to include in the output
+- `realify=true`: Whether to convert complex solutions to real form
+- `class=["physical", "stable"]`: Array of classification labels to include
+- `not_class=[]`: Array of classification labels to exclude
+
+# Returns
+Filtered vector of each branch matching the specified criteria
+"""
+function get_branches(
+    res::Result,
+    y::String;
+    branches=1:branch_count(res),
+    realify=true,
+    class=["physical", "stable"],
+    not_class=[],
+)
+    Y = transform_solutions(res, y; branches, realify)
+    Y = _apply_mask(Y, _get_mask(res, class, not_class; branches))
+    if realify
+        branches = map(idx -> real(getindex.(Y, idx)), eachindex(first(Y)))
+    else
+        branches = map(idx -> getindex.(Y, idx), eachindex(first(Y)))
+    end
+    return branches
+end
+
 ###
 # TRANSFORMATIONS TO THE LAB frame
 ###

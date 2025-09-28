@@ -18,7 +18,7 @@ function set_imaginary_tolerance(x::Float64)
     @eval(IM_TOL::Float64 = $x)
 end
 
-using DocStringExtensions
+using DocStringExtensions: TYPEDSIGNATURES, TYPEDEF, TYPEDFIELDS
 using OrderedCollections: OrderedDict
 using ProgressMeter: ProgressMeter, Progress
 using LinearAlgebra: LinearAlgebra, eigvals
@@ -28,8 +28,11 @@ using Distances: Distances
 using BijectiveHilbert: BijectiveHilbert, Simple2D, decode_hilbert!, encode_hilbert
 using HomotopyContinuation: HomotopyContinuation
 using Symbolics: Symbolics, unwrap, wrap, Num, get_variables
+using SymbolicUtils: SymbolicUtils
+
 const HC = HomotopyContinuation
 import FunctionWrappers: FunctionWrapper
+using RuntimeGeneratedFunctions: RuntimeGeneratedFunction
 
 include("extension_functions.jl")
 
@@ -54,6 +57,9 @@ using .LinearResponse
 include("LimitCycles/LimitCycles.jl")
 using .LimitCycles
 
+# Equation
+export HarmonicEquation # for Meanfield equations
+
 # methods
 export WarmUp
 export TotalDegree
@@ -66,6 +72,7 @@ export get_class
 export filter_result!
 export get_single_solution
 export get_solutions
+export get_branches
 export transform_solutions
 export IM_TOL
 export set_imaginary_tolerance
@@ -83,6 +90,8 @@ export eigenvalues, eigenvectors
 export get_jacobian_response
 export get_linear_response
 export get_rotframe_jacobian_response
+export get_susceptibility
+export get_forward_transmission_response
 
 # plotting
 export plot_linear_response

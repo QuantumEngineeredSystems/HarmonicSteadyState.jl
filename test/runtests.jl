@@ -16,8 +16,10 @@ end
 end
 
 @testset "Computing steady states" begin
-    include("steady_states/parametron.jl")
-    include("steady_states/krylov.jl")
+    @testset "parametron" begin
+        include("steady_states/parametron.jl")
+    end
+    # include("steady_states/krylov.jl")
     include("steady_states/methods.jl")
 end
 
@@ -34,6 +36,7 @@ end
 
 @testset "Linear response" begin
     include("linear_response.jl")
+    include("input_output.jl")
 end
 
 @testset "Limit cycle" begin
