@@ -37,9 +37,6 @@ QuantumCumulantsExt = "QuantumCumulants"
 SteadyStateDiffEqExt = "SteadyStateDiffEq"
 TimeEvolution = "OrdinaryDiffEqTsit5"
 
-[sources]
-HarmonicBalance = {url = "https://github.com/QuantumEngineeredSystems/HarmonicBalance.jl", rev = "MTK"}
-
 [compat]
 Peaks = "0.5"
 Aqua = "0.8.11"
