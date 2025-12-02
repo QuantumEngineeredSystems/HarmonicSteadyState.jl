@@ -147,7 +147,7 @@ end
 
 """
 Reorder EACH ELEMENT of `a` to match the index permutation `order`.
-If length(order) < length(array), the remanining positions are kept.
+If length(order) < length(array), the remaining positions are kept.
 """
 function _reorder_nested(a::Array, order::Vector{Int})
     a[1] isa Union{Array,BitVector} || return a
