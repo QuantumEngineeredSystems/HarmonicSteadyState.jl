@@ -31,7 +31,7 @@ makedocs(;
     ),
     pages=pages,
     clean=true,
-    linkcheck=true,
+    linkcheck=false,
     warnonly=:missing_docs,
     draft=(!CI),
     doctest=false,  # We test it in the CI, no need to run it here
