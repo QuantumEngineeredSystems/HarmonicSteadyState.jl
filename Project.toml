@@ -1,7 +1,7 @@
 name = "HarmonicSteadyState"
 uuid = "1158f75c-a779-4b85-8bfb-8fcf6bf02ced"
-authors = ["Orjan Ameye <orjan.ameye@hotmail.com>", "Jan Kosata <kosataj@phys.ethz.ch>", "Javier del Pino <jdelpino@phys.ethz.ch>"]
 version = "0.4.1"
+authors = ["Orjan Ameye <orjan.ameye@hotmail.com>", "Jan Kosata <kosataj@phys.ethz.ch>", "Javier del Pino <jdelpino@phys.ethz.ch>"]
 
 [deps]
 BijectiveHilbert = "91e7fc40-53cd-4118-bd19-d7fcd1de2a54"
@@ -38,7 +38,6 @@ SteadyStateDiffEqExt = "SteadyStateDiffEq"
 TimeEvolution = "OrdinaryDiffEqTsit5"
 
 [compat]
-Peaks = "0.5"
 Aqua = "0.8.11"
 BijectiveHilbert = "0.3, 0.5"
 CheckConcreteStructs = "0.1.0"
@@ -52,12 +51,13 @@ HomotopyContinuation = "2.12"
 JET = "0.9.18, 0.10"
 LinearAlgebra = "1.10"
 LinearSolve = "3.7.2"
-ModelingToolkit = "10"
+ModelingToolkit = "10, 11"
 NaNMath = "1.1"
 NonlinearSolve = "4.5.1"
 OrderedCollections = "1.8"
 OrdinaryDiffEqRosenbrock = "1.9"
 OrdinaryDiffEqTsit5 = "1.1"
+Peaks = "0.5"
 Plots = "1.40.9"
 PrecompileTools = "1.2"
 Printf = "1.10"
