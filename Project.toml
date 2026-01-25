@@ -1,7 +1,7 @@
 name = "HarmonicSteadyState"
 uuid = "1158f75c-a779-4b85-8bfb-8fcf6bf02ced"
 authors = ["Orjan Ameye <orjan.ameye@hotmail.com>", "Jan Kosata <kosataj@phys.ethz.ch>", "Javier del Pino <jdelpino@phys.ethz.ch>"]
-version = "0.4.1"
+version = "0.5.0"
 
 [deps]
 BijectiveHilbert = "91e7fc40-53cd-4118-bd19-d7fcd1de2a54"
@@ -37,6 +37,11 @@ QuantumCumulantsExt = "QuantumCumulants"
 SteadyStateDiffEqExt = "SteadyStateDiffEq"
 TimeEvolution = "OrdinaryDiffEqTsit5"
 
+[sources]
+QuestBase = {url = "https://github.com/QuantumEngineeredSystems/QuestBase.jl", rev = "symbolicsv7"}
+HarmonicBalance = {url = "https://github.com/QuantumEngineeredSystems/HarmonicBalance.jl", rev = "symbolicsv7"}
+
+
 [compat]
 Peaks = "0.5"
 Aqua = "0.8.11"
@@ -47,9 +52,9 @@ DocStringExtensions = "0.9.4"
 Documenter = "1.4"
 ExplicitImports = "1.11"
 FunctionWrappers = "1.1.3"
-HarmonicBalance = "0.16"
+HarmonicBalance = "0.17"
 HomotopyContinuation = "2.12"
-JET = "0.9.18, 0.10"
+JET = "0.9.18, 0.10, 0.11"
 LinearAlgebra = "1.10"
 LinearSolve = "3.7.2"
 ModelingToolkit = "10"
@@ -63,7 +68,7 @@ PrecompileTools = "1.2"
 Printf = "1.10"
 ProgressMeter = "1.7.2"
 QuantumCumulants = "0.4"
-QuestBase = "0.3.4"
+QuestBase = "0.4"
 Random = "1.10"
 RuntimeGeneratedFunctions = "0.5.5"
 SciMLBase = "2.83.1"
