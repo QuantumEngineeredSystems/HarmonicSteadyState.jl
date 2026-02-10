@@ -1,7 +1,7 @@
 module HC_wrapper
 using QuestBase: var_name, HarmonicEquation
 
-using Symbolics: Num, @variables, expand_derivatives, get_variables
+using Symbolics: Num, expand_derivatives, get_variables
 using Symbolics.SymbolicUtils: isterm
 using LinearAlgebra: LinearAlgebra
 
