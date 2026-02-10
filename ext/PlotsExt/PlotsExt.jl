@@ -24,8 +24,8 @@ using HarmonicSteadyState.LinearResponse:
     get_jacobian_response, get_rotframe_jacobian_response
 
 using Plots: heatmap, theme_palette, scatter, RGB, cgrad
-using Symbolics.Latexify: Latexify, latexify, @L_str
-using Symbolics.Latexify.LaTeXStrings: LaTeXStrings
+using Symbolics.Latexify: Latexify, latexify
+using Symbolics.Latexify.LaTeXStrings: LaTeXStrings, @L_str
 using SciMLBase: SciMLBase
 
 const _set_Plots_default = Dict{Symbol,Any}([
