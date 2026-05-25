@@ -35,6 +35,7 @@ end
 @testset "Code quality" begin
     using Aqua
     using OrdinaryDiffEqTsit5, SteadyStateDiffEq, Plots, HarmonicBalance
+    using Latexify
 
     TimeEvolution = Base.get_extension(HarmonicSteadyState, :TimeEvolution)
     SteadyStateDiffEqExt = Base.get_extension(HarmonicSteadyState, :SteadyStateDiffEqExt)
@@ -48,6 +49,7 @@ end
         piracies=(treat_as_own=[ModelKit.Variable, ModelKit.System],),
         ambiguities=false,
         persistent_tasks=false,
+        stale_deps=(; ignore=[:SciMLBase, :HarmonicBalance]),
     )
     for mod in [TimeEvolution, SteadyStateDiffEqExt, PlotsExt, HarmonicBalanceExt]
         @test check_no_stale_explicit_imports(mod) == nothing

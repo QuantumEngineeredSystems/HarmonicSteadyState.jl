@@ -128,7 +128,10 @@ function transform_solutions(
 
     rule(u) = Dict(zip(vars, u))
 
-    transformed = map(x -> Symbolics.unwrap(substitute_all(expr, rule(x))), soln)
+    transformed = map(
+        x -> Symbolics.value(Symbolics.substitute(expr, rule(x); fold=Val{true}())),
+        soln,
+    )
     return convert(T, transformed) # TODO is this necessary?
 end
 """ Parse `expr` into a Symbolics.jl expression, substitute with `rules` and build a function taking free_symbols """
@@ -306,8 +309,8 @@ end
 function _to_lab_frame_velocity(soln, vars, times)
     timetrace = zeros(length(times))
     for var in vars
-        val = real(substitute_all(Symbolics.unwrap(_remove_brackets(var)), soln))
-        ω = real(real(unwrap(substitute_all(var.ω, soln))))
+        val = real(SymbolicUtils.unwrap_const(Symbolics.unwrap(substitute_all(Symbolics.unwrap(_remove_brackets(var)), soln))))
+        ω = real(SymbolicUtils.unwrap_const(Symbolics.unwrap(substitute_all(var.ω, soln))))
         if var.type == "u"
             timetrace .+= -ω * val * sin.(ω * times)
         elseif var.type == "v"
@@ -321,8 +324,8 @@ function _to_lab_frame(soln, vars, times)::Vector{AbstractFloat}
     timetrace = zeros(length(times))
 
     for var in vars
-        val = real(substitute_all(Symbolics.unwrap(_remove_brackets(var)), soln))
-        ω = real(unwrap(substitute_all(var.ω, soln)))
+        val = real(SymbolicUtils.unwrap_const(Symbolics.unwrap(substitute_all(Symbolics.unwrap(_remove_brackets(var)), soln))))
+        ω = real(SymbolicUtils.unwrap_const(Symbolics.unwrap(substitute_all(var.ω, soln))))
         if var.type == "u"
             timetrace .+= val * cos.(ω * times)
         elseif var.type == "v"

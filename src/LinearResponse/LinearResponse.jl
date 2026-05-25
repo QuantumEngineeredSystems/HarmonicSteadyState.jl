@@ -5,6 +5,7 @@ using DocStringExtensions: TYPEDFIELDS, TYPEDSIGNATURES, TYPEDEF
 using ProgressMeter: ProgressMeter, Progress, next!
 
 using Symbolics: Symbolics, Num, unwrap
+using SymbolicUtils: SymbolicUtils
 using LinearAlgebra: LinearAlgebra, norm, eigen, eigvals, eigvecs, I
 
 using HarmonicSteadyState:
