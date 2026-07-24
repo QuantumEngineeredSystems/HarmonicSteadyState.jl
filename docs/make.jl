@@ -19,13 +19,16 @@ end
 makedocs(;
     sitename="HarmonicSteadyState.jl",
     authors="Quest group",
-    modules=[
-        HarmonicSteadyState,
-        TimeEvolution,
-        SteadyStateDiffEqExt,
-        HarmonicSteadyState.LinearResponse,
-        PlotsExt,
-    ],
+    modules=filter(
+        !isnothing,
+        [
+            HarmonicSteadyState,
+            TimeEvolution,
+            SteadyStateDiffEqExt,
+            HarmonicSteadyState.LinearResponse,
+            PlotsExt,
+        ],
+    ),
     format=Documenter.HTML(;
         canonical="https://quantumengineeredsystems.github.io/HarmonicSteadyState.jl/stable/",
     ),
