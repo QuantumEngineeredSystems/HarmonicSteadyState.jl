@@ -129,8 +129,7 @@ function transform_solutions(
     rule(u) = Dict(zip(vars, u))
 
     transformed = map(
-        x -> Symbolics.value(Symbolics.substitute(expr, rule(x); fold=Val{true}())),
-        soln,
+        x -> Symbolics.value(Symbolics.substitute(expr, rule(x); fold=Val{true}())), soln
     )
     return convert(T, transformed) # TODO is this necessary?
 end
@@ -309,7 +308,13 @@ end
 function _to_lab_frame_velocity(soln, vars, times)
     timetrace = zeros(length(times))
     for var in vars
-        val = real(SymbolicUtils.unwrap_const(Symbolics.unwrap(substitute_all(Symbolics.unwrap(_remove_brackets(var)), soln))))
+        val = real(
+            SymbolicUtils.unwrap_const(
+                Symbolics.unwrap(
+                    substitute_all(Symbolics.unwrap(_remove_brackets(var)), soln)
+                ),
+            ),
+        )
         ω = real(SymbolicUtils.unwrap_const(Symbolics.unwrap(substitute_all(var.ω, soln))))
         if var.type == "u"
             timetrace .+= -ω * val * sin.(ω * times)
@@ -324,7 +329,13 @@ function _to_lab_frame(soln, vars, times)::Vector{AbstractFloat}
     timetrace = zeros(length(times))
 
     for var in vars
-        val = real(SymbolicUtils.unwrap_const(Symbolics.unwrap(substitute_all(Symbolics.unwrap(_remove_brackets(var)), soln))))
+        val = real(
+            SymbolicUtils.unwrap_const(
+                Symbolics.unwrap(
+                    substitute_all(Symbolics.unwrap(_remove_brackets(var)), soln)
+                ),
+            ),
+        )
         ω = real(SymbolicUtils.unwrap_const(Symbolics.unwrap(substitute_all(var.ω, soln))))
         if var.type == "u"
             timetrace .+= val * cos.(ω * times)

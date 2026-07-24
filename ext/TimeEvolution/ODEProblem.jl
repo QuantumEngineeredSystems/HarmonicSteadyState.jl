@@ -32,12 +32,11 @@ function OrdinaryDiffEqTsit5.ODEProblem(
     # substitute the harmonic variables and sweep parameters; fold so the result is numeric
     function eqs(v, T)
         sub_dict = merge(
-            Dict(zip(vars, v)),
-            Dict(zip(keys(sweep), [sweep[p](T) for p in keys(sweep)])),
+            Dict(zip(vars, v)), Dict(zip(keys(sweep), [sweep[p](T) for p in keys(sweep)]))
         )
         return [
-            real(Symbolics.value(Symbolics.substitute(eq, sub_dict; fold=Val{true}())))
-            for eq in subeqs
+            real(Symbolics.value(Symbolics.substitute(eq, sub_dict; fold=Val{true}()))) for
+            eq in subeqs
         ]
     end
 

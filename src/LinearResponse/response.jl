@@ -152,11 +152,11 @@ function eigenvalues(res::Result{D,S,P}, branch; class=["physical"]) where {D,S,
             throw(
                 ErrorException(
                     "The branch contains NaN values.
-                    Likely, the branch has non-physical solutions in the parameter sweep",
+                    Likely, the branch has non-physical solutions in the parameter sweep"
                 ),
             )
         end
-        eigvals(jac)
+        return eigvals(jac)
     end
     eigenvalues_filtered = map(.*, eigenvalues, filter_branch)
 
@@ -189,11 +189,11 @@ function eigenvectors(res::Result{D,S,P}, branch; class=["physical"]) where {D,S
             throw(
                 ErrorException(
                     "The branch contains NaN values.
-                    Likely, the branch has non-physical solutions in the parameter sweep",
+                    Likely, the branch has non-physical solutions in the parameter sweep"
                 ),
             )
         end
-        eigvecs(jac)
+        return eigvecs(jac)
     end
     eigvecs_filtered = map(.*, eigenvectors, filter_branch)
 
