@@ -36,8 +36,7 @@ end
 
 @testset "Linear response" begin
     include("linear_response.jl")
-    # input_output.jl needs QuantumCumulants; re-enable once QC supports SU 4 / SciMLBase 3.
-    # include("input_output.jl")
+    include("input_output.jl")
 end
 
 @testset "Limit cycle" begin
@@ -45,12 +44,9 @@ end
 end
 
 @testset "extensions" begin
-    # @testset "QuantumCumulants extension" begin
-    #     include("extensions/QuantumCumulantsExt.jl")
-    # end
-    # QuantumCumulants extension currently disabled: QC 0.4 caps SymbolicUtils to ≤3
-    # and SciMLBase to ≤2, incompatible with this upgrade. Re-enable once QC supports
-    # SymbolicUtils 4 / SciMLBase 3.
+    @testset "QuantumCumulants extension" begin
+        include("extensions/QuantumCumulantsExt.jl")
+    end
     @testset "Time evolution extension" begin
         include("extensions/time_evolution.jl")
         include("extensions/hysteresis_sweep.jl")

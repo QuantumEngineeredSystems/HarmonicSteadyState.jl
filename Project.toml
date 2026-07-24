@@ -29,11 +29,13 @@ ModelingToolkitBase = "7771a370-6774-4173-bd38-47e70ca0b839"
 NaNMath = "77ba4419-2d1f-58cd-9bb1-8ffee604a2e3"
 OrdinaryDiffEqTsit5 = "b1df2697-797e-41e3-8120-5422d3b24e4a"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
+QuantumCumulants = "35bcea6d-e19f-57db-af74-8011de6c7255"
 SteadyStateDiffEq = "9672c7b4-1e72-59bd-8a11-6ac3964bc41f"
 
 [extensions]
 HarmonicBalanceExt = "HarmonicBalance"
 PlotsExt = ["Plots", "Latexify"]
+QuantumCumulantsExt = "QuantumCumulants"
 SteadyStateDiffEqExt = "SteadyStateDiffEq"
 TimeEvolution = "OrdinaryDiffEqTsit5"
 
@@ -63,6 +65,7 @@ Plots = "1.40.9"
 PrecompileTools = "1.2"
 Printf = "1.10"
 ProgressMeter = "1.7.2"
+QuantumCumulants = "0.7"
 QuestBase = "0.4"
 Random = "1.10"
 RuntimeGeneratedFunctions = "0.5.5"
@@ -86,6 +89,7 @@ LinearSolve = "7ed4a6bd-45f5-4d41-b270-4a48e9bafcae"
 ModelingToolkitBase = "7771a370-6774-4173-bd38-47e70ca0b839"
 NonlinearSolve = "8913a72c-1f9b-4ce2-8d82-65094dcecaec"
 OrdinaryDiffEqRosenbrock = "43230ef6-c299-4910-a778-202eb28ce4ce"
+QuantumCumulants = "35bcea6d-e19f-57db-af74-8011de6c7255"
 OrdinaryDiffEqTsit5 = "b1df2697-797e-41e3-8120-5422d3b24e4a"
 Peaks = "18e31ff7-3703-566c-8e60-38913d67486b"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
@@ -101,4 +105,4 @@ HarmonicBalance = {url = "https://github.com/QuantumEngineeredSystems/HarmonicBa
 QuestBase = {url = "https://github.com/QuantumEngineeredSystems/QuestBase.jl", rev = "symbolicsv7-upgrade"}
 
 [targets]
-test = ["Aqua", "JET", "CheckConcreteStructs", "SymbolicUtils", "Symbolics", "ExplicitImports", "Test", "Random", "OrdinaryDiffEqTsit5", "Documenter", "Plots", "SteadyStateDiffEq", "LinearSolve", "TestExtras", "ModelingToolkitBase", "OrdinaryDiffEqRosenbrock", "NonlinearSolve", "HarmonicBalance", "Peaks", "Latexify"]
+test = ["Aqua", "JET", "CheckConcreteStructs", "SymbolicUtils", "Symbolics", "ExplicitImports", "Test", "Random", "OrdinaryDiffEqTsit5", "Documenter", "Plots", "SteadyStateDiffEq", "LinearSolve", "TestExtras", "ModelingToolkitBase", "OrdinaryDiffEqRosenbrock", "NonlinearSolve", "HarmonicBalance", "Peaks", "Latexify", "QuantumCumulants"]

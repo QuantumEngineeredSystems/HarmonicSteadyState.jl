@@ -8,7 +8,7 @@ using HarmonicSteadyState, QuantumCumulants, Test
 
     # Operators
     @qnumbers m::Destroy(h, 1) c::Destroy(h, 2)
-    @rnumbers Δ Vk Ωd γm γk
+    @variables Δ::Real Vk::Real Ωd::Real γm::Real γk::Real
     param = [Δ, Vk, Ωd, γm, γk]
 
     H_RWA_sym = (

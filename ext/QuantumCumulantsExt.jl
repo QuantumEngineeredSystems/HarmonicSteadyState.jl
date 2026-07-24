@@ -39,7 +39,9 @@ function replace_to_reals(eqs::Vector{String}, ops_av::Vector{String}, conjugate
     foreach(conjugate_pairs) do pair
         is_real = isequal(pair...)
         op_pair = ops_av[pair[1]]
-        op_name = replace(op_pair, "⟨" => "", "⟩" => "", "*" => "", "′" => "⁺")
+        op_name = replace(
+            op_pair, "⟨" => "", "⟩" => "", "*" => "", "′" => "⁺", "'" => "⁺", " " => ""
+        )
         op_r = op_name * "ᵣ"
         op_i = op_name * "ᵢ"
 
