@@ -102,7 +102,6 @@ TestExtras = "5ed8adda-3752-4e41-b88a-e8b09835ee3a"
 
 [sources]
 HarmonicBalance = {url = "https://github.com/QuantumEngineeredSystems/HarmonicBalance.jl", rev = "source"}
-QuestBase = {url = "https://github.com/QuantumEngineeredSystems/QuestBase.jl", rev = "symbolicsv7-upgrade"}
 
 [targets]
 test = ["Aqua", "JET", "CheckConcreteStructs", "SymbolicUtils", "Symbolics", "ExplicitImports", "Test", "Random", "OrdinaryDiffEqTsit5", "Documenter", "Plots", "SteadyStateDiffEq", "LinearSolve", "TestExtras", "ModelingToolkitBase", "OrdinaryDiffEqRosenbrock", "NonlinearSolve", "HarmonicBalance", "Peaks", "Latexify", "QuantumCumulants"]
