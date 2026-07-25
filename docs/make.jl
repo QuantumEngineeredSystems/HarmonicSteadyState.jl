@@ -2,7 +2,7 @@ CI = get(ENV, "CI", nothing) == "true" || get(ENV, "GITHUB_TOKEN", nothing) !== 
 
 using HarmonicSteadyState
 using Documenter
-using Plots, SteadyStateDiffEq, OrdinaryDiffEqTsit5
+using Plots, Latexify, SteadyStateDiffEq, OrdinaryDiffEqTsit5
 
 TimeEvolution = Base.get_extension(HarmonicSteadyState, :TimeEvolution)
 SteadyStateDiffEqExt = Base.get_extension(HarmonicSteadyState, :SteadyStateDiffEqExt)
@@ -19,12 +19,14 @@ end
 makedocs(;
     sitename="HarmonicSteadyState.jl",
     authors="Quest group",
-    modules=[
-        HarmonicSteadyState,
-        TimeEvolution,
-        SteadyStateDiffEqExt,
-        HarmonicSteadyState.LinearResponse,
-        PlotsExt,
+    modules=Module[
+        m for m in [
+            HarmonicSteadyState,
+            TimeEvolution,
+            SteadyStateDiffEqExt,
+            HarmonicSteadyState.LinearResponse,
+            PlotsExt,
+        ] if !isnothing(m)
     ],
     format=Documenter.HTML(;
         canonical="https://quantumengineeredsystems.github.io/HarmonicSteadyState.jl/stable/",

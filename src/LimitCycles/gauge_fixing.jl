@@ -14,7 +14,7 @@ Equivalent to adding `n` pairs of harmonics ω +- ω_lc for each existing ω.
 """
 function add_pairs!(eom::DifferentialEquation; ω_lc::Num, n::Int)
     foreach(1:n) do k
-        add_pairs!(eom, ω_lc)
+        return add_pairs!(eom, ω_lc)
     end
     return nothing
 end

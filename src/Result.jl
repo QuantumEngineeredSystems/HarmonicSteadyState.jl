@@ -143,7 +143,7 @@ function attractors(res::Result{D}; class="stable", not_class=[]) where {D}
     Y = _get_mask(res, class, not_class)
 
     return map(enumerate(Y)) do (idx, bools)
-        Dict(i => get_branch(res, i)[idx] for (i, bool) in pairs(bools) if bool)
+        return Dict(i => get_branch(res, i)[idx] for (i, bool) in pairs(bools) if bool)
     end # map
 end
 

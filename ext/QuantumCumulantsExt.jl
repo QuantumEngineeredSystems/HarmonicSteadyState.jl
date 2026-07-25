@@ -39,7 +39,9 @@ function replace_to_reals(eqs::Vector{String}, ops_av::Vector{String}, conjugate
     foreach(conjugate_pairs) do pair
         is_real = isequal(pair...)
         op_pair = ops_av[pair[1]]
-        op_name = replace(op_pair, "⟨" => "", "⟩" => "", "*" => "", "′" => "⁺")
+        op_name = replace(
+            op_pair, "⟨" => "", "⟩" => "", "*" => "", "′" => "⁺", "'" => "⁺", " " => ""
+        )
         op_r = op_name * "ᵣ"
         op_i = op_name * "ᵢ"
 
@@ -47,7 +49,7 @@ function replace_to_reals(eqs::Vector{String}, ops_av::Vector{String}, conjugate
         is_real || push!(variables, op_i)
         conj_replace = map(eachindex(pair)) do i
             op = ops_av[pair[i]] # ∨ f(i) contains "+" or "-"
-            op => if is_real
+            return op => if is_real
                 "(" * op_r * ")"
             else
                 "(" * op_r * " $(f(i)) im*" * op_i * ")"
@@ -89,14 +91,14 @@ function compute_real_equations(eqs::MeanfieldEquations)
         eq_re = real(eq) # the factor of √(2) is needed to have Q to C limit.
         eq_im = - imag(eq)
         iszero(eq_re) || push!(eqs_real, eq_re)
-        iszero(eq_im) || push!(eqs_real, eq_im)
+        return iszero(eq_im) || push!(eqs_real, eq_im)
     end
     return eqs_real, Num.(vars)
 end # TODO: test if order of vars and eqs is correct
 
 function add_iv(eqs, vars, iv)
     var_new = map(vars) do var
-        QuestBase.declare_variable(string(var), iv)
+        return QuestBase.declare_variable(string(var), iv)
     end
     subs = Dict(zip(vars, var_new))
     eqs_new = QuestBase.substitute_all(eqs, subs)
@@ -126,12 +128,14 @@ function QuestBase.HarmonicEquation(MFeqs::MeanfieldEquations, parameters)
     jac = HarmonicSteadyState.get_Jacobian(eqs_jac, vars_jac)
 
     hvars = map(vars) do var
-        HarmonicSteadyState.QuestBase.HarmonicVariable(Num(var), "", "", Num(1), Num(0))
+        return HarmonicSteadyState.QuestBase.HarmonicVariable(
+            Num(var), "", "", Num(1), Num(0)
+        )
     end
 
     equations_lhs = map(enumerate(vars)) do (idx, var)
         dvar = QuestBase.d(var, MFeqs.iv)
-        equations_lhs[idx] ~ dvar # by convention lhs in HB
+        return equations_lhs[idx] ~ dvar # by convention lhs in HB
     end
 
     return QuestBase.HarmonicEquation(equations_lhs, hvars, Num.(parameters), jac)

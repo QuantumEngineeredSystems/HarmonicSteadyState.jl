@@ -12,7 +12,11 @@ HC = HomotopyContinuation
 
 "Conversion from Symbolics.jl types to HomotopyContinuation types."
 function HomotopyContinuation.ModelKit.Variable(var::Num)
-    isterm(var.val) ? HC.Variable(string(var.val.f)) : HC.Variable(string(var_name(var)))
+    return if isterm(var.val)
+        HC.Variable(string(var.val.f))
+    else
+        HC.Variable(string(var_name(var)))
+    end
 end
 
 "Converts a Num into Variable in the active namespace."

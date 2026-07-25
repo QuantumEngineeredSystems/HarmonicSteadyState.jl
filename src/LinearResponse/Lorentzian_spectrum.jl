@@ -47,7 +47,7 @@ end
 
 "Gives the numerical value of a peak at ω."
 function evaluate(peak::Lorentzian{T}, ω::T) where {T<:Real}
-    peak.A / sqrt(((peak.ω0 - ω)^2 + (peak.Γ)^2))
+    return peak.A / sqrt(((peak.ω0 - ω)^2 + (peak.Γ)^2))
 end
 
 "Gives the numerical value of a JacobianSpectrum at ω"
@@ -112,7 +112,11 @@ function JacobianSpectrum(
         for pair in _get_uv_pairs(hvars)
             u, v = hvars[pair]
             eigvec_2d = eigvec[pair] # fetch the relevant part of the Jacobian eigenvector
-            ωnum = real(unwrap(Symbolics.substitute(u.ω, Dict(solution_dict))))
+            ωnum = real(
+                SymbolicUtils.unwrap_const(
+                    Symbolics.unwrap(Symbolics.substitute(u.ω, Dict(solution_dict)))
+                ),
+            )
             # ^ the harmonic (numerical now) associated to this harmonic variable
 
             # eigvec_2d is associated to a natural variable -> this variable gets Lorentzian peaks

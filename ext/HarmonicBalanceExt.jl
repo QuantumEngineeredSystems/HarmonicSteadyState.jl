@@ -63,7 +63,7 @@ function HarmonicSteadyState.LinearResponse.ResponseMatrix(
         args = cat(symbols, [Δ]; dims=1)
         f_re = Symbolics.build_function(el.re, args; expression=Val{false})
         f_im = Symbolics.build_function(el.im, args; expression=Val{false})
-        (args...) -> f_re(args...) + im * f_im(args...)
+        return (args...) -> f_re(args...) + im * f_im(args...)
     end
     return ResponseMatrix(compiled_M, symbols, res.problem.eom.variables)
 end

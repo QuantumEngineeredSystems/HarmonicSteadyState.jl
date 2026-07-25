@@ -59,10 +59,10 @@ using Test
 end
 
 @testset "work with rnumbers and cumber" begin
-    @testset "@cnumbers" begin
+    @testset "complex parameters" begin
         h = FockSpace(:cavity)
         @qnumbers a::Destroy(h)
-        @cnumbers Δ U G κ
+        @variables Δ U G κ
         param = [Δ, U, G, κ]
 
         H_RWA = -Δ * a' * a + U * (a'^2 * a^2) / 2 - G * (a' * a' + a * a) / 2
@@ -76,10 +76,10 @@ end
             complete(eqs), param, varied, fixed
         )
     end
-    @testset "@rnumbers" begin
+    @testset "real parameters" begin
         h = FockSpace(:cavity)
         @qnumbers a::Destroy(h)
-        @rnumbers Δ U G κ
+        @variables Δ::Real U::Real G::Real κ::Real
         param = [Δ, U, G, κ]
 
         H_RWA = -Δ * a' * a + U * (a'^2 * a^2) / 2 - G * (a' * a' + a * a) / 2
@@ -105,7 +105,7 @@ end
     @qnumbers a::Destroy(h, 1) b::Destroy(h, 2)
 
     # Parameters
-    @rnumbers Δ K F κ ωm g0 Γm
+    @variables Δ::Real K::Real F::Real κ::Real ωm::Real g0::Real Γm::Real
 
     param = [Δ, K, F, κ, ωm, g0, Γm]
 
