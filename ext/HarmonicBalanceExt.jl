@@ -53,9 +53,13 @@ Any substitution rules not specified in `res` can be supplied in `rules`."
 function HarmonicSteadyState.LinearResponse.ResponseMatrix(
     res::HarmonicSteadyState.Result; rules=Dict()
 )
+    what = "compute the response matrix"
+    eom = HarmonicSteadyState._harmonic_equation(res, what)
+    natural_equation = HarmonicSteadyState._natural_equation(eom, what)
+
     # get the symbolic response matrix
     Symbolics.@variables Δ
-    M = get_response_matrix(res.problem.eom.natural_equation, Num(Δ))
+    M = get_response_matrix(natural_equation, Num(Δ))
     M = QuestBase.substitute_all(M, merge(res.fixed_parameters, rules))
     symbols = HarmonicSteadyState._free_symbols(res)
 
@@ -65,7 +69,7 @@ function HarmonicSteadyState.LinearResponse.ResponseMatrix(
         f_im = Symbolics.build_function(el.im, args; expression=Val{false})
         return (args...) -> f_re(args...) + im * f_im(args...)
     end
-    return ResponseMatrix(compiled_M, symbols, res.problem.eom.variables)
+    return ResponseMatrix(compiled_M, symbols, eom.variables)
 end
 
 """

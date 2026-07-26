@@ -41,6 +41,10 @@ function HarmonicSteadyState.follow_branch(
 
     p1 = first(keys(res.swept_parameters)) # parameter values
 
+    harmonic_equation = HarmonicSteadyState._harmonic_equation(
+        res, "follow a branch through a bifurcation"
+    )
+
     for i in 2:length(Ys)
         s = Ys[i][followed_branch[i - 1]] # solution amplitude in the current branch and current parameter index
         if !isnan(s) # the solution is not unstable or unphysical
@@ -61,7 +65,7 @@ function HarmonicSteadyState.follow_branch(
                 sol_dict[v] = var_values_noise[i]
             end
 
-            problem_t = ODEProblem(res.problem.eom, sol_dict; timespan=(0, tf))
+            problem_t = ODEProblem(harmonic_equation, sol_dict; timespan=(0, tf))
             res_t = solve(problem_t, OrdinaryDiffEqTsit5.Tsit5(); saveat=tf)
 
             # closest branch to final state

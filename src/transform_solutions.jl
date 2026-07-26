@@ -293,7 +293,10 @@ function to_lab_frame(soln::OrderedDict, res::Result, nat_var::Num, times)
     else
         nat_var
     end
-    vars = filter(x -> isequal(x.natural_variable, var), res.problem.eom.variables)
+    what = "transform a solution to the lab frame"
+    eom = _harmonic_equation(res, what)
+    _natural_equation(eom, what) # the harmonic ansatz is only invertible in the lab frame
+    vars = filter(x -> isequal(x.natural_variable, var), eom.variables)
 
     return if Symbolics.is_derivative(unwrap(nat_var))
         _to_lab_frame_velocity(soln, vars, times)
