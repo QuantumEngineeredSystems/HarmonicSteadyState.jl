@@ -4,8 +4,8 @@ using Printf: Printf, @printf
 using DocStringExtensions: TYPEDFIELDS, TYPEDSIGNATURES, TYPEDEF
 using ProgressMeter: ProgressMeter, Progress, next!
 
-using Symbolics: Symbolics, Num, unwrap
-using SymbolicUtils: SymbolicUtils
+using Symbolics: Symbolics, Num
+using SymbolicUtils: SymbolicUtils, unwrap
 using LinearAlgebra: LinearAlgebra, norm, eigen, eigvals, eigvecs, I
 
 using HarmonicSteadyState:

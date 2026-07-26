@@ -128,9 +128,7 @@ function QuestBase.HarmonicEquation(MFeqs::MeanfieldEquations, parameters)
     jac = HarmonicSteadyState.get_Jacobian(eqs_jac, vars_jac)
 
     hvars = map(vars) do var
-        return HarmonicSteadyState.QuestBase.HarmonicVariable(
-            Num(var), "", "", Num(1), Num(0)
-        )
+        return QuestBase.HarmonicVariable(Num(var), "", "", Num(1), Num(0))
     end
 
     equations_lhs = map(enumerate(vars)) do (idx, var)
