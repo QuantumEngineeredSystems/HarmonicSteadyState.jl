@@ -136,7 +136,9 @@ function QuestBase.HarmonicEquation(MFeqs::MeanfieldEquations, parameters)
         return equations_lhs[idx] ~ dvar # by convention lhs in HB
     end
 
-    return QuestBase.HarmonicEquation(equations_lhs, hvars, Num.(parameters), jac)
+    # retain `MFeqs` as the source system, such that downstream code can tell the harmonic
+    # equations did not come from a second order `DifferentialEquation` in the lab frame
+    return QuestBase.HarmonicEquation(equations_lhs, hvars, Num.(parameters), jac, MFeqs)
 end
 
 end

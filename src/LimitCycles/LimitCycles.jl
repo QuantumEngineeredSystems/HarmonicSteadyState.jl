@@ -8,8 +8,7 @@ using QuestBase:
     HarmonicVariable,
     get_independent_variables,
     declare_variable,
-    _remove_brackets,
-    source
+    _remove_brackets
 
 using DocStringExtensions: TYPEDSIGNATURES
 

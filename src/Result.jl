@@ -7,7 +7,7 @@ Stores the steady states of a HarmonicEquation.
 $(TYPEDFIELDS)
 
 """
-mutable struct Result{D,SolType<:Number,ParType<:Number,F<:JacobianFunction(SolType), Source}
+mutable struct Result{D,SolType<:Number,ParType<:Number,F<:JacobianFunction(SolType),Source}
     "The variable values of steady-state solutions."
     solutions::Array{Vector{Vector{SolType}},D}
     "Values of all parameters for all solutions."
@@ -15,7 +15,7 @@ mutable struct Result{D,SolType<:Number,ParType<:Number,F<:JacobianFunction(SolT
     "The parameters fixed throughout the solutions."
     fixed_parameters::OrderedDict{Num,ParType}
     "The `HomotopyContinuationProblem` used to generate this."
-    problem::HomotopyContinuationProblem{ParType,F, Source}
+    problem::HomotopyContinuationProblem{ParType,F,Source}
     """
     Maps strings such as \"stable\", \"physical\" etc to arrays of values,
     classifying the solutions (see method `classify_solutions!`).
@@ -67,6 +67,26 @@ function Result(
 end
 
 Symbolics.get_variables(res::Result) = get_variables(res.problem)
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the system the problem behind `res` was generated from, usually a `HarmonicEquation`.
+Returns `nothing` if the problem was built from explicitly entered equations.
+"""
+QuestBase.source(res::Result) = source(res.problem)
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the type of the system the problem behind `res` was generated from, or `Nothing` if
+it carries no source system.
+"""
+QuestBase.source_type(::Result{D,S,P,F,Source}) where {D,S,P,F,Source} = Source
+
+function _harmonic_equation(res::Result, what::AbstractString)
+    return _harmonic_equation(res.problem, what)
+end
 
 function Base.show(io::IO, r::Result)
     println(io, "A steady state result for ", length(r.solutions), " parameter points")

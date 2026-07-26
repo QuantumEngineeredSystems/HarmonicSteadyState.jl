@@ -76,9 +76,8 @@ function get_implicit_Jacobian(eom::HarmonicEquation; sym_order, rules=Dict())
 end
 
 function get_implicit_Jacobian(p::SteadyStateProblem)
-    return get_implicit_Jacobian(
-        source(p); sym_order=_free_symbols(p), rules=p.fixed_parameters
-    )
+    eom = _harmonic_equation(p, "compile an implicit Jacobian")
+    return get_implicit_Jacobian(eom; sym_order=_free_symbols(p), rules=p.fixed_parameters)
 end
 
 # for implicit evaluation, the numerical values precede the rearrangement

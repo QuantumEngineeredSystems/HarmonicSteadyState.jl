@@ -17,11 +17,15 @@ using Test
         HarmonicSteadyState.JacobianFunction(ComplexF64)(x -> x),
     )
     @test isnothing(HarmonicSteadyState.source(prob))
+    @test HarmonicSteadyState.source_type(prob) == Nothing
+    @test_throws ErrorException HarmonicSteadyState._harmonic_equation(prob, "do a thing")
 
     prob = HarmonicSteadyState.HomotopyContinuationProblem(
         [x, y], Num[], OrderedDict{Num,Vector{Float64}}(), OrderedDict{Num,Float64}(), F
     )
     @test_throws UndefRefError prob.jacobian
+    @test isnothing(HarmonicSteadyState.source(prob))
+    @test HarmonicSteadyState.source_type(prob) == Nothing
 end
 
 @testset "Problem with self made system" begin
