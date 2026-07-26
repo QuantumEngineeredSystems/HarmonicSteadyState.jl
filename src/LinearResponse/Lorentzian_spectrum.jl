@@ -114,7 +114,7 @@ function JacobianSpectrum(
     uv_ωnums = [
         real(
             SymbolicUtils.unwrap_const(
-                Symbolics.unwrap(Symbolics.substitute(hvars[pair][1].ω, substitutions))
+                SymbolicUtils.unwrap(Symbolics.substitute(hvars[pair][1].ω, substitutions))
             ),
         ) for pair in uv_pairs
     ]

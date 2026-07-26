@@ -27,8 +27,8 @@ using Random: Random # for setting seed
 using Distances: Distances
 using BijectiveHilbert: BijectiveHilbert, Simple2D, decode_hilbert!, encode_hilbert
 using HomotopyContinuation: HomotopyContinuation
-using Symbolics: Symbolics, unwrap, wrap, Num, get_variables
-using SymbolicUtils: SymbolicUtils
+using Symbolics: Symbolics, wrap, Num, get_variables
+using SymbolicUtils: SymbolicUtils, unwrap
 
 const HC = HomotopyContinuation
 import FunctionWrappers: FunctionWrapper

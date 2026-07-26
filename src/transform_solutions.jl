@@ -310,12 +310,14 @@ function _to_lab_frame_velocity(soln, vars, times)
     for var in vars
         val = real(
             SymbolicUtils.unwrap_const(
-                Symbolics.unwrap(
-                    substitute_all(Symbolics.unwrap(_remove_brackets(var)), soln)
+                SymbolicUtils.unwrap(
+                    substitute_all(SymbolicUtils.unwrap(_remove_brackets(var)), soln)
                 ),
             ),
         )
-        ω = real(SymbolicUtils.unwrap_const(Symbolics.unwrap(substitute_all(var.ω, soln))))
+        ω = real(
+            SymbolicUtils.unwrap_const(SymbolicUtils.unwrap(substitute_all(var.ω, soln)))
+        )
         if var.type == "u"
             timetrace .+= -ω * val * sin.(ω * times)
         elseif var.type == "v"
@@ -331,12 +333,14 @@ function _to_lab_frame(soln, vars, times)::Vector{AbstractFloat}
     for var in vars
         val = real(
             SymbolicUtils.unwrap_const(
-                Symbolics.unwrap(
-                    substitute_all(Symbolics.unwrap(_remove_brackets(var)), soln)
+                SymbolicUtils.unwrap(
+                    substitute_all(SymbolicUtils.unwrap(_remove_brackets(var)), soln)
                 ),
             ),
         )
-        ω = real(SymbolicUtils.unwrap_const(Symbolics.unwrap(substitute_all(var.ω, soln))))
+        ω = real(
+            SymbolicUtils.unwrap_const(SymbolicUtils.unwrap(substitute_all(var.ω, soln)))
+        )
         if var.type == "u"
             timetrace .+= val * cos.(ω * times)
         elseif var.type == "v"

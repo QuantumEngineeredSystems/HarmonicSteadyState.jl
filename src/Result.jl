@@ -65,7 +65,7 @@ function Result(
     )
 end
 
-Symbolics.get_variables(res::Result)::Vector{Num} = get_variables(res.problem)
+Symbolics.get_variables(res::Result) = get_variables(res.problem)
 
 function Base.show(io::IO, r::Result)
     println(io, "A steady state result for ", length(r.solutions), " parameter points")
