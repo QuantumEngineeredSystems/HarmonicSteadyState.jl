@@ -105,18 +105,28 @@ function JacobianSpectrum(
     solutions = get_variable_solutions(res; branch=branch, index=index)
     λs, vs = eigen(res.jacobian(solutions))
 
+    # The harmonic of a uv pair does not depend on the eigenvalue, so it is substituted
+    # once per pair instead of once per (eigenvalue, pair). The symbolic substitution and
+    # the `Dict` it needs dominate this loop, so hoisting them matters.
+    substitutions = Dict(solution_dict)
+    uv_pairs = _get_uv_pairs(hvars)
+    a_idxs = _get_as(hvars)
+    uv_ωnums = [
+        real(
+            SymbolicUtils.unwrap_const(
+                Symbolics.unwrap(Symbolics.substitute(hvars[pair][1].ω, substitutions))
+            ),
+        ) for pair in uv_pairs
+    ]
+
     for (j, λ) in enumerate(λs)
         eigvec = vs[:, j] # the eigenvector
 
         # 2 peaks for each pair of uv variables
-        for pair in _get_uv_pairs(hvars)
+        for (p, pair) in enumerate(uv_pairs)
             u, v = hvars[pair]
             eigvec_2d = eigvec[pair] # fetch the relevant part of the Jacobian eigenvector
-            ωnum = real(
-                SymbolicUtils.unwrap_const(
-                    Symbolics.unwrap(Symbolics.substitute(u.ω, Dict(solution_dict)))
-                ),
-            )
+            ωnum = uv_ωnums[p]
             # ^ the harmonic (numerical now) associated to this harmonic variable
 
             # eigvec_2d is associated to a natural variable -> this variable gets Lorentzian peaks
@@ -128,7 +138,7 @@ function JacobianSpectrum(
         end
 
         # 1 peak for a-type variable
-        for a_idx in _get_as(hvars)
+        for a_idx in a_idxs
             a = hvars[a_idx]
             eigvec_1d = eigvec[a_idx]
             peak = 2 * norm(eigvec_1d) * Lorentzian(; ω0=abs(imag(λ)), Γ=real(λ))
