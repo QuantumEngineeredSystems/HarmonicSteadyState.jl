@@ -31,7 +31,7 @@ function HarmonicSteadyState.steady_state_sweep(
         # make type-stable: FD.Dual or Float
         p = get_new_parameters(prob, varied_idx, value)
         sol = solve(remake(prob; p, u0), alg; kwargs...)
-        result[i] = sol.u
+        return result[i] = sol.u
     end
     return result
 end

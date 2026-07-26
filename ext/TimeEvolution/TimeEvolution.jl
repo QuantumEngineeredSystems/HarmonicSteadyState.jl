@@ -1,7 +1,7 @@
 module TimeEvolution
 
 using DocStringExtensions: TYPEDSIGNATURES
-using Symbolics: Num, substitute, unwrap, get_variables
+using Symbolics: Symbolics, Num, get_variables
 using OrdinaryDiffEqTsit5: OrdinaryDiffEqTsit5
 
 using HarmonicSteadyState:

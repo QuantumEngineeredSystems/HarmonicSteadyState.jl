@@ -8,16 +8,16 @@ solutions for a given parameter set. The output is a similar array, with each so
 rearranged such that neighboring solution sets have the smallest Euclidean distance.
 
 The `sorting` keyword argument specifies the method used to get continuous solution branches.
-Options are `"hilbert"` (1D sorting along a Hilbert curve), `"nearest"` (nearest-neighbor sorting),
-and `"none"`. The `show_progress` keyword argument indicates whether a progress bar should be displayed.
+Options are `:hilbert` (1D sorting along a Hilbert curve), `:nearest` (nearest-neighbor sorting),
+and `:none`. The `show_progress` keyword argument indicates whether a progress bar should be displayed.
 """
 function sort_solutions(
-    solutions::Solutions(T); sorting="nearest", show_progress=true
+    solutions::Solutions(T); sorting=:nearest, show_progress=true
 ) where {T}
-    sorting_schemes = ["none", "hilbert", "nearest"]
+    sorting_schemes = [:none, :hilbert, :nearest]
     sorting ∈ sorting_schemes ||
         error("Only the following sorting options are allowed:  ", sorting_schemes)
-    sorting == "none" && return solutions
+    sorting == :none && return solutions
     l = length(size(solutions))
     l == 1 && return sort_1D(solutions; show_progress)
     l == 2 && return sort_2D(solutions; sorting, show_progress)
@@ -30,10 +30,10 @@ end
 Sorts the solutions in `res` in-place according to the specified `sorting` method.
 
 `res` is a `Result` object containing the solutions to be sorted. The `sorting` keyword argument
-specifies the method used to get continuous solution branches. Options are `"hilbert"`, `"nearest"`,
-and `"none"`. The `show_progress` keyword argument indicates whether a progress bar should be displayed.
+specifies the method used to get continuous solution branches. Options are `:hilbert`, `:nearest`,
+and `:none`. The `show_progress` keyword argument indicates whether a progress bar should be displayed.
 """
-function sort_solutions!(res::Result; sorting="nearest", show_progress=true)
+function sort_solutions!(res::Result; sorting=:nearest, show_progress=true)
     return res.solutions .= sort_solutions(res.solutions; sorting, show_progress)
 end
 
@@ -172,15 +172,15 @@ Sorts 2D solutions according to the specified `sorting` method.
 
 `solns` is a 2D array of solutions. The `sorting` keyword argument specifies the method used
 to get continuous solution branches.
-Options are `"hilbert"` and `"nearest"`. The `show_progress` keyword argument indicates
+Options are `:hilbert` and `:nearest`. The `show_progress` keyword argument indicates
 whether a progress bar should be displayed.
 """
-function sort_2D(solns::Solutions(T); sorting="nearest", show_progress=true) where {T}
+function sort_2D(solns::Solutions(T); sorting=:nearest, show_progress=true) where {T}
     """match each 2D solution with all its surrounding neighbors, including the diagonal ones"""
     # determine a trajectory in 2D space where nodes will be visited
-    if sorting == "hilbert" # propagating matching of solutions along a hilbert_curve in 2D
+    if sorting == :hilbert # propagating matching of solutions along a hilbert_curve in 2D
         idx_pairs = hilbert_indices(solns)
-    elseif sorting == "nearest" # propagate matching of solutions along rows
+    elseif sorting == :nearest # propagate matching of solutions along rows
         idx_pairs = naive_indices(solns)
     end
 

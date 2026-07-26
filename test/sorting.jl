@@ -15,7 +15,7 @@ varied = (ω => range(0.99, 1.01, 10), λ => range(1e-6, 0.03, 10))
 
 @testset "hilbert" begin
     result_2D = get_steady_states(harmonic_eq, varied, fixed)
-    result_2D_hilbert = get_steady_states(harmonic_eq, varied, fixed; sorting="hilbert")
+    result_2D_hilbert = get_steady_states(harmonic_eq, varied, fixed; sorting=:hilbert)
     is_zero_solution(v) = all(round.(v) .≈ 0.0 + 0.0*im)
     maps = map(zip(result_2D.solutions, result_2D_hilbert.solutions)) do (sol, sol_hilbert)
         is_zero_solution.(sol) == is_zero_solution.(sol_hilbert)

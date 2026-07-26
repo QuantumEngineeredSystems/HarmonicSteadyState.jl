@@ -66,7 +66,7 @@ function Result(
     )
 end
 
-Symbolics.get_variables(res::Result)::Vector{Num} = get_variables(res.problem)
+Symbolics.get_variables(res::Result) = get_variables(res.problem)
 
 function Base.show(io::IO, r::Result)
     println(io, "A steady state result for ", length(r.solutions), " parameter points")
@@ -115,6 +115,7 @@ function swept_parameters(res::Result{D}) where {D}
 end
 
 swept_parameter(res::Result, x::Num) = res.swept_parameters[x]
+swept_parameter(res::Result, x::SymbolicUtils.BasicSymbolic) = res.swept_parameters[Num(x)]
 function swept_parameter(res::Result, x::String)
     is_swept_parameter(res, x)
     return res.swept_parameters[_parse_expression(x)]
@@ -143,7 +144,7 @@ function attractors(res::Result{D}; class="stable", not_class=[]) where {D}
     Y = _get_mask(res, class, not_class)
 
     return map(enumerate(Y)) do (idx, bools)
-        Dict(i => get_branch(res, i)[idx] for (i, bool) in pairs(bools) if bool)
+        return Dict(i => get_branch(res, i)[idx] for (i, bool) in pairs(bools) if bool)
     end # map
 end
 
@@ -161,3 +162,6 @@ function is_swept_parameter(res::Result, z::String)
     return true
 end
 is_swept_parameter(res::Result, z::Num) = is_swept_parameter(res::Result, string(z))
+function is_swept_parameter(res::Result, z::SymbolicUtils.BasicSymbolic)
+    return is_swept_parameter(res, string(z))
+end

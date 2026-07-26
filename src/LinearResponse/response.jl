@@ -31,10 +31,7 @@ function get_jacobian_response(
         )
     end
     # evaluate the Jacobians for the different values of noise frequency Ω
-    for ij in CartesianIndices(C)
-        C[ij] = abs(evaluate(spectra[ij[2]][nat_var], Ω_range[ij[1]]))
-        show_progress ? next!(bar) : nothing
-    end
+    _fill_response!(C, spectra, nat_var, Ω_range, show_progress ? bar : nothing)
     return C
 end
 function get_jacobian_response(
@@ -60,9 +57,19 @@ function get_jacobian_response(
         )
     end
     # evaluate the Jacobians for the different values of noise frequency Ω
-    for ij in CartesianIndices(C)
-        C[ij] = abs(evaluate(spectra[ij[2]][nat_var], Ω_range[ij[1]]))
-        show_progress ? next!(bar) : nothing
+    _fill_response!(C, spectra, nat_var, Ω_range, show_progress ? bar : nothing)
+    return C
+end
+
+# The spectrum of `nat_var` is the same for every Ω, so it is looked up once per solution
+# rather than once per (Ω, solution) entry of `C`.
+function _fill_response!(C, spectra, nat_var::Num, Ω_range, bar)
+    for (j, spectrum) in enumerate(spectra)
+        s = spectrum[nat_var]
+        for (i, Ω) in enumerate(Ω_range)
+            C[i, j] = abs(evaluate(s, Ω))
+            isnothing(bar) || next!(bar)
+        end
     end
     return C
 end
@@ -152,11 +159,11 @@ function eigenvalues(res::Result{D,S,P}, branch; class=["physical"]) where {D,S,
             throw(
                 ErrorException(
                     "The branch contains NaN values.
-                    Likely, the branch has non-physical solutions in the parameter sweep",
+                    Likely, the branch has non-physical solutions in the parameter sweep"
                 ),
             )
         end
-        eigvals(jac)
+        return eigvals(jac)
     end
     eigenvalues_filtered = map(.*, eigenvalues, filter_branch)
 
@@ -189,11 +196,11 @@ function eigenvectors(res::Result{D,S,P}, branch; class=["physical"]) where {D,S
             throw(
                 ErrorException(
                     "The branch contains NaN values.
-                    Likely, the branch has non-physical solutions in the parameter sweep",
+                    Likely, the branch has non-physical solutions in the parameter sweep"
                 ),
             )
         end
-        eigvecs(jac)
+        return eigvecs(jac)
     end
     eigvecs_filtered = map(.*, eigenvectors, filter_branch)
 
@@ -227,7 +234,7 @@ function get_response(rmat::ResponseMatrix, s::StateDict, Ω)
     # uv-type
     for pair in _get_uv_pairs(rmat.variables)
         u, v = rmat.variables[pair]
-        this_ω = unwrap(substitute_all(u.ω, s))
+        this_ω = SymbolicUtils.unwrap_const(unwrap(substitute_all(u.ω, s)))
         uv1 = _evaluate_response_vector(rmat, s, Ω - this_ω)[pair]
         uv2 = _evaluate_response_vector(rmat, s, -Ω + this_ω)[pair]
         resp += sqrt(_plusamp(uv1)^2 + _minusamp(uv2)^2)

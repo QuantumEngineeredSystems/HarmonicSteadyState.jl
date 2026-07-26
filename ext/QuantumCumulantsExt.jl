@@ -39,7 +39,9 @@ function replace_to_reals(eqs::Vector{String}, ops_av::Vector{String}, conjugate
     foreach(conjugate_pairs) do pair
         is_real = isequal(pair...)
         op_pair = ops_av[pair[1]]
-        op_name = replace(op_pair, "⟨" => "", "⟩" => "", "*" => "", "′" => "⁺")
+        op_name = replace(
+            op_pair, "⟨" => "", "⟩" => "", "*" => "", "′" => "⁺", "'" => "⁺", " " => ""
+        )
         op_r = op_name * "ᵣ"
         op_i = op_name * "ᵢ"
 
@@ -47,10 +49,10 @@ function replace_to_reals(eqs::Vector{String}, ops_av::Vector{String}, conjugate
         is_real || push!(variables, op_i)
         conj_replace = map(eachindex(pair)) do i
             op = ops_av[pair[i]] # ∨ f(i) contains "+" or "-"
-            op => if is_real
-                "((" * op_r * ") / √(2))"
+            return op => if is_real
+                "(" * op_r * ")"
             else
-                "((" * op_r * " $(f(i)) im*" * op_i * ") / √(2))"
+                "(" * op_r * " $(f(i)) im*" * op_i * ")"
             end
         end
         if isequal(pair...)
@@ -86,17 +88,17 @@ function compute_real_equations(eqs::MeanfieldEquations)
     eqs_complex = expand.(eqs_complex)
     eqs_real = Num[]
     foreach(eqs_complex) do eq
-        eq_re = √(2) * real(eq) # the factor of √(2) is needed to have Q to C limit.
-        eq_im = -√(2) * imag(eq)
+        eq_re = real(eq) # the factor of √(2) is needed to have Q to C limit.
+        eq_im = - imag(eq)
         iszero(eq_re) || push!(eqs_real, eq_re)
-        iszero(eq_im) || push!(eqs_real, eq_im)
+        return iszero(eq_im) || push!(eqs_real, eq_im)
     end
     return eqs_real, Num.(vars)
 end # TODO: test if order of vars and eqs is correct
 
 function add_iv(eqs, vars, iv)
     var_new = map(vars) do var
-        QuestBase.declare_variable(string(var), iv)
+        return QuestBase.declare_variable(string(var), iv)
     end
     subs = Dict(zip(vars, var_new))
     eqs_new = QuestBase.substitute_all(eqs, subs)
@@ -107,7 +109,7 @@ function HarmonicSteadyState.HomotopyContinuationProblem(
     MFeqs::MeanfieldEquations, parameters, swept, fixed
 )
     equations, vars = compute_real_equations(MFeqs)
-
+    @assert length(equations) == length(vars) "After conversion to real equations, the number of equations and variables are not the same. Please report an issue with a minimal working example."
     return HarmonicSteadyState.HomotopyContinuationProblem(
         Num.(equations),
         Num.(vars),
@@ -117,7 +119,7 @@ function HarmonicSteadyState.HomotopyContinuationProblem(
     )
 end
 
-function HarmonicSteadyState.HarmonicEquation(MFeqs::MeanfieldEquations, parameters)
+function QuestBase.HarmonicEquation(MFeqs::MeanfieldEquations, parameters)
     equations_lhs, vars = compute_real_equations(MFeqs)
     # equations_lhs, vars = reparse_with_iv(equations_lhs, vars, MFeqs.iv)
     equations_lhs, vars = add_iv(equations_lhs, vars, MFeqs.iv)
@@ -126,15 +128,15 @@ function HarmonicSteadyState.HarmonicEquation(MFeqs::MeanfieldEquations, paramet
     jac = HarmonicSteadyState.get_Jacobian(eqs_jac, vars_jac)
 
     hvars = map(vars) do var
-        HarmonicSteadyState.QuestBase.HarmonicVariable(Num(var), "", "", Num(1), Num(0))
+        return QuestBase.HarmonicVariable(Num(var), "", "", Num(1), Num(0))
     end
 
     equations_lhs = map(enumerate(vars)) do (idx, var)
         dvar = QuestBase.d(var, MFeqs.iv)
-        equations_lhs[idx] ~ dvar # by convention lhs in HB
+        return equations_lhs[idx] ~ dvar # by convention lhs in HB
     end
 
-    return HarmonicSteadyState.HarmonicEquation(equations_lhs, hvars, Num.(parameters), jac)
+    return QuestBase.HarmonicEquation(equations_lhs, hvars, Num.(parameters), jac)
 end
 
 end

@@ -34,20 +34,29 @@ end
 
 "Adds a peak p to JacobianSpectrum s."
 function add_peak(s::JacobianSpectrum, p::Lorentzian)
-    return JacobianSpectrum(cat(s.peaks, p; dims=1))
+    return JacobianSpectrum(vcat(s.peaks, p))
 end
 
 "Adds all peaks from s2 to s1."
 function add_peak(s1::JacobianSpectrum, s2::JacobianSpectrum)
-    for p in s2.peaks
-        s1 = add_peak(s1, p)
-    end
+    return JacobianSpectrum(vcat(s1.peaks, s2.peaks))
+end
+
+"Adds a peak `p` to `s`, growing `s` in place."
+function add_peak!(s::JacobianSpectrum, p::Lorentzian)
+    push!(s.peaks, p)
+    return s
+end
+
+"Adds all peaks from `s2` to `s1`, growing `s1` in place."
+function add_peak!(s1::JacobianSpectrum, s2::JacobianSpectrum)
+    append!(s1.peaks, s2.peaks)
     return s1
 end
 
 "Gives the numerical value of a peak at ω."
 function evaluate(peak::Lorentzian{T}, ω::T) where {T<:Real}
-    peak.A / sqrt(((peak.ω0 - ω)^2 + (peak.Γ)^2))
+    return peak.A / sqrt(((peak.ω0 - ω)^2 + (peak.Γ)^2))
 end
 
 "Gives the numerical value of a JacobianSpectrum at ω"
@@ -91,9 +100,9 @@ function JacobianSpectrum(
     eom = QuestBase.source(res.problem)
     hvars = eom.variables # fetch the vector of HarmonicVariable
     # blank JacobianSpectrum for each variable
-    all_spectra = Dict{Num,JacobianSpectrum{P}}([
-        [nvar, JacobianSpectrum{P}()] for nvar in getfield.(hvars, :natural_variable)
-    ])
+    all_spectra = Dict{Num,JacobianSpectrum{P}}(
+        hvar.natural_variable => JacobianSpectrum{P}() for hvar in hvars
+    )
 
     if force
         res.classes["stable"][index][branch] || return all_spectra # if the solution is unstable, return empty spectra
@@ -106,32 +115,45 @@ function JacobianSpectrum(
     solutions = get_variable_solutions(res; branch=branch, index=index)
     λs, vs = eigen(res.jacobian(solutions))
 
+    uv_pairs = _get_uv_pairs(hvars)
+    a_idxs = _get_as(hvars)
+
+    # Neither the harmonic of a uv pair nor the spectrum a variable accumulates into depends
+    # on the eigenvalue, so both are resolved once per variable instead of once per
+    # (eigenvalue, variable). The symbolic substitution dominates this loop, so hoisting it
+    # matters.
+    uv_ωnums = [
+        real(
+            SymbolicUtils.unwrap_const(
+                SymbolicUtils.unwrap(
+                    Symbolics.substitute(hvars[first(pair)].ω, solution_dict)
+                ),
+            ),
+        ) for pair in uv_pairs
+    ]
+    uv_spectra = [all_spectra[hvars[first(pair)].natural_variable] for pair in uv_pairs]
+    a_spectra = [all_spectra[hvars[a_idx].natural_variable] for a_idx in a_idxs]
+
     for (j, λ) in enumerate(λs)
-        eigvec = vs[:, j] # the eigenvector
+        eigvec = @view vs[:, j] # the eigenvector
 
         # 2 peaks for each pair of uv variables
-        for pair in _get_uv_pairs(hvars)
-            u, v = hvars[pair]
+        for (p, pair) in enumerate(uv_pairs)
             eigvec_2d = eigvec[pair] # fetch the relevant part of the Jacobian eigenvector
-            ωnum = real(unwrap(Symbolics.substitute(u.ω, Dict(solution_dict))))
+            ωnum = uv_ωnums[p]
             # ^ the harmonic (numerical now) associated to this harmonic variable
 
             # eigvec_2d is associated to a natural variable -> this variable gets Lorentzian peaks
             peaks = norm(eigvec_2d) * _pair_to_peaks(λ, eigvec_2d; ω=ωnum)
 
-            all_spectra[u.natural_variable] = add_peak(
-                all_spectra[u.natural_variable], peaks
-            )
+            add_peak!(uv_spectra[p], peaks)
         end
 
         # 1 peak for a-type variable
-        for a_idx in _get_as(hvars)
-            a = hvars[a_idx]
+        for (p, a_idx) in enumerate(a_idxs)
             eigvec_1d = eigvec[a_idx]
             peak = 2 * norm(eigvec_1d) * Lorentzian(; ω0=abs(imag(λ)), Γ=real(λ))
-            all_spectra[a.natural_variable] = add_peak(
-                all_spectra[a.natural_variable], peak
-            )
+            add_peak!(a_spectra[p], peak)
         end
     end
     #_simplify_spectra!(all_spectra) # condense similar peaks

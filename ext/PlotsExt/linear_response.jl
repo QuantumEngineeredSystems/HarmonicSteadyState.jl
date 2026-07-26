@@ -203,7 +203,7 @@ function HarmonicSteadyState.plot_eigenvalues(
                 ),
             )
         end
-        eigvals(jac)
+        return eigvals(jac)
     end
     eigenvalues_filtered = map(.*, eigenvalues, filter_branch)
 

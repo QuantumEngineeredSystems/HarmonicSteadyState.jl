@@ -1,5 +1,5 @@
 using HarmonicSteadyState,
-    ModelingToolkit,
+    ModelingToolkitBase,
     SteadyStateDiffEq,
     OrdinaryDiffEqRosenbrock,
     LinearAlgebra,
@@ -13,9 +13,9 @@ using HarmonicSteadyState,
         @parameters g = 9.8 k = 0.2
         D = Differential(t)
         eqs = [D(v) ~ g - k * v]
-        @named model = ODESystem(eqs, t)
+        @named model = ModelingToolkitBase.System(eqs, t)
 
-        model = structural_simplify(model)
+        model = mtkcompile(model)
 
         prob_ss = SteadyStateProblem{false}(model, [], []; jac=true)
         prob_np = NonlinearProblem(prob_ss)
@@ -58,8 +58,8 @@ using HarmonicSteadyState,
             ) / (-(γ^2) - (4) * (ω^2)),
         ]
 
-        @named model = ODESystem(eqs, t, [u1, v1], [α, ω, ω0, F, γ])
-        model = structural_simplify(model)
+        @named model = ModelingToolkitBase.System(eqs, t, [u1, v1], [α, ω, ω0, F, γ])
+        model = mtkcompile(model)
 
         param = [α, ω, ω0, F, γ] .=> [1.0, 1.2, 1.0, 0.01, 0.01]
         u0 = [1.0, 0.0]
