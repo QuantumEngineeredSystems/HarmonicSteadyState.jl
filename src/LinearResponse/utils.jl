@@ -1,7 +1,8 @@
 "Return the indices of u,v pairs belonging to the same natural variable and harmonic from hvars."
 function _get_uv_pairs(hvars::Vector{HarmonicVariable})
     u_idx = findall(x -> x.type == "u", hvars)
-    pairs = []
+    pairs = Vector{Int}[]
+    sizehint!(pairs, length(u_idx))
     for i in u_idx
         j = findall(
             x ->
