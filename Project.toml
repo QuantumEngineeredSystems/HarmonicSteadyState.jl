@@ -100,8 +100,5 @@ Symbolics = "0c5d862f-8b57-4792-8d23-62f2024744c7"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 TestExtras = "5ed8adda-3752-4e41-b88a-e8b09835ee3a"
 
-[sources]
-HarmonicBalance = {url = "https://github.com/QuantumEngineeredSystems/HarmonicBalance.jl", rev = "source"}
-
 [targets]
 test = ["Aqua", "JET", "CheckConcreteStructs", "SymbolicUtils", "Symbolics", "ExplicitImports", "Test", "Random", "OrdinaryDiffEqTsit5", "Documenter", "Plots", "SteadyStateDiffEq", "LinearSolve", "TestExtras", "ModelingToolkitBase", "OrdinaryDiffEqRosenbrock", "NonlinearSolve", "HarmonicBalance", "Peaks", "Latexify", "QuantumCumulants"]
