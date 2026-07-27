@@ -229,17 +229,19 @@ function _get_raw_solution(
     show_progress,
 )
     result_full = Array{Vector{Any},1}(undef, length(parameter_values))
-    if show_progress
-        bar = Progress(
+    bar = if show_progress
+        Progress(
             length(parameter_values);
             dt=1,
             desc="Solving via $(nameof(typeof(method))) homotopy ...",
             barlen=50,
         )
+    else
+        nothing
     end
     for i in eachindex(parameter_values) # do NOT thread this
         p = parameter_values[i]
-        show_progress ? ProgressMeter.next!(bar) : nothing
+        isnothing(bar) || ProgressMeter.next!(bar)
         result_full[i] = [
             HC.solve(
                 problem.system;

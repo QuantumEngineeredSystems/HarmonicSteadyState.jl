@@ -1,6 +1,7 @@
 module LimitCycles
 
 using QuestBase:
+    QuestBase,
     get_all_terms,
     substitute_all,
     DifferentialEquation,

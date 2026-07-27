@@ -22,16 +22,18 @@ function get_jacobian_response(
     spectra = [JacobianSpectrum(res; branch=branch, index=i) for i in findall(stable)]
     C = Array{P,2}(undef, length(Ω_range), length(spectra))
 
-    if show_progress
-        bar = Progress(
+    bar = if show_progress
+        Progress(
             length(CartesianIndices(C));
             dt=1,
             desc="Diagonalizing the Jacobian for each solution ... ",
             barlen=50,
         )
+    else
+        nothing
     end
     # evaluate the Jacobians for the different values of noise frequency Ω
-    _fill_response!(C, spectra, nat_var, Ω_range, show_progress ? bar : nothing)
+    _fill_response!(C, spectra, nat_var, Ω_range, bar)
     return C
 end
 function get_jacobian_response(
@@ -48,16 +50,18 @@ function get_jacobian_response(
     ]
     C = Array{P,2}(undef, length(Ω_range), length(spectra))
 
-    if show_progress
-        bar = Progress(
+    bar = if show_progress
+        Progress(
             length(CartesianIndices(C));
             dt=1,
             desc="Diagonalizing the Jacobian for each solution ... ",
             barlen=50,
         )
+    else
+        nothing
     end
     # evaluate the Jacobians for the different values of noise frequency Ω
-    _fill_response!(C, spectra, nat_var, Ω_range, show_progress ? bar : nothing)
+    _fill_response!(C, spectra, nat_var, Ω_range, bar)
     return C
 end
 
@@ -100,13 +104,15 @@ function get_rotframe_jacobian_response(
     stableidx = findall(stable)
     C = zeros(P, length(Ω_range), sum(stable))
 
-    if show_progress
-        bar = Progress(
+    bar = if show_progress
+        Progress(
             length(C);
             dt=1,
             desc="Solving the linear response ODE for each solution and input frequency ...",
             barlen=50,
         )
+    else
+        nothing
     end
 
     for i in 1:sum(stable)
@@ -122,7 +128,7 @@ function get_rotframe_jacobian_response(
                     )
             end
         end
-        show_progress ? next!(bar) : nothing
+        isnothing(bar) || next!(bar)
     end
     return C
 end
