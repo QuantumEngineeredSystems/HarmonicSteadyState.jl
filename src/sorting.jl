@@ -105,13 +105,13 @@ function sort_1D(solns::Solutions(T); show_progress=true) where {T<:Number}
     # prefer real solution at first position
     sorted_solns[1] = sort(solns[1]; by=x -> abs.(imag(x)))
 
-    if show_progress
-        bar = Progress(
-            length(solns); dt=1, desc="Ordering solutions into branches ...", barlen=50
-        )
+    bar = if show_progress
+        Progress(length(solns); dt=1, desc="Ordering solutions into branches ...", barlen=50)
+    else
+        nothing
     end
     for i in eachindex(solns[1:(end - 1)])
-        show_progress ? ProgressMeter.next!(bar) : nothing
+        isnothing(bar) || ProgressMeter.next!(bar)
         matched_indices = align_pair(sorted_solns[i], solns[i + 1])
         next_indices = getindex.(matched_indices, 2)
         sorted_solns[i + 1] = (solns[i + 1])[next_indices]
@@ -178,10 +178,12 @@ whether a progress bar should be displayed.
 function sort_2D(solns::Solutions(T); sorting=:nearest, show_progress=true) where {T}
     """match each 2D solution with all its surrounding neighbors, including the diagonal ones"""
     # determine a trajectory in 2D space where nodes will be visited
-    if sorting == :hilbert # propagating matching of solutions along a hilbert_curve in 2D
-        idx_pairs = hilbert_indices(solns)
+    idx_pairs = if sorting == :hilbert # propagating matching of solutions along a hilbert_curve in 2D
+        hilbert_indices(solns)
     elseif sorting == :nearest # propagate matching of solutions along rows
-        idx_pairs = naive_indices(solns)
+        naive_indices(solns)
+    else
+        error("Unknown sorting method: $(sorting). Use :hilbert or :nearest.")
     end
 
     # infinite solutions are ignored by the align_pair function.
@@ -190,13 +192,18 @@ function sort_2D(solns::Solutions(T); sorting=:nearest, show_progress=true) wher
     # prefer real solution at first position
     sorted_solns[1, 1] = sort(solns[1, 1]; by=x -> abs.(imag(x)))
 
-    if show_progress
-        bar = Progress(
-            length(idx_pairs); dt=1, desc="Ordering solutions into branches ...", barlen=50
+    bar = if show_progress
+        Progress(
+            length(idx_pairs);
+            dt=1,
+            desc="Ordering solutions into branches ...",
+            barlen=50,
         )
+    else
+        nothing
     end
     for i in 1:(length(idx_pairs) - 1)
-        show_progress ? ProgressMeter.next!(bar) : nothing
+        isnothing(bar) || ProgressMeter.next!(bar)
         neighbors = get_nn_2D(idx_pairs[i + 1], size(solns, 1), size(solns, 2))
         reference = [sorted_solns[ind...] for ind in neighbors]
         matched_indices = align_pair(reference, solns[idx_pairs[i + 1]...])
