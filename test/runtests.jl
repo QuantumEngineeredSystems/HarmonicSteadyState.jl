@@ -26,6 +26,7 @@ if GROUP in ("All", "Core")
         end
         # include("steady_states/krylov.jl")
         include("steady_states/methods.jl")
+        include("steady_states/jacobian.jl")
     end
 
     @testset "Processing solutions" begin
