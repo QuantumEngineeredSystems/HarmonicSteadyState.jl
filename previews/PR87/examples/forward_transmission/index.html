@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Forward transmission · HarmonicSteadyState.jl</title><meta name="title" content="Forward transmission · HarmonicSteadyState.jl"/><meta property="og:title" content="Forward transmission · HarmonicSteadyState.jl"/><meta property="twitter:title" content="Forward transmission · HarmonicSteadyState.jl"/><meta name="description" content="Documentation for HarmonicSteadyState.jl."/><meta property="og:description" content="Documentation for HarmonicSteadyState.jl."/><meta property="twitter:description" content="Documentation for HarmonicSteadyState.jl."/><meta property="og:url" content="https://quantumengineeredsystems.github.io/HarmonicSteadyState.jl/stable/examples/forward_transmission/"/><meta property="twitter:url" content="https://quantumengineeredsystems.github.io/HarmonicSteadyState.jl/stable/examples/forward_transmission/"/><link rel="canonical" href="https://quantumengineeredsystems.github.io/HarmonicSteadyState.jl/stable/examples/forward_transmission/"/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../">HarmonicSteadyState.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><a class="tocitem" href="../../API/">API</a></li><li><span class="tocitem">Examples</span><ul><li class="is-active"><a class="tocitem" href>Forward transmission</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Examples</a></li><li class="is-active"><a href>Forward transmission</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Forward transmission</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/QuantumEngineeredSystems/HarmonicSteadyState.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/QuantumEngineeredSystems/HarmonicSteadyState.jl/blob/main/examples/forward_transmission.jl" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Linear-response-and-transmission/reflection-coeffictients-for-magnon-three-wave-mixing"><a class="docs-heading-anchor" href="#Linear-response-and-transmission/reflection-coeffictients-for-magnon-three-wave-mixing">Linear response and transmission/reflection coeffictients for magnon three-wave mixing</a><a id="Linear-response-and-transmission/reflection-coeffictients-for-magnon-three-wave-mixing-1"></a><a class="docs-heading-anchor-permalink" href="#Linear-response-and-transmission/reflection-coeffictients-for-magnon-three-wave-mixing" title="Permalink"></a></h1><pre><code class="language-julia hljs">using HarmonicSteadyState, QuantumCumulants, Plots</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi"><span class="sgr33"><span class="sgr1">┌ Warning: </span></span>Module SymbolicsPreallocationToolsExt with build ID ffffffff-ffff-ffff-702c-010bfbd53128 is missing from the cache.
+<span class="sgr33"><span class="sgr1">│ </span></span>This may mean SymbolicsPreallocationToolsExt [d479e226-fb54-5ebe-a75e-a7af7f39127f] does not support precompilation but is imported by a module that does.
+<span class="sgr33"><span class="sgr1">└ </span></span><span class="sgr90">@ Base loading.jl:2018</span>
+<span class="sgr91"><span class="sgr1">┌ Error: </span></span>Error during loading of extension SymbolicsPreallocationToolsExt of Symbolics, use `Base.retry_load_extensions()` to retry.
+<span class="sgr91"><span class="sgr1">│ </span></span>  exception =
+<span class="sgr91"><span class="sgr1">│ </span></span>   1-element ExceptionStack:
+<span class="sgr91"><span class="sgr1">│ </span></span>   Declaring __precompile__(false) is not allowed in files that are being precompiled.
+<span class="sgr91"><span class="sgr1">│ </span></span>   Stacktrace:
+<span class="sgr91"><span class="sgr1">│ </span></span>     [1] <span class="sgr1">_require(</span><span class="sgr90">pkg</span>::Base.PkgId, <span class="sgr90">env</span>::Nothing<span class="sgr1">)</span>
+<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:2022</span></span>
+<span class="sgr91"><span class="sgr1">│ </span></span>     [2] <span class="sgr1">__require_prelocked(</span><span class="sgr90">uuidkey</span>::Base.PkgId, <span class="sgr90">env</span>::Nothing<span class="sgr1">)</span>
+<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:1882</span></span>
+<span class="sgr91"><span class="sgr1">│ </span></span>     [3] <span class="sgr1">#invoke_in_world#3</span>
+<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">./<span class="sgr4">essentials.jl:926</span> [inlined]</span>
+<span class="sgr91"><span class="sgr1">│ </span></span>     [4] <span class="sgr1">invoke_in_world</span>
+<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">./<span class="sgr4">essentials.jl:923</span> [inlined]</span>
+<span class="sgr91"><span class="sgr1">│ </span></span>     [5] <span class="sgr1">_require_prelocked</span>
+<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">./<span class="sgr4">loading.jl:1873</span> [inlined]</span>
+<span class="sgr91"><span class="sgr1">│ </span></span>     [6] <span class="sgr1">_require_prelocked</span>
+<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">./<span class="sgr4">loading.jl:1872</span> [inlined]</span>
+<span class="sgr91"><span class="sgr1">│ </span></span>     [7] <span class="sgr1">run_extension_callbacks(</span><span class="sgr90">extid</span>::Base.ExtensionId<span class="sgr1">)</span>
+<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:1365</span></span>
+<span class="sgr91"><span class="sgr1">│ </span></span>     [8] <span class="sgr1">run_extension_callbacks(</span><span class="sgr90">pkgid</span>::Base.PkgId<span class="sgr1">)</span>
+<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:1400</span></span>
+<span class="sgr91"><span class="sgr1">│ </span></span>     [9] <span class="sgr1">run_package_callbacks(</span><span class="sgr90">modkey</span>::Base.PkgId<span class="sgr1">)</span>
+<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:1224</span></span>
+<span class="sgr91"><span class="sgr1">│ </span></span>    [10] <span class="sgr1">__require_prelocked(</span><span class="sgr90">uuidkey</span>::Base.PkgId, <span class="sgr90">env</span>::String<span class="sgr1">)</span>
+<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:1889</span></span>
+<span class="sgr91"><span class="sgr1">│ </span></span>    [11] <span class="sgr1">#invoke_in_world#3</span>
+<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">./<span class="sgr4">essentials.jl:926</span> [inlined]</span>
+<span class="sgr91"><span class="sgr1">│ </span></span>    [12] <span class="sgr1">invoke_in_world</span>
+<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">./<span class="sgr4">essentials.jl:923</span> [inlined]</span>
+<span class="sgr91"><span class="sgr1">│ </span></span>    [13] <span class="sgr1">_require_prelocked(</span><span class="sgr90">uuidkey</span>::Base.PkgId, <span class="sgr90">env</span>::String<span class="sgr1">)</span>
+<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:1873</span></span>
+<span class="sgr91"><span class="sgr1">│ </span></span>    [14] <span class="sgr1">macro expansion</span>
+<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">./<span class="sgr4">loading.jl:1860</span> [inlined]</span>
+<span class="sgr91"><span class="sgr1">│ </span></span>    [15] <span class="sgr1">macro expansion</span>
+<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">./<span class="sgr4">lock.jl:267</span> [inlined]</span>
+<span class="sgr91"><span class="sgr1">│ </span></span>    [16] <span class="sgr1">__require(</span><span class="sgr90">into</span>::Module, <span class="sgr90">mod</span>::Symbol<span class="sgr1">)</span>
+<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:1823</span></span>
+<span class="sgr91"><span class="sgr1">│ </span></span>    [17] <span class="sgr1">#invoke_in_world#3</span>
+<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">./<span class="sgr4">essentials.jl:926</span> [inlined]</span>
+<span class="sgr91"><span class="sgr1">│ </span></span>    [18] <span class="sgr1">invoke_in_world</span>
+<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">./<span class="sgr4">essentials.jl:923</span> [inlined]</span>
+<span class="sgr91"><span class="sgr1">│ </span></span>    [19] <span class="sgr1">require(</span><span class="sgr90">into</span>::Module, <span class="sgr90">mod</span>::Symbol<span class="sgr1">)</span>
+<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:1816</span></span>
+<span class="sgr91"><span class="sgr1">│ </span></span>    [20] <span class="sgr1">include</span>
+<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">./<span class="sgr4">Base.jl:495</span> [inlined]</span>
+<span class="sgr91"><span class="sgr1">│ </span></span>    [21] <span class="sgr1">include_package_for_output(</span><span class="sgr90">pkg</span>::Base.PkgId, <span class="sgr90">input</span>::String, <span class="sgr90">depot_path</span>::Vector<span class="sgr90">{String}</span>, <span class="sgr90">dl_load_path</span>::Vector<span class="sgr90">{String}</span>, <span class="sgr90">load_path</span>::Vector<span class="sgr90">{String}</span>, <span class="sgr90">concrete_deps</span>::Vector<span class="sgr90">{Pair{Base.PkgId, UInt128}}</span>, <span class="sgr90">source</span>::String<span class="sgr1">)</span>
+<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:2292</span></span>
+<span class="sgr91"><span class="sgr1">│ </span></span>    [22] top-level scope
+<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90"><span class="sgr4">stdin:4</span></span>
+<span class="sgr91"><span class="sgr1">│ </span></span>    [23] <span class="sgr1">eval</span>
+<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">./<span class="sgr4">boot.jl:385</span> [inlined]</span>
+<span class="sgr91"><span class="sgr1">│ </span></span>    [24] <span class="sgr1">include_string(</span><span class="sgr90">mapexpr</span>::typeof(identity), <span class="sgr90">mod</span>::Module, <span class="sgr90">code</span>::String, <span class="sgr90">filename</span>::String<span class="sgr1">)</span>
+<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:2146</span></span>
+<span class="sgr91"><span class="sgr1">│ </span></span>    [25] <span class="sgr1">include_string</span>
+<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">./<span class="sgr4">loading.jl:2156</span> [inlined]</span>
+<span class="sgr91"><span class="sgr1">│ </span></span>    [26] <span class="sgr1">exec_options(</span><span class="sgr90">opts</span>::Base.JLOptions<span class="sgr1">)</span>
+<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">client.jl:321</span></span>
+<span class="sgr91"><span class="sgr1">│ </span></span>    [27] <span class="sgr1">_start()</span>
+<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">client.jl:557</span></span>
+<span class="sgr91"><span class="sgr1">└ </span></span><span class="sgr90">@ Base loading.jl:1371</span></code></pre><p>Consider a model of nonlinear magnon-magnon coupling, as described in <a href="https://arxiv.org/abs/2506.11527">this</a> paper. The model describes  a three-wave mixing interaction between a strongly driven <span>$k=0$</span> FMR mode and two parametricallly excited propagating modes with opposite momentum <span>$\pm k$</span> and at half frequency. In this notebook, we will show how the mean-field approximation can be used to calculate steady states, and to calculate the <span>$S_{21}$</span> transmission coefficient.</p><pre><code class="language-julia hljs">hm = FockSpace(:magnon)
+hc = FockSpace(:polariton)
+h = hm ⊗ hc  # Hilbertspace
+
+@qnumbers m::Destroy(h, 1) c::Destroy(h, 2) # Operators
+
+@rnumbers Δ Vk Ωd γm γk # Parameters
+param = [Δ, Vk, Ωd, γm, γk]
+
+H_RWA_sym = (
+    Δ * m&#39; * m + Δ / 2 * c&#39; * c + Vk * m * c&#39; * c&#39; + Vk * m&#39; * c * c + (Ωd * m + Ωd * m&#39;)
+)
+ops = [m, m&#39;, c, c&#39;] # Operators for meanfield evolution
+
+eqs_RWA = meanfield(ops, H_RWA_sym, [m, c]; rates=[γm, γk], order=1)
+eqs_completed_RWA = complete(eqs_RWA) # Meanfield equations using QuantumCumulants.jl</code></pre><p>\begin{align} \frac{d}{dt} \langle m\rangle  &amp;= -1 i Vk \langle c\rangle ^{2} -1 i \langle m\rangle  \Delta -1 i {\Omega}d -0.5 {\gamma}m \langle m\rangle  \
+\frac{d}{dt} \langle m^\dagger\rangle  &amp;= 1 i \Delta \langle m^\dagger\rangle  -0.5 {\gamma}m \langle m^\dagger\rangle  + 1 i {\Omega}d + 1 i \langle c^\dagger\rangle ^{2} Vk \
+\frac{d}{dt} \langle c\rangle  &amp;= -0.5 {\gamma}k \langle c\rangle  -2 i \langle c^\dagger\rangle  \langle m\rangle  Vk + \frac{-1}{2} i \Delta \langle c\rangle  \
+\frac{d}{dt} \langle c^\dagger\rangle  &amp;= 2 i Vk \langle c\rangle  \langle m^\dagger\rangle  + \frac{1}{2} i \langle c^\dagger\rangle  \Delta -0.5 \langle c^\dagger\rangle  {\gamma}k \end{align}</p><p>We can use this meanfield equations to construct a <code>HarmonicEquation</code> object in HarmonicSteadyState.jl. In the construction, additional information is computed, such as the Jacobian of the equations, which is used to determine the stability if the the steady states.</p><pre><code class="language-julia hljs">harmonic_eq = HarmonicEquation(eqs_completed_RWA, param)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">A set of 4 harmonic equations
+Variables: mᵣ(t), mᵢ(t), cᵣ(t), cᵢ(t)
+Parameters: Δ, Vk, Ωd, γm, γk
+
+Harmonic ansatz: 
+0 = mᵣ(t) + mᵢ(t) + cᵣ(t) + cᵢ(t)
+
+Harmonic equations:
+
+-0.5mᵣ(t)*γm - mᵢ(t)*Δ - 2.0Vk*cᵣ(t)*cᵢ(t) ~ Differential(t)(mᵣ(t))
+
+Ωd + mᵣ(t)*Δ - 0.5mᵢ(t)*γm + Vk*(cᵣ(t)^2) - Vk*(cᵢ(t)^2) ~ Differential(t)(mᵢ(t))
+
+-0.5cᵣ(t)*γk - 0.5cᵢ(t)*Δ - 2.0Vk*cᵣ(t)*mᵢ(t) + 2.0Vk*mᵣ(t)*cᵢ(t) ~ Differential(t)(cᵣ(t))
+
+0.5cᵣ(t)*Δ - 0.5cᵢ(t)*γk + 2.0Vk*cᵣ(t)*mᵣ(t) + 2.0Vk*cᵢ(t)*mᵢ(t) ~ Differential(t)(cᵢ(t))
+</code></pre><p>Let&#39;s sweep the power of the drive <span>$\Omega_d$</span>, with <span>$\Delta=0$</span>, and solve for the steady state. The steady-state solutions show that the FMR mode saturates after a threshold power, followed by the coherent excitation of the parametrically induced counter-propagating modes.</p><pre><code class="language-julia hljs">drive_range = range(0, 1.8, 100)
+fixed = (Δ =&gt; 0, Vk =&gt; 0.0002, γm =&gt; 0.1, γk =&gt; 0.01)
+varied = (Ωd =&gt; drive_range)
+result = get_steady_states(harmonic_eq, TotalDegree(), varied, fixed)
+
+plot(plot(result; y=&quot;1/sqrt(2)*(mᵣ+ mᵢ)&quot;), plot(result; y=&quot;1/sqrt(2)*(cᵣ + cᵢ)&quot;))
+
+# Linear response and S21</code></pre><img src="ef81b4ff.svg" alt="Example block output"/><p>To find the response of the driven system to a second, weak probe, we use the method described <a href="https://quantumengineeredsystems.github.io/HarmonicBalance.jl/stable/background/stability_response#linresp_background">here</a>. Here, we calculate the response in the same rotating frame as the Hamiltonian. The linear response is related to the scattering parameter <span>$S_{21}$</span> by <span>$S_{21}(\omega)=1-\sqrt{\kappa_{ext}} \chi(\omega),$</span> where <span>$\kappa_{ext}$</span> is the coupling of the system to the measurement apparatus.</p><p>The result below shows the characteristic splitting of the magnon resonance above the power threshold, which matches the experiment.</p><pre><code class="language-julia hljs">Ω_range = range(-0.1, 0.1, 500)
+χ3 = get_susceptibility(result, 1, Ω_range, 3);
+χ1 = get_susceptibility(result, 1, Ω_range, 1);
+κ_ext = 0.05
+S21_3 = 1 .- χ3 * κ_ext / 2
+S21_log_3 = 20 .* log10.(abs.(S21_3)) # expressed in dB
+S21_1 = 1 .- χ1 * κ_ext / 2
+S21_log_1 = 20 .* log10.(abs.(S21_1)) # expressed in dB</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">500×35 Matrix{Float64}:
+ -0.705811  -0.705811  -0.705811  …  -0.705811  -0.705811  -0.705811
+ -0.71075   -0.71075   -0.71075      -0.71075   -0.71075   -0.71075
+ -0.715739  -0.715739  -0.715739     -0.715739  -0.715739  -0.715739
+ -0.720778  -0.720778  -0.720778     -0.720778  -0.720778  -0.720778
+ -0.725868  -0.725868  -0.725868     -0.725868  -0.725868  -0.725868
+ -0.731009  -0.731009  -0.731009  …  -0.731009  -0.731009  -0.731009
+ -0.736202  -0.736202  -0.736202     -0.736202  -0.736202  -0.736202
+ -0.741448  -0.741448  -0.741448     -0.741448  -0.741448  -0.741448
+ -0.746748  -0.746748  -0.746748     -0.746748  -0.746748  -0.746748
+ -0.752102  -0.752102  -0.752102     -0.752102  -0.752102  -0.752102
+  ⋮                               ⋱                        
+ -0.746748  -0.746748  -0.746748     -0.746748  -0.746748  -0.746748
+ -0.741448  -0.741448  -0.741448     -0.741448  -0.741448  -0.741448
+ -0.736202  -0.736202  -0.736202     -0.736202  -0.736202  -0.736202
+ -0.731009  -0.731009  -0.731009     -0.731009  -0.731009  -0.731009
+ -0.725868  -0.725868  -0.725868  …  -0.725868  -0.725868  -0.725868
+ -0.720778  -0.720778  -0.720778     -0.720778  -0.720778  -0.720778
+ -0.715739  -0.715739  -0.715739     -0.715739  -0.715739  -0.715739
+ -0.71075   -0.71075   -0.71075      -0.71075   -0.71075   -0.71075
+ -0.705811  -0.705811  -0.705811     -0.705811  -0.705811  -0.705811</code></pre><p>Compare the two branches</p><pre><code class="language-julia hljs">stable = get_class(result, 3, &quot;physical&quot;)
+heatmap(
+    Ω_range, drive_range, vcat(S21_log_1&#39;, S21_log_3&#39;); c=:matter, cbar_title=&quot;S21 (dB)&quot;
+)
+ylabel!(&quot;Ω_d&quot;)
+xlabel!(&quot;Probe detuning&quot;)</code></pre><img src="f5bca361.svg" alt="Example block output"/><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../API/">« API</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.15.0 on <span class="colophon-date" title="Monday 3 November 2025 12:49">Monday 3 November 2025</span>. Using Julia version 1.10.10.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
