@@ -4,18 +4,38 @@ Returns a function that takes a vector of variables and `swept_parameters` to gi
 The order of the vector is first the variables, then the swept parameters.
 For LC variables called "hopf", the Jacobian is already compiled.
 For Type stability the function is wrapped in a FunctionWrapper.
+
+The Jacobian is evaluated implicitly, see [`get_implicit_Jacobian`](@ref), or with `backend`
+if one is given, see [`get_ad_Jacobian`](@ref). Neither reads `eom.jacobian`, the Jacobian of
+the system rearranged so the derivatives stand alone on one side. All three give the same
+matrix at a steady state, but the rearrangement inverts the mass matrix symbolically and the
+result is compiled as one expression:
+
+| system                   | rearranged | implicit | first call | per call    |
+|:-------------------------|-----------:|---------:|-----------:|------------:|
+| Duffing                  |    181     |    69    | 0.02/0.13s | 0.17/1.18µs |
+| two-tone Duffing         |   1632     |   340    | 0.10/0.13s | 0.60/2.38µs |
+| two-tone, `η*x^2*d(x,t)` | 366698     |  1036    | 583/0.12s  | 610/5.9µs   |
+
+Nonlinear damping over several harmonics blows the rearranged expression up by two orders of
+magnitude, and LLVM then needs ten minutes on the first call. The implicit route pays a small
+dense solve per call instead, which costs about a microsecond on the systems where the
+rearranged Jacobian was cheap and wins outright everywhere else.
 """
 function _compile_Jacobian(
-    eom::HarmonicEquation, soltype::DataType, swept::OrderedDict, fixed::OrderedDict
+    eom::HarmonicEquation,
+    soltype::DataType,
+    swept::OrderedDict,
+    fixed::OrderedDict;
+    backend=nothing,
 )::JacobianFunction(soltype)
-    if "Hopf" ∈ getfield.(eom.variables, :type)
-        compiled_J = eom.jacobian
-    elseif !hasnan(eom.jacobian)
-        compiled_J = compile_matrix(eom.jacobian, _free_symbols(eom, swept); rules=fixed)
+    sym_order = _free_symbols(eom, swept)
+    compiled_J = if "Hopf" ∈ getfield.(eom.variables, :type)
+        eom.jacobian # already a compiled gauge-fixed function, see LimitCycles
+    elseif isnothing(backend)
+        get_implicit_Jacobian(eom; sym_order, rules=fixed)
     else
-        compiled_J = get_implicit_Jacobian(
-            eom; sym_order=_free_symbols(eom, swept), rules=fixed
-        )
+        get_ad_Jacobian(eom; sym_order, rules=fixed, backend)
     end
     return JacobianFunction(soltype)(compiled_J)
 end
@@ -29,7 +49,10 @@ function compile_matrix(
     mat::Matrix{Num}, variables::Vector{Num}; rules=Dict()
 )::RuntimeGeneratedFunction
     J = substitute_all.(mat, Ref(rules)) # Ref makes sure only mat is broadcasted
-    jacfunc = Symbolics.build_function(J, variables; expression=Val(false))
+    # `cse` shares repeated subexpressions across the whole matrix, which is what the entries
+    # of a Jacobian mostly are. It cuts the LLVM compile on the first call by 2-3x on larger
+    # systems and the per-call cost by about a tenth, to the last bit of the same result.
+    jacfunc = Symbolics.build_function(J, variables; expression=Val(false), cse=true)
     return jacfunc isa Tuple ? jacfunc[1] : jacfunc
 end
 
@@ -71,7 +94,79 @@ Returns a function `f(soln::OrderedDict{Num,T})::Matrix{T}`.
 function get_implicit_Jacobian(eom::HarmonicEquation; sym_order, rules=Dict())
     J0c = compile_matrix(_get_J_matrix(eom; order=0), sym_order; rules)
     J1c = compile_matrix(_get_J_matrix(eom; order=1), sym_order; rules)
-    jacfunc(vals::Vector) = -inv(real.(J1c(vals))) * J0c(vals)
+    function jacfunc(vals::Vector)
+        # Both blocks are freshly allocated by their compiled functions, so factorising and
+        # solving in place is safe and cuts the per-call cost sevenfold over `-inv(J1)*J0`.
+        J1 = real.(J1c(vals))
+        J0 = J0c(vals)
+        # `check=false` to match `inv`/`\`: solution arrays are NaN-padded, and a Jacobian
+        # at a padded entry has to come back NaN rather than throw.
+        ldiv!(lu!(J1; check=false), J0)
+        return J0 .= .-J0
+    end
+    return jacfunc
+end
+
+"Compile the harmonic equations as `f([u..., u̇..., swept...])`, the residual the Jacobian blocks are the derivatives of."
+function _compile_residual(eom::HarmonicEquation, sym_order::Vector{Num}; rules=Dict())
+    T = get_independent_variables(eom)[1]
+    vars = get_variables(eom)
+    n = length(vars)
+    dsyms = [declare_variable("__du" * string(i)) for i in 1:n]
+    subs = merge(Dict(d(vars, T, 1) .=> dsyms), Dict(vars .=> _remove_brackets.(vars)))
+    R = Num[
+        substitute_all(Symbolics.expand_derivatives(eq.lhs - eq.rhs), subs) for
+        eq in eom.equations
+    ]
+    R = substitute_all.(R, Ref(rules))
+    args = Num[sym_order[1:n]..., dsyms..., sym_order[(n + 1):end]...]
+    f = Symbolics.build_function(R, args; expression=Val(false), cse=true)
+    return (f isa Tuple ? f[1] : f), n
+end
+
+_split(o) = vcat(real.(o), imag.(o))
+
+"""
+$(TYPEDSIGNATURES)
+
+Construct a function for the Jacobian of `eom`, differentiating the harmonic equations with
+`backend` rather than symbolically.
+
+`backend` is an ADTypes backend such as `AutoForwardDiff()`; load the differentiation package
+it names to make it available. Both this and [`get_implicit_Jacobian`](@ref) solve for the
+derivatives only once the parameters have values, so they agree at every steady state.
+
+Returns a function `f(vals::Vector)::Matrix`.
+"""
+function get_ad_Jacobian(eom::HarmonicEquation; sym_order, rules=Dict(), backend)
+    f, n = _compile_residual(eom, sym_order; rules)
+
+    # The harmonic equations are polynomial, hence holomorphic, so a perturbation along the
+    # real axis already carries the full complex derivative. Differentiating that and splitting
+    # the result into real and imaginary parts keeps every backend on the real inputs they all
+    # accept, while still admitting the complex solutions the Jacobian is evaluated at.
+    gu(a, c) = _split(f(vcat(complex.(a, c[1]), zeros(Complex{eltype(a)}, n), c[2])))
+    gd(b, c) = _split(f(vcat(c[1], complex.(b, zeros(length(b))), c[2])))
+
+    # No `prepare_jacobian`: `classify_solutions` evaluates the Jacobian under `Threads.@threads`,
+    # and a preparation object holds buffers the backend writes into, so sharing one across
+    # threads races and silently misclassifies the odd solution.
+    function jacfunc(vals::Vector)
+        u = ComplexF64.(vals[1:n])
+        rest = ComplexF64.(vals[(n + 1):end])
+        M0 = DifferentiationInterface.jacobian(
+            gu, backend, real.(u), Constant((imag.(u), rest))
+        )
+        M1 = DifferentiationInterface.jacobian(
+            gd, backend, zeros(n), Constant((u, rest))
+        )
+        J0 = complex.(M0[1:n, :], M0[(n + 1):(2n), :])
+        J1 = M1[1:n, :] # real part: the mass matrix has no imaginary component
+        # `check=false` to match the implicit route: solution arrays are NaN-padded, and a
+        # Jacobian at a padded entry has to come back NaN rather than throw.
+        ldiv!(lu!(J1; check=false), J0)
+        return J0 .= .-J0
+    end
     return jacfunc
 end
 

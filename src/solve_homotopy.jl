@@ -103,10 +103,17 @@ function get_steady_states(
 end
 
 function get_steady_states(
-    eom::HarmonicEquation, method::SteadyStateMethod, swept, fixed; kwargs...
+    eom::HarmonicEquation,
+    method::SteadyStateMethod,
+    swept,
+    fixed;
+    jacobian_backend=nothing,
+    kwargs...,
 )
     return get_steady_states(
-        HomotopyContinuationProblem(eom, OrderedDict(swept), OrderedDict(fixed)),
+        HomotopyContinuationProblem(
+            eom, OrderedDict(swept), OrderedDict(fixed); jacobian_backend
+        ),
         method;
         kwargs...,
     )
@@ -126,9 +133,13 @@ function get_steady_states(
     fixed = filter(x -> length(x[2]) == 1, pairs)
     return get_steady_states(eom, method, swept, fixed; kwargs...)
 end
-function get_steady_states(eom::HarmonicEquation, swept, fixed; kwargs...)
+function get_steady_states(
+    eom::HarmonicEquation, swept, fixed; jacobian_backend=nothing, kwargs...
+)
     return get_steady_states(
-        HomotopyContinuationProblem(eom, OrderedDict(swept), OrderedDict(fixed)),
+        HomotopyContinuationProblem(
+            eom, OrderedDict(swept), OrderedDict(fixed); jacobian_backend
+        ),
         WarmUp();
         kwargs...,
     )
