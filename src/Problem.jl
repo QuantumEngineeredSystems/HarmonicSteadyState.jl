@@ -110,8 +110,8 @@ function HomotopyContinuationProblem(
     fixed::AbstractDict,
 )
     swept, fixed = promote_types(swept, fixed)
-    vars_new = declare_variable.(string.(variables))
-    pars_new = declare_variable.(string.(parameters))
+    vars_new = Num[declare_variable(string(var)) for var in variables]
+    pars_new = Num[declare_variable(string(par)) for par in parameters]
 
     system = HomotopyContinuation.System(equations, vars_new, pars_new)
     J = compute_and_compile_Jacobian(equations, vars_new, ComplexF64, swept, fixed)

@@ -60,7 +60,7 @@ end
 $(TYPEDSIGNATURES)
 
 Plot a bifurcation diagram from a continuation sweep starting from `starting_branch` using
-the [Result](@ref) struct `res`. Time integration is used to determine what follow up branch
+the [`Result`](@ref HarmonicSteadyState.Result) struct `res`. Time integration is used to determine what follow up branch
 in the continuation is.
 
 # Keyword arguments
