@@ -1,5 +1,6 @@
 using QuantumCumulants, HarmonicSteadyState, Symbolics
 # using Plots
+using Test
 
 @testset "KPO" begin
     h = FockSpace(:cavity)
@@ -32,17 +33,36 @@ using QuantumCumulants, HarmonicSteadyState, Symbolics
     end
 
     @testset "HarmonicEquation" begin
-        harmonic_eq = HarmonicSteadyState.HarmonicEquation(eqs_completed_RWA, [Δ, U, G, κ]);
+        harmonic_eq = HarmonicSteadyState.HarmonicEquation(eqs_completed_RWA, [Δ, U, G, κ])
         result = get_steady_states(harmonic_eq, varied, fixed)
         @test sum(any.(get_class(result, "stable"))) == 3
+    end
+
+    @testset "second order cumulant" begin
+        eqs_RWA = meanfield(ops, H_RWA, [a]; rates=[κ], order=2)
+        eqs_completed_RWA = complete(eqs_RWA)
+
+        fixed = (U => 0.001, κ => 0.002, G => 0.01)
+        varied = (Δ => range(-0.03, 0.01, 100))
+        problem_c2 = HarmonicSteadyState.HomotopyContinuationProblem(
+            eqs_completed_RWA, [Δ, U, G, κ], varied, fixed
+        )
+        @test length(problem_c2.variables) == 5
+
+        result = get_steady_states(problem_c2, TotalDegree())
+        @test sum(any.(get_class(result, "stable"))) == 5
+        classify_solutions!(result, "a⁺aᵣ < 0", "neg photon number")
+        @test maximum(
+            phase_diagram(result; not_class="neg photon number", class="stable")
+        ) == 3
     end
 end
 
 @testset "work with rnumbers and cumber" begin
-    @testset "@cnumbers" begin
+    @testset "complex parameters" begin
         h = FockSpace(:cavity)
         @qnumbers a::Destroy(h)
-        @cnumbers Δ U G κ
+        @variables Δ U G κ
         param = [Δ, U, G, κ]
 
         H_RWA = -Δ * a' * a + U * (a'^2 * a^2) / 2 - G * (a' * a' + a * a) / 2
@@ -56,10 +76,10 @@ end
             complete(eqs), param, varied, fixed
         )
     end
-    @testset "@rnumbers" begin
+    @testset "real parameters" begin
         h = FockSpace(:cavity)
         @qnumbers a::Destroy(h)
-        @rnumbers Δ U G κ
+        @variables Δ::Real U::Real G::Real κ::Real
         param = [Δ, U, G, κ]
 
         H_RWA = -Δ * a' * a + U * (a'^2 * a^2) / 2 - G * (a' * a' + a * a) / 2
@@ -85,7 +105,7 @@ end
     @qnumbers a::Destroy(h, 1) b::Destroy(h, 2)
 
     # Parameters
-    @rnumbers Δ K F κ ωm g0 Γm
+    @variables Δ::Real K::Real F::Real κ::Real ωm::Real g0::Real Γm::Real
 
     param = [Δ, K, F, κ, ωm, g0, Γm]
 

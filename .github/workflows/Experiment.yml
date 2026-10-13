@@ -1,0 +1,44 @@
+name: Reproducible experiment
+
+on:
+  push:
+    branches:
+      - attractors
+  pull_request:
+    paths:
+      - 'experiments/attractors/**'
+      - '.github/workflows/Experiment.yml'
+      - 'Project.toml'
+      - 'src/**'
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+permissions:
+  contents: read
+
+jobs:
+  experiment:
+    name: attractors on Julia 1.13
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: julia-actions/setup-julia@v2
+        with:
+          version: '1.13'
+      - uses: julia-actions/cache@v2
+      - name: Instantiate experiment environment
+        run: julia --project=experiments/attractors -e 'using Pkg; Pkg.instantiate(); Pkg.status(; mode=Pkg.PKGMODE_MANIFEST)' > experiment-environment.txt
+      - name: Check correctness and measure warmed runs
+        run: julia --project=experiments/attractors experiments/attractors/run.jl | tee experiment-results.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: attractors-results
+          path: |
+            experiment-environment.txt
+            experiment-results.txt
+            experiments/attractors/Manifest.toml

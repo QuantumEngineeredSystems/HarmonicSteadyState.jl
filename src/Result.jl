@@ -7,7 +7,7 @@ Stores the steady states of a HarmonicEquation.
 $(TYPEDFIELDS)
 
 """
-mutable struct Result{D,SolType<:Number,ParType<:Number,F<:JacobianFunction(SolType)}
+mutable struct Result{D,SolType<:Number,ParType<:Number,F<:JacobianFunction(SolType),Source}
     "The variable values of steady-state solutions."
     solutions::Array{Vector{Vector{SolType}},D}
     "Values of all parameters for all solutions."
@@ -15,7 +15,7 @@ mutable struct Result{D,SolType<:Number,ParType<:Number,F<:JacobianFunction(SolT
     "The parameters fixed throughout the solutions."
     fixed_parameters::OrderedDict{Num,ParType}
     "The `HomotopyContinuationProblem` used to generate this."
-    problem::HomotopyContinuationProblem{ParType,F}
+    problem::HomotopyContinuationProblem{ParType,F,Source}
     """
     Maps strings such as \"stable\", \"physical\" etc to arrays of values,
     classifying the solutions (see method `classify_solutions!`).
@@ -52,8 +52,9 @@ function Result(
     soltype = solution_type(solutions)
     partype = parameter_type(swept_parameters, fixed_parameters)
     dim = ndims(solutions)
+    Source = source_type(problem)
 
-    return Result{dim,soltype,partype,typeof(jacobian)}(
+    return Result{dim,soltype,partype,typeof(jacobian),Source}(
         solutions,
         swept_parameters,
         fixed_parameters,
@@ -65,7 +66,27 @@ function Result(
     )
 end
 
-Symbolics.get_variables(res::Result)::Vector{Num} = get_variables(res.problem)
+Symbolics.get_variables(res::Result) = get_variables(res.problem)
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the system the problem behind `res` was generated from, usually a `HarmonicEquation`.
+Returns `nothing` if the problem was built from explicitly entered equations.
+"""
+QuestBase.source(res::Result) = source(res.problem)
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the type of the system the problem behind `res` was generated from, or `Nothing` if
+it carries no source system.
+"""
+QuestBase.source_type(::Result{D,S,P,F,Source}) where {D,S,P,F,Source} = Source
+
+function _harmonic_equation(res::Result, what::AbstractString)
+    return _harmonic_equation(res.problem, what)
+end
 
 function Base.show(io::IO, r::Result)
     println(io, "A steady state result for ", length(r.solutions), " parameter points")
@@ -114,6 +135,7 @@ function swept_parameters(res::Result{D}) where {D}
 end
 
 swept_parameter(res::Result, x::Num) = res.swept_parameters[x]
+swept_parameter(res::Result, x::SymbolicUtils.BasicSymbolic) = res.swept_parameters[Num(x)]
 function swept_parameter(res::Result, x::String)
     is_swept_parameter(res, x)
     return res.swept_parameters[_parse_expression(x)]
@@ -142,7 +164,7 @@ function attractors(res::Result{D}; class="stable", not_class=[]) where {D}
     Y = _get_mask(res, class, not_class)
 
     return map(enumerate(Y)) do (idx, bools)
-        Dict(i => get_branch(res, i)[idx] for (i, bool) in pairs(bools) if bool)
+        return Dict(i => get_branch(res, i)[idx] for (i, bool) in pairs(bools) if bool)
     end # map
 end
 
@@ -160,3 +182,6 @@ function is_swept_parameter(res::Result, z::String)
     return true
 end
 is_swept_parameter(res::Result, z::Num) = is_swept_parameter(res::Result, string(z))
+function is_swept_parameter(res::Result, z::SymbolicUtils.BasicSymbolic)
+    return is_swept_parameter(res, string(z))
+end

@@ -9,6 +9,7 @@ diff_eq = DifferentialEquation(
 )
 add_harmonic!(diff_eq, x, ω)
 eom = get_harmonic_equations(diff_eq)
+HarmonicBalance.add_jacobian!(eom)
 
 fixed = OrderedDict(α => 1, ω0 => 1.0, γ => 1e-2, F => 1e-6)
 varied = OrderedDict(ω => range(0.9, 1.1, 10))
@@ -24,6 +25,7 @@ prob = HomotopyContinuationProblem(eom, varied, fixed)
     J = substitute_all.(eom.jacobian, Ref(fixed))
     jacfunc = build_function(J, _free_symbols(prob); expression=Val(false))[1]
     wrapped_jac = FunctionWrapper{Matrix{ComplexF64},Tuple{Vector{ComplexF64}}}(jacfunc)
+    @test all(isfinite, wrapped_jac(complex_vars))
     @test wrapped_jac(complex_vars) isa Matrix{ComplexF64}
     @test wrapped_jac(float_vars) isa Matrix{ComplexF64}
     @constinferred wrapped_jac(complex_vars)

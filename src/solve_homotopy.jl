@@ -3,7 +3,7 @@
         prob::HomotopyContinuationProblem,
         method::HomotopyContinuationMethod;
         show_progress=true,
-        sorting="nearest",
+        sorting=:nearest,
         classify_default=true,
         verbose=false
         )
@@ -16,10 +16,15 @@ keeping `fixed_parameters` constant.
 ### Keyword arguments
 - `show_progress`: Indicate whether a progress bar should be displayed.
 - `sorting`: the method used by `sort_solutions` to get continuous solutions branches.
-    The current options are `"hilbert"` (1D sorting along a Hilbert curve), `"nearest"`
-    (nearest-neighbor sorting) and `"none"`.
+    The current options are `:hilbert` (1D sorting along a Hilbert curve), `:nearest`
+    (nearest-neighbor sorting) and `:none`.
 - `classify_default`: If `true`, the solutions will be classified using the default
     classification method.
+- `jacobian_backend`: When constructing a problem from a `HarmonicEquation`, use an
+    ADTypes backend such as `AutoForwardDiff()` to differentiate the harmonic equations.
+    Load the corresponding differentiation package first. The default, `nothing`, uses
+    symbolic derivatives with a numerical mass-matrix solve. For an existing problem,
+    choose the backend in its `HomotopyContinuationProblem` constructor.
 
 ### Example
 solving a simple harmonic oscillator
@@ -63,7 +68,7 @@ function get_steady_states(
     prob::HomotopyContinuationProblem,
     method::HomotopyContinuationMethod;
     show_progress=true,
-    sorting="nearest",
+    sorting=:nearest,
     classify_default=true,
     verbose=false,
 )
@@ -92,7 +97,7 @@ function get_steady_states(
     )
 
     verbose && @info "Sort solutions"
-    if sorting != "no_sorting"
+    if sorting != :none
         sort_solutions!(result; sorting, show_progress)
     end
 
@@ -103,10 +108,17 @@ function get_steady_states(
 end
 
 function get_steady_states(
-    eom::HarmonicEquation, method::SteadyStateMethod, swept, fixed; kwargs...
+    eom::HarmonicEquation,
+    method::SteadyStateMethod,
+    swept,
+    fixed;
+    jacobian_backend=nothing,
+    kwargs...,
 )
     return get_steady_states(
-        HomotopyContinuationProblem(eom, OrderedDict(swept), OrderedDict(fixed)),
+        HomotopyContinuationProblem(
+            eom, OrderedDict(swept), OrderedDict(fixed); jacobian_backend
+        ),
         method;
         kwargs...,
     )
@@ -126,9 +138,13 @@ function get_steady_states(
     fixed = filter(x -> length(x[2]) == 1, pairs)
     return get_steady_states(eom, method, swept, fixed; kwargs...)
 end
-function get_steady_states(eom::HarmonicEquation, swept, fixed; kwargs...)
+function get_steady_states(
+    eom::HarmonicEquation, swept, fixed; jacobian_backend=nothing, kwargs...
+)
     return get_steady_states(
-        HomotopyContinuationProblem(eom, OrderedDict(swept), OrderedDict(fixed)),
+        HomotopyContinuationProblem(
+            eom, OrderedDict(swept), OrderedDict(fixed); jacobian_backend
+        ),
         WarmUp();
         kwargs...,
     )
@@ -147,7 +163,7 @@ end
 
 """
 Reorder EACH ELEMENT of `a` to match the index permutation `order`.
-If length(order) < length(array), the remanining positions are kept.
+If length(order) < length(array), the remaining positions are kept.
 """
 function _reorder_nested(a::Array, order::Vector{Int})
     a[1] isa Union{Array,BitVector} || return a
@@ -229,17 +245,19 @@ function _get_raw_solution(
     show_progress,
 )
     result_full = Array{Vector{Any},1}(undef, length(parameter_values))
-    if show_progress
-        bar = Progress(
+    bar = if show_progress
+        Progress(
             length(parameter_values);
             dt=1,
             desc="Solving via $(nameof(typeof(method))) homotopy ...",
             barlen=50,
         )
+    else
+        nothing
     end
     for i in eachindex(parameter_values) # do NOT thread this
         p = parameter_values[i]
-        show_progress ? ProgressMeter.next!(bar) : nothing
+        isnothing(bar) || ProgressMeter.next!(bar)
         result_full[i] = [
             HC.solve(
                 problem.system;

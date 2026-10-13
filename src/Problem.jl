@@ -19,13 +19,21 @@ HomotopyContinuationProblem(
     eom::HarmonicEquation,
     swept::AbstractDict,
     fixed::AbstractDict;
-    compile_Jacobian::Bool=true,
+    compile_jacobian::Bool=true,
+    jacobian_backend=nothing,
 )
 ```
+
+By default, the Jacobian is evaluated implicitly by solving the numerical mass-matrix
+system at each steady state. Pass `jacobian_backend=AutoForwardDiff()` (from
+`DifferentiationInterface`, with `ForwardDiff` loaded) to differentiate the harmonic
+equations numerically instead. The symbolic rearranged Jacobian stored in `eom` is
+not compiled by this constructor.
 """
 mutable struct HomotopyContinuationProblem{
     ParType<:Number,
     Jac<:JacobianFunction(ComplexF64), # HC.jl only supports Float64
+    Source,
 } <: SteadyStateProblem
     "The harmonic variables to be solved for."
     variables::Vector{Num}
@@ -38,24 +46,28 @@ mutable struct HomotopyContinuationProblem{
     "The input object for HomotopyContinuation.jl solver methods."
     system::HC.System
     """
-    The Jacobian matrix (possibly symbolic or compiled function).
-    If `Matrix{Nan}` and implicit function is compiled when a `Result` is created.
+    A compiled function evaluating the numerical Jacobian at a steady state.
+    Its input contains the harmonic variables followed by the swept parameters.
     """
     jacobian::Jac
-    "The HarmonicEquation object used to generate this `HomotopyContinuationProblem`."
-    eom::HarmonicEquation
+    """
+    The system this `HomotopyContinuationProblem` was generated from, usually a
+    `HarmonicEquation`, or `nothing` for a problem built from explicitly entered equations.
+    Retrieve it with `QuestBase.source`.
+    """
+    source::Source
 
     function HomotopyContinuationProblem(
         variables, parameters, swept::OrderedDict, fixed::OrderedDict{K,V}, system, jacobian
     ) where {K,V}
-        return new{V,typeof(jacobian)}(
+        return new{V,typeof(jacobian),Nothing}(
             variables, parameters, swept, fixed, system, jacobian
         )
     end # incomplete initialization for user-defined symbolic systems
     function HomotopyContinuationProblem(
         variables, parameters, swept::OrderedDict, fixed::OrderedDict{K,V}, system
     ) where {K,V}
-        return new{V,JacobianFunction(ComplexF64)}(
+        return new{V,JacobianFunction(ComplexF64),Nothing}(
             variables, parameters, swept, fixed, system
         )
     end # incomplete initialization for user-defined symbolic systems
@@ -66,9 +78,9 @@ mutable struct HomotopyContinuationProblem{
         fixed::OrderedDict{K,V},
         system,
         jacobian,
-        eom,
-    ) where {K,V}
-        return new{V,typeof(jacobian)}(
+        eom::T,
+    ) where {K,V,T}
+        return new{V,typeof(jacobian),T}(
             variables, parameters, swept, fixed, system, jacobian, eom
         )
     end
@@ -77,7 +89,11 @@ end
 "Constructor for the type `HomotopyContinuationProblem` (to be solved by HomotopyContinuation)
 from a `HarmonicEquation`."
 function HomotopyContinuationProblem(
-    eom::HarmonicEquation, swept::AbstractDict, fixed::AbstractDict; compile_jacobian=true
+    eom::HarmonicEquation,
+    swept::AbstractDict,
+    fixed::AbstractDict;
+    compile_jacobian=true,
+    jacobian_backend=nothing,
 )
     S = HomotopyContinuation.System(eom)
     vars_new = declare_variables(eom)
@@ -86,7 +102,7 @@ function HomotopyContinuationProblem(
     # check_fixed_and_sweep(eom, swept, fixed) # check later in `solve_homotopy`
 
     if compile_jacobian
-        jac = _compile_Jacobian(eom, ComplexF64, swept, fixed)
+        jac = _compile_Jacobian(eom, ComplexF64, swept, fixed; backend=jacobian_backend)
         # ^ HC.jl only supports Float64 (https://github.com/JuliaHomotopyContinuation/HomotopyContinuation.jl/issues/604)
         return HomotopyContinuationProblem(
             vars_new, eom.parameters, swept, fixed, S, jac, eom
@@ -105,8 +121,8 @@ function HomotopyContinuationProblem(
     fixed::AbstractDict,
 )
     swept, fixed = promote_types(swept, fixed)
-    vars_new = declare_variable.(string.(variables))
-    pars_new = declare_variable.(string.(parameters))
+    vars_new = Num[declare_variable(string(var)) for var in variables]
+    pars_new = Num[declare_variable(string(par)) for par in parameters]
 
     system = HomotopyContinuation.System(equations, vars_new, pars_new)
     J = compute_and_compile_Jacobian(equations, vars_new, ComplexF64, swept, fixed)
@@ -120,6 +136,57 @@ function Base.show(io::IO, p::HomotopyContinuationProblem)
     println(io, "Variables: ", join(string.(p.variables), ", "))
     println(io, "Parameters: ", join(string.(p.parameters), ", "))
     return nothing
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the system `p` was generated from, usually a `HarmonicEquation`. Returns `nothing`
+for problems built from explicitly entered equations, which carry no source system.
+"""
+QuestBase.source(p::HomotopyContinuationProblem) = p.source
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the type of the system `p` was generated from, or `Nothing` if it carries no source
+system.
+"""
+function QuestBase.source_type(
+    p::HomotopyContinuationProblem{P,J,Source}
+) where {P,J,Source}
+    return Source
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the `HarmonicEquation` behind `p`, or throw an informative error if `p` does not
+retain one. `what` names the operation that needs it and is interpolated into the message.
+"""
+function _harmonic_equation(p::SteadyStateProblem, what::AbstractString)
+    eom = source(p)
+    isnothing(eom) && error(
+        "Cannot $what: this problem was built out of explicitly entered equations, so it \
+        does not retain the harmonic equations they describe.",
+    )
+    return eom
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the lab frame `DifferentialEquation` `eom` was derived from, or throw an informative
+error if `eom` was derived from something else. `what` names the operation that needs it and
+is interpolated into the message.
+"""
+function _natural_equation(eom::HarmonicEquation, what::AbstractString)
+    nat_eq = source(eom)
+    nat_eq isa QuestBase.DifferentialEquation || error(
+        "Cannot $what: these harmonic equations were derived from a `$(source_type(eom))` \
+        rather than from a second order `DifferentialEquation` in the lab frame.",
+    )
+    return nat_eq
 end
 
 # assume this order of variables in all compiled function (transform_solutions, Jacobians)

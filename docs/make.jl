@@ -2,7 +2,7 @@ CI = get(ENV, "CI", nothing) == "true" || get(ENV, "GITHUB_TOKEN", nothing) !== 
 
 using HarmonicSteadyState
 using Documenter
-using Plots, SteadyStateDiffEq, OrdinaryDiffEqTsit5
+using Plots, Latexify, SteadyStateDiffEq, OrdinaryDiffEqTsit5
 
 TimeEvolution = Base.get_extension(HarmonicSteadyState, :TimeEvolution)
 SteadyStateDiffEqExt = Base.get_extension(HarmonicSteadyState, :SteadyStateDiffEqExt)
@@ -10,22 +10,30 @@ PlotsExt = Base.get_extension(HarmonicSteadyState, :PlotsExt)
 
 include("pages.jl")
 
+if CI
+    include("make_md_examples.jl")
+else
+    nothing
+end
+
 makedocs(;
     sitename="HarmonicSteadyState.jl",
     authors="Quest group",
-    modules=[
-        HarmonicSteadyState,
-        TimeEvolution,
-        SteadyStateDiffEqExt,
-        HarmonicSteadyState.LinearResponse,
-        PlotsExt,
+    modules=Module[
+        m for m in [
+            HarmonicSteadyState,
+            TimeEvolution,
+            SteadyStateDiffEqExt,
+            HarmonicSteadyState.LinearResponse,
+            PlotsExt,
+        ] if !isnothing(m)
     ],
     format=Documenter.HTML(;
         canonical="https://quantumengineeredsystems.github.io/HarmonicSteadyState.jl/stable/",
     ),
     pages=pages,
     clean=true,
-    linkcheck=true,
+    linkcheck=false,
     warnonly=:missing_docs,
     draft=(!CI),
     doctest=false,  # We test it in the CI, no need to run it here

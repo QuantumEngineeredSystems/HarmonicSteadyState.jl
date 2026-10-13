@@ -2,7 +2,7 @@
 """
 $(TYPEDSIGNATURES)
 
-Plot the linear response to white noise of the variable `nat_var` for [Result](@ref) `res`
+Plot the linear response to white noise of the variable `nat_var` for [`Result`](@ref HarmonicSteadyState.Result) `res`
 on `branch` identifier.
 
 # Keyword arguments
@@ -55,7 +55,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Plot the linear response to white noise of the variable `nat_var` for [Result](@ref) `res`
+Plot the linear response to white noise of the variable `nat_var` for [`Result`](@ref HarmonicSteadyState.Result) `res`
 on the `followed_branches` identifiers with the size of `Ω_range`.
 
 # Keyword arguments
@@ -105,7 +105,7 @@ end
 $(TYPEDSIGNATURES)
 
 Plot the linear response to white noise in the rotating frame defined the harmonic ansatz
-for [Result](@ref) `res` on `branch` identifier.
+for [`Result`](@ref HarmonicSteadyState.Result) `res` on `branch` identifier.
 
 # Keyword arguments
 - `Ω_range`: Range of frequencies to analyze
@@ -158,7 +158,7 @@ end
 $(TYPEDSIGNATURES)
 
 Visualize the eigenvalues of the Jacobian in the rotating frame for `branch` identifier in
-the [Result](@ref) `res`.
+the [`Result`](@ref HarmonicSteadyState.Result) `res`.
 
 # Keyword arguments
 - `class`: Array of solution classes to include (default: ["physical"])
@@ -203,7 +203,7 @@ function HarmonicSteadyState.plot_eigenvalues(
                 ),
             )
         end
-        eigvals(jac)
+        return eigvals(jac)
     end
     eigenvalues_filtered = map(.*, eigenvalues, filter_branch)
 

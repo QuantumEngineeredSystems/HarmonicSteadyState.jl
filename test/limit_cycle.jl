@@ -1,5 +1,4 @@
-using HarmonicSteadyState
-import HarmonicSteadyState.LinearResponse.plot_linear_response
+using HarmonicSteadyState, Plots
 using HarmonicSteadyState: OrderedDict
 using Test
 

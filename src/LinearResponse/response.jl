@@ -9,7 +9,6 @@ Calculate the Jacobian response spectrum for a given system. Computes the magnit
 - `Ω_range`: Range of frequencies to evaluate
 - `branch::Int` or `followed_branches::Vector{Int}`: Branch number(s) to analyze
 - `show_progress=true`: Whether to show a progress bar
-- `force=false`: Force recalculation of spectrum even if already exists
 
 # Returns
 - Array{P,2}: Complex response matrix where rows correspond to frequencies and columns to solutions
@@ -23,19 +22,18 @@ function get_jacobian_response(
     spectra = [JacobianSpectrum(res; branch=branch, index=i) for i in findall(stable)]
     C = Array{P,2}(undef, length(Ω_range), length(spectra))
 
-    if show_progress
-        bar = Progress(
+    bar = if show_progress
+        Progress(
             length(CartesianIndices(C));
             dt=1,
             desc="Diagonalizing the Jacobian for each solution ... ",
             barlen=50,
         )
+    else
+        nothing
     end
     # evaluate the Jacobians for the different values of noise frequency Ω
-    for ij in CartesianIndices(C)
-        C[ij] = abs(evaluate(spectra[ij[2]][nat_var], Ω_range[ij[1]]))
-        show_progress ? next!(bar) : nothing
-    end
+    _fill_response!(C, spectra, nat_var, Ω_range, bar)
     return C
 end
 function get_jacobian_response(
@@ -52,18 +50,30 @@ function get_jacobian_response(
     ]
     C = Array{P,2}(undef, length(Ω_range), length(spectra))
 
-    if show_progress
-        bar = Progress(
+    bar = if show_progress
+        Progress(
             length(CartesianIndices(C));
             dt=1,
             desc="Diagonalizing the Jacobian for each solution ... ",
             barlen=50,
         )
+    else
+        nothing
     end
     # evaluate the Jacobians for the different values of noise frequency Ω
-    for ij in CartesianIndices(C)
-        C[ij] = abs(evaluate(spectra[ij[2]][nat_var], Ω_range[ij[1]]))
-        show_progress ? next!(bar) : nothing
+    _fill_response!(C, spectra, nat_var, Ω_range, bar)
+    return C
+end
+
+# The spectrum of `nat_var` is the same for every Ω, so it is looked up once per solution
+# rather than once per (Ω, solution) entry of `C`.
+function _fill_response!(C, spectra, nat_var::Num, Ω_range, bar)
+    for (j, spectrum) in enumerate(spectra)
+        s = spectrum[nat_var]
+        for (i, Ω) in enumerate(Ω_range)
+            C[i, j] = abs(evaluate(s, Ω))
+            isnothing(bar) || next!(bar)
+        end
     end
     return C
 end
@@ -94,13 +104,15 @@ function get_rotframe_jacobian_response(
     stableidx = findall(stable)
     C = zeros(P, length(Ω_range), sum(stable))
 
-    if show_progress
-        bar = Progress(
+    bar = if show_progress
+        Progress(
             length(C);
             dt=1,
             desc="Solving the linear response ODE for each solution and input frequency ...",
             barlen=50,
         )
+    else
+        nothing
     end
 
     for i in 1:sum(stable)
@@ -116,7 +128,7 @@ function get_rotframe_jacobian_response(
                     )
             end
         end
-        show_progress ? next!(bar) : nothing
+        isnothing(bar) || next!(bar)
     end
     return C
 end
@@ -125,7 +137,7 @@ end
     eigenvalues(res::Result, branch; class=["physical"])
 
 Calculate the eigenvalues of the Jacobian matrix of the harmonic equations of a `branch`
-for a one dimensional sweep in the [Result](@ref) struct.
+for a one dimensional sweep in the [`Result`](@ref HarmonicSteadyState.Result) struct.
 
 # Arguments
 - `res::Result`: Result object containing solutions and jacobian information
@@ -153,11 +165,11 @@ function eigenvalues(res::Result{D,S,P}, branch; class=["physical"]) where {D,S,
             throw(
                 ErrorException(
                     "The branch contains NaN values.
-                    Likely, the branch has non-physical solutions in the parameter sweep",
+                    Likely, the branch has non-physical solutions in the parameter sweep"
                 ),
             )
         end
-        eigvals(jac)
+        return eigvals(jac)
     end
     eigenvalues_filtered = map(.*, eigenvalues, filter_branch)
 
@@ -190,11 +202,11 @@ function eigenvectors(res::Result{D,S,P}, branch; class=["physical"]) where {D,S
             throw(
                 ErrorException(
                     "The branch contains NaN values.
-                    Likely, the branch has non-physical solutions in the parameter sweep",
+                    Likely, the branch has non-physical solutions in the parameter sweep"
                 ),
             )
         end
-        eigvecs(jac)
+        return eigvecs(jac)
     end
     eigvecs_filtered = map(.*, eigenvectors, filter_branch)
 
@@ -228,7 +240,7 @@ function get_response(rmat::ResponseMatrix, s::StateDict, Ω)
     # uv-type
     for pair in _get_uv_pairs(rmat.variables)
         u, v = rmat.variables[pair]
-        this_ω = unwrap(substitute_all(u.ω, s))
+        this_ω = SymbolicUtils.unwrap_const(unwrap(substitute_all(u.ω, s)))
         uv1 = _evaluate_response_vector(rmat, s, Ω - this_ω)[pair]
         uv2 = _evaluate_response_vector(rmat, s, -Ω + this_ω)[pair]
         resp += sqrt(_plusamp(uv1)^2 + _minusamp(uv2)^2)
