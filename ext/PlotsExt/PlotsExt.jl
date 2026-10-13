@@ -17,8 +17,8 @@ using HarmonicSteadyState:
     is_swept_parameter,
     _get_mask
 
-using Symbolics: Num
-using LinearAlgebra: LinearAlgebra, eigvals, eigvecs
+using Symbolics: Num, get_variables
+using LinearAlgebra: LinearAlgebra, eigen
 
 using HarmonicSteadyState.LinearResponse:
     get_jacobian_response, get_rotframe_jacobian_response

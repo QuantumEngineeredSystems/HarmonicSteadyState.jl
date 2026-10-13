@@ -163,20 +163,22 @@ the [`Result`](@ref HarmonicSteadyState.Result) `res`.
 # Keyword arguments
 - `class`: Array of solution classes to include (default: ["physical"])
 - `type`: Which part of eigenvalues to plot (`:real` or `:imag`, default: `:imag`)
-- `projection`: Function mapping eigenvectors to colors (default: v->1)
+- `projection`: Function mapping eigenvectors to real color weights (default: v->1)
 - `cscheme`: Color scheme for plotting (`:default` or custom scheme)
 - `kwargs...`: Additional arguments passed to Plots.scatter
 
 # Returns
 A scatter plot of eigenvalues colored by the projection of their eigenvectors.
+Excluded points and absent branches remain aligned gaps in the sweep. Only included,
+available states are diagonalized or passed to `projection`.
 
 # Example
 ```julia
 # Plot imaginary parts of eigenvalues
-plot_eigenvalues(result, branch=1)
+plot_eigenvalues(result, 1)
 
 # Plot real parts with custom coloring based on the norm of eigenvectors of the first harmonic
-plot_eigenvalues(result, branch=1, type=:real, projection=v->sqrt(v[1]^2+v[2]^2))
+plot_eigenvalues(result, 1; type=:real, projection=v->sqrt(abs2(v[1])+abs2(v[2])))
 ```
 """
 function HarmonicSteadyState.plot_eigenvalues(
@@ -188,40 +190,29 @@ function HarmonicSteadyState.plot_eigenvalues(
     cscheme=:default,
     kwargs...,
 ) where {D,S,P}
-    filter = _get_mask(res, class)
-    filter_branch = map(x -> getindex(x, branch), replace.(filter, 0 => NaN))
-
-    D != 1 && error("The results are two dimensional. Consider using the `cut` keyword.")
+    D == 1 || throw(ArgumentError("Eigenvalue plotting requires a one-dimensional sweep."))
+    selected = _get_mask(res, class)
     varied = Vector{P}(swept_parameters(res))
+    count = length(get_variables(res))
+    eigenvalues = fill(ComplexF64(NaN), count, length(varied))
+    weights = fill(NaN, count, length(varied))
 
-    eigenvalues = map(eachindex(varied)) do i
-        jac = res.jacobian(get_variable_solutions(res; branch=branch, index=i))
-        if any(isnan, jac)
-            throw(
-                ErrorException(
-                    "The branch contains NaN values. Likely, the branch has non-physical solutions in the parameter sweep",
-                ),
-            )
-        end
-        return eigvals(jac)
+    for index in eachindex(varied)
+        selected[index][branch] || continue
+        state = get_variable_solutions(res; branch=branch, index=index)
+        any(isnan, state) && continue # absent branches retain aligned plot gaps
+        jacobian = res.jacobian(state)
+        any(isnan, jacobian) && error("The Jacobian contains NaN at sweep point $index.")
+        decomposition = eigen(jacobian)
+        eigenvalues[:, index] .= decomposition.values
+        weights[:, index] .= map(projection, eachcol(decomposition.vectors))
     end
-    eigenvalues_filtered = map(.*, eigenvalues, filter_branch)
-
-    eigenvectors = [
-        eigvecs(res.jacobian(get_variable_solutions(res; branch=branch, index=i))) for
-        i in eachindex(varied)
-    ]
-    eigvecs_filtered = map(.*, eigenvectors, filter_branch)
-
-    norm = reduce(
-        hcat, [[projection(vec) for vec in eachcol(vecs)] for vecs in eigvecs_filtered]
-    )
 
     if type == :imag
-        eigval = reduce(hcat, imag.(eigenvalues_filtered))'
+        eigval = imag.(eigenvalues)'
         ylab = L"\Im\{\epsilon\}"
     else
-        eigval = reduce(hcat, real.(eigenvalues_filtered))'
+        eigval = real.(eigenvalues)'
         ylab = L"\Re\{\epsilon\}"
     end
     xlab = get_labels(res)
@@ -241,7 +232,7 @@ function HarmonicSteadyState.plot_eigenvalues(
         markerstrokewidth=0,
         xlab,
         ylab,
-        zcolor=norm',
+        zcolor=weights',
         c=myscheme,
         colorbar=false,
         kwargs...,
