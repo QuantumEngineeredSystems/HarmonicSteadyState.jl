@@ -20,6 +20,11 @@ keeping `fixed_parameters` constant.
     (nearest-neighbor sorting) and `:none`.
 - `classify_default`: If `true`, the solutions will be classified using the default
     classification method.
+- `jacobian_backend`: When constructing a problem from a `HarmonicEquation`, use an
+    ADTypes backend such as `AutoForwardDiff()` to differentiate the harmonic equations.
+    Load the corresponding differentiation package first. The default, `nothing`, uses
+    symbolic derivatives with a numerical mass-matrix solve. For an existing problem,
+    choose the backend in its `HomotopyContinuationProblem` constructor.
 
 ### Example
 solving a simple harmonic oscillator
@@ -103,10 +108,17 @@ function get_steady_states(
 end
 
 function get_steady_states(
-    eom::HarmonicEquation, method::SteadyStateMethod, swept, fixed; kwargs...
+    eom::HarmonicEquation,
+    method::SteadyStateMethod,
+    swept,
+    fixed;
+    jacobian_backend=nothing,
+    kwargs...,
 )
     return get_steady_states(
-        HomotopyContinuationProblem(eom, OrderedDict(swept), OrderedDict(fixed)),
+        HomotopyContinuationProblem(
+            eom, OrderedDict(swept), OrderedDict(fixed); jacobian_backend
+        ),
         method;
         kwargs...,
     )
@@ -126,9 +138,13 @@ function get_steady_states(
     fixed = filter(x -> length(x[2]) == 1, pairs)
     return get_steady_states(eom, method, swept, fixed; kwargs...)
 end
-function get_steady_states(eom::HarmonicEquation, swept, fixed; kwargs...)
+function get_steady_states(
+    eom::HarmonicEquation, swept, fixed; jacobian_backend=nothing, kwargs...
+)
     return get_steady_states(
-        HomotopyContinuationProblem(eom, OrderedDict(swept), OrderedDict(fixed)),
+        HomotopyContinuationProblem(
+            eom, OrderedDict(swept), OrderedDict(fixed); jacobian_backend
+        ),
         WarmUp();
         kwargs...,
     )

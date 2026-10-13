@@ -19,9 +19,16 @@ HomotopyContinuationProblem(
     eom::HarmonicEquation,
     swept::AbstractDict,
     fixed::AbstractDict;
-    compile_Jacobian::Bool=true,
+    compile_jacobian::Bool=true,
+    jacobian_backend=nothing,
 )
 ```
+
+By default, the Jacobian is evaluated implicitly by solving the numerical mass-matrix
+system at each steady state. Pass `jacobian_backend=AutoForwardDiff()` (from
+`DifferentiationInterface`, with `ForwardDiff` loaded) to differentiate the harmonic
+equations numerically instead. The symbolic rearranged Jacobian stored in `eom` is
+not compiled by this constructor.
 """
 mutable struct HomotopyContinuationProblem{
     ParType<:Number,
@@ -39,8 +46,8 @@ mutable struct HomotopyContinuationProblem{
     "The input object for HomotopyContinuation.jl solver methods."
     system::HC.System
     """
-    The Jacobian matrix (possibly symbolic or compiled function).
-    If `Matrix{Nan}` and implicit function is compiled when a `Result` is created.
+    A compiled function evaluating the numerical Jacobian at a steady state.
+    Its input contains the harmonic variables followed by the swept parameters.
     """
     jacobian::Jac
     """
@@ -82,7 +89,11 @@ end
 "Constructor for the type `HomotopyContinuationProblem` (to be solved by HomotopyContinuation)
 from a `HarmonicEquation`."
 function HomotopyContinuationProblem(
-    eom::HarmonicEquation, swept::AbstractDict, fixed::AbstractDict; compile_jacobian=true
+    eom::HarmonicEquation,
+    swept::AbstractDict,
+    fixed::AbstractDict;
+    compile_jacobian=true,
+    jacobian_backend=nothing,
 )
     S = HomotopyContinuation.System(eom)
     vars_new = declare_variables(eom)
@@ -91,7 +102,7 @@ function HomotopyContinuationProblem(
     # check_fixed_and_sweep(eom, swept, fixed) # check later in `solve_homotopy`
 
     if compile_jacobian
-        jac = _compile_Jacobian(eom, ComplexF64, swept, fixed)
+        jac = _compile_Jacobian(eom, ComplexF64, swept, fixed; backend=jacobian_backend)
         # ^ HC.jl only supports Float64 (https://github.com/JuliaHomotopyContinuation/HomotopyContinuation.jl/issues/604)
         return HomotopyContinuationProblem(
             vars_new, eom.parameters, swept, fixed, S, jac, eom

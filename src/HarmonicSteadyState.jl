@@ -6,7 +6,6 @@ using QuestBase:
     var_name,
     declare_variables,
     declare_variable,
-    hasnan,
     substitute_all,
     get_independent_variables,
     d,
@@ -23,9 +22,10 @@ end
 using DocStringExtensions: TYPEDSIGNATURES, TYPEDEF, TYPEDFIELDS
 using OrderedCollections: OrderedDict
 using ProgressMeter: ProgressMeter, Progress
-using LinearAlgebra: LinearAlgebra, eigvals
+using LinearAlgebra: LinearAlgebra, eigvals, ldiv!, lu!
 using Random: Random # for setting seed
 
+using DifferentiationInterface: DifferentiationInterface, Constant
 using Distances: Distances
 using BijectiveHilbert: BijectiveHilbert, Simple2D, decode_hilbert!, encode_hilbert
 using HomotopyContinuation: HomotopyContinuation
