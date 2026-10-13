@@ -137,7 +137,7 @@ end
     eigenvalues(res::Result, branch; class=["physical"])
 
 Calculate the eigenvalues of the Jacobian matrix of the harmonic equations of a `branch`
-for a one dimensional sweep in the [Result](@ref) struct.
+for a one dimensional sweep in the [`Result`](@ref HarmonicSteadyState.Result) struct.
 
 # Arguments
 - `res::Result`: Result object containing solutions and jacobian information
