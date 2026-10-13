@@ -103,24 +103,24 @@ function HarmonicSteadyState.get_linear_response(
     C = Array{P,2}(undef, length(Ω_range), sum(stable))
 
     # note: this could be optimized by not grabbing the entire huge dictionary every time
-    if show_progress
-        bar = Progress(
+    bar = if show_progress
+        Progress(
             length(C);
             dt=1,
             desc="Solving the linear response ODE for each solution and input frequency ... ",
             barlen=50,
         )
+    else
+        nothing
     end
-    for j in findall(stable)
+    for (column, index) in enumerate(findall(stable))
 
         # get response for each individual point
-        s = HarmonicSteadyState.get_single_solution(res; branch=branch, index=j)
-        for i in 1:(size(C)[1])
-            C[i, j] = HarmonicSteadyState.LinearResponse.get_response(
-                response, s, Ω_range[i]
-            )
+        s = HarmonicSteadyState.get_single_solution(res; branch=branch, index=index)
+        for (row, Ω) in enumerate(Ω_range)
+            C[row, column] = HarmonicSteadyState.LinearResponse.get_response(response, s, Ω)
+            isnothing(bar) || next!(bar)
         end
-        show_progress ? next!(bar) : nothing
     end
     return C
 end
