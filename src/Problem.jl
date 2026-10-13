@@ -19,9 +19,16 @@ HomotopyContinuationProblem(
     eom::HarmonicEquation,
     swept::AbstractDict,
     fixed::AbstractDict;
-    compile_Jacobian::Bool=true,
+    compile_jacobian::Bool=true,
+    jacobian_backend=nothing,
 )
 ```
+
+By default, the Jacobian is evaluated implicitly by solving the numerical mass-matrix
+system at each steady state. Pass `jacobian_backend=AutoForwardDiff()` (from
+`DifferentiationInterface`, with `ForwardDiff` loaded) to differentiate the harmonic
+equations numerically instead. The symbolic rearranged Jacobian stored in `eom` is
+not compiled by this constructor.
 """
 mutable struct HomotopyContinuationProblem{
     ParType<:Number,
@@ -39,8 +46,8 @@ mutable struct HomotopyContinuationProblem{
     "The input object for HomotopyContinuation.jl solver methods."
     system::HC.System
     """
-    The Jacobian matrix (possibly symbolic or compiled function).
-    If `Matrix{Nan}` and implicit function is compiled when a `Result` is created.
+    A compiled function evaluating the numerical Jacobian at a steady state.
+    Its input contains the harmonic variables followed by the swept parameters.
     """
     jacobian::Jac
     """
@@ -114,8 +121,8 @@ function HomotopyContinuationProblem(
     fixed::AbstractDict,
 )
     swept, fixed = promote_types(swept, fixed)
-    vars_new = declare_variable.(string.(variables))
-    pars_new = declare_variable.(string.(parameters))
+    vars_new = Num[declare_variable(string(var)) for var in variables]
+    pars_new = Num[declare_variable(string(par)) for par in parameters]
 
     system = HomotopyContinuation.System(equations, vars_new, pars_new)
     J = compute_and_compile_Jacobian(equations, vars_new, ComplexF64, swept, fixed)

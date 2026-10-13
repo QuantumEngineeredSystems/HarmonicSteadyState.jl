@@ -20,6 +20,11 @@ keeping `fixed_parameters` constant.
     (nearest-neighbor sorting) and `:none`.
 - `classify_default`: If `true`, the solutions will be classified using the default
     classification method.
+- `jacobian_backend`: When constructing a problem from a `HarmonicEquation`, use an
+    ADTypes backend such as `AutoForwardDiff()` to differentiate the harmonic equations.
+    Load the corresponding differentiation package first. The default, `nothing`, uses
+    symbolic derivatives with a numerical mass-matrix solve. For an existing problem,
+    choose the backend in its `HomotopyContinuationProblem` constructor.
 
 ### Example
 solving a simple harmonic oscillator

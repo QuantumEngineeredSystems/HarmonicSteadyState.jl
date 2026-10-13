@@ -43,7 +43,7 @@ end
 
     parametron = DifferentialEquation(
         d(x, t, 2) + (ω0^2 - λ * cos(2 * ω * t)) * x + α * x^3 + γ * d(x, t) ~
-            F * cos(ω * t + ψ),
+        F * cos(ω * t + ψ),
         x,
     )
     add_harmonic!(parametron, x, ω)
@@ -56,7 +56,8 @@ end
     # Nonlinear damping, the term that blows the rearrangement up once several harmonics
     # are involved. At one harmonic it still compiles, so the agreement is checkable.
     nonlinear_damping = DifferentialEquation(
-        d(x, t, 2) + ω0^2 * x + α * x^3 + γ * d(x, t) + η * x^2 * d(x, t) ~ F * cos(ω * t), x
+        d(x, t, 2) + ω0^2 * x + α * x^3 + γ * d(x, t) + η * x^2 * d(x, t) ~ F * cos(ω * t),
+        x,
     )
     add_harmonic!(nonlinear_damping, x, ω)
     @test worst_disagreement(
@@ -91,7 +92,7 @@ end
     @variables α Δ ω0 δ F γ η t x(t)
     diff_eq = DifferentialEquation(
         d(x, t, 2) + ω0^2 * x + α * x^3 + γ * d(x, t) + η * x^2 * d(x, t) ~
-            F * (cos((ω0 + δ - Δ / 2) * t) + cos((ω0 + δ + Δ / 2) * t)),
+        F * (cos((ω0 + δ - Δ / 2) * t) + cos((ω0 + δ + Δ / 2) * t)),
         x,
     )
     add_harmonic!(diff_eq, x, ω0 + δ - Δ / 2)
@@ -115,7 +116,8 @@ end
 
     @variables α ω ω0 F γ η t x(t)
     duffing = DifferentialEquation(
-        d(x, t, 2) + ω0^2 * x + α * x^3 + γ * d(x, t) + η * x^2 * d(x, t) ~ F * cos(ω * t), x
+        d(x, t, 2) + ω0^2 * x + α * x^3 + γ * d(x, t) + η * x^2 * d(x, t) ~ F * cos(ω * t),
+        x,
     )
     add_harmonic!(duffing, x, ω)
     heq = get_harmonic_equations(duffing)

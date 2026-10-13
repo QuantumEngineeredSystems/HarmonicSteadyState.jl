@@ -157,9 +157,7 @@ function get_ad_Jacobian(eom::HarmonicEquation; sym_order, rules=Dict(), backend
         M0 = DifferentiationInterface.jacobian(
             gu, backend, real.(u), Constant((imag.(u), rest))
         )
-        M1 = DifferentiationInterface.jacobian(
-            gd, backend, zeros(n), Constant((u, rest))
-        )
+        M1 = DifferentiationInterface.jacobian(gd, backend, zeros(n), Constant((u, rest)))
         J0 = complex.(M0[1:n, :], M0[(n + 1):(2n), :])
         J1 = M1[1:n, :] # real part: the mass matrix has no imaginary component
         # `check=false` to match the implicit route: solution arrays are NaN-padded, and a
