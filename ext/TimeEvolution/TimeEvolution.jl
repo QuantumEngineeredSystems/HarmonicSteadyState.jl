@@ -15,7 +15,13 @@ using HarmonicSteadyState:
     follow_branch,
     SteadyState
 
-using QuestBase: rearrange_standard, is_rearranged, substitute_all, HarmonicEquation
+using QuestBase:
+    rearrange_standard,
+    is_rearranged,
+    substitute_all,
+    HarmonicEquation,
+    declare_variables,
+    get_independent_variables
 
 include("sweeps.jl")
 include("ODEProblem.jl")
