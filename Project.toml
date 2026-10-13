@@ -108,5 +108,6 @@ TestExtras = "5ed8adda-3752-4e41-b88a-e8b09835ee3a"
 test = ["Aqua", "JET", "CheckConcreteStructs", "SymbolicUtils", "Symbolics", "ExplicitImports", "Test", "Random", "OrdinaryDiffEqTsit5", "Documenter", "Plots", "SteadyStateDiffEq", "LinearSolve", "TestExtras", "ModelingToolkitBase", "OrdinaryDiffEqRosenbrock", "NonlinearSolve", "HarmonicBalance", "Peaks", "Latexify", "QuantumCumulants", "ForwardDiff"]
 
 [sources]
+HomotopyContinuation = {url = "https://github.com/JuliaHomotopyContinuation/HomotopyContinuation.jl", rev = "main"}
 QuestBase = {url = "https://github.com/QuantumEngineeredSystems/QuestBase.jl", rev = "main"}
 HarmonicBalance = {url = "https://github.com/QuantumEngineeredSystems/HarmonicBalance.jl", rev = "master"}
