@@ -14,5 +14,9 @@ SteadyStateDiffEq = "9672c7b4-1e72-59bd-8a11-6ac3964bc41f"
 
 [compat]
 Documenter = "1"
-QuestBase = "0.5"
-julia = "1.10"
+QuestBase = "0.5.3"
+julia = "~1.13"
+
+[sources]
+QuestBase = {url = "https://github.com/QuantumEngineeredSystems/QuestBase.jl", rev = "main"}
+HarmonicSteadyState = {path = ".."}
