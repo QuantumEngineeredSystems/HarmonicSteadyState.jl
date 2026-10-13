@@ -28,6 +28,20 @@ using Test
     @test HarmonicSteadyState.source_type(prob) == Nothing
 end
 
+@testset "dictionary parameter inputs" begin
+    using Symbolics: @variables, Num
+    @variables u a b
+    problem = HarmonicSteadyState.HomotopyContinuationProblem(
+        [-u + a + b], [u], [a, b], Dict(a => Float32[1, 2]), Dict(b => 0.5)
+    )
+    @test problem.swept_parameters[a] == [1.0, 2.0]
+    @test eltype(problem.swept_parameters[a]) == Float64
+    @test problem.fixed_parameters[b] === 0.5
+    result = get_steady_states(problem, TotalDegree(); show_progress=false)
+    @test only(result.solutions[1]) ≈ [1.5]
+    @test only(result.solutions[2]) ≈ [2.5]
+end
+
 @testset "Problem with self made system" begin
     using Symbolics
     @variables u1 v1 Δ F

@@ -12,19 +12,24 @@ function type_stable_parameters(sweeps::OrderedDict, fixed_parameters::OrderedDi
     T = common_type(input_array)
     return [convert.(T, ps) for ps in input_array]
 end
-function parameter_type(sweeps::OrderedDict, fixed_parameters::OrderedDict)
-    input_array = collect_parameters(sweeps, fixed_parameters)
-    return common_type(input_array)
+function parameter_type(sweeps::AbstractDict, fixed_parameters::AbstractDict)
+    T = Union{}
+    for range in values(sweeps), value in range
+        T = promote_type(T, typeof(value))
+    end
+    for value in values(fixed_parameters)
+        T = promote_type(T, typeof(value))
+    end
+    return T
 end
 
-function promote_types(sweeps::OrderedDict, fixed_parameters::OrderedDict{K}) where {K}
-    param_ranges = collect(values(sweeps))
-    iter = Iterators.product(param_ranges..., values(fixed_parameters)...)
-    types = Iterators.flatten(unique(unique(typeof.(ps)) for ps in iter))
-    T = promote_type(types...)
+function promote_types(sweeps::AbstractDict, fixed_parameters::AbstractDict)
+    T = parameter_type(sweeps, fixed_parameters)
 
-    promoted_sweeps = OrderedDict{K,Vector{T}}((keys(sweeps) .=> values(sweeps))...)
-    promoted_fixed = OrderedDict{K,T}(fixed_parameters)
+    promoted_sweeps = OrderedDict{Num,Vector{T}}(
+        key => Vector{T}(range) for (key, range) in pairs(sweeps)
+    )
+    promoted_fixed = OrderedDict{Num,T}(fixed_parameters)
     return promoted_sweeps, promoted_fixed
 end
 
