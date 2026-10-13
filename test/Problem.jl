@@ -28,6 +28,20 @@ using Test
     @test HarmonicSteadyState.source_type(prob) == Nothing
 end
 
+@testset "Problem with self made system" begin
+    using Symbolics
+    @variables u1 v1 Δ F
+    eqs = [Δ * u1 + F, -Δ * v1]
+    vars = [u1, v1]
+    pars = [Δ, F]
+    fix = OrderedDict{Num,Float64}(F => 0.005)
+    swept = OrderedDict{Num,Vector{Float64}}(Δ => range(0.0, 1.0; length=10))
+    prob = HarmonicSteadyState.HomotopyContinuationProblem(eqs, vars, pars, swept, fix)
+    @test all(string.(prob.variables) .== string.(vars))
+    @test all(string.(prob.parameters) .== string.(pars))
+    @test all(string.(prob.system.expressions) .== string.(eqs))
+end
+
 @testset "explicit symbol order with Unicode subscripts" begin
     using Symbolics: @variables
     @variables a₂ᵣ b₁ᵢ p₁ᵣ
@@ -48,18 +62,4 @@ end
         @test !isempty(finite)
         @test all(solution -> isapprox(solution, expected; atol=1e-6), finite)
     end
-end
-
-@testset "Problem with self made system" begin
-    using Symbolics
-    @variables u1 v1 Δ F
-    eqs = [Δ * u1 + F, -Δ * v1]
-    vars = [u1, v1]
-    pars = [Δ, F]
-    fix = OrderedDict{Num,Float64}(F => 0.005)
-    swept = OrderedDict{Num,Vector{Float64}}(Δ => range(0.0, 1.0; length=10))
-    prob = HarmonicSteadyState.HomotopyContinuationProblem(eqs, vars, pars, swept, fix)
-    @test all(string.(prob.variables) .== string.(vars))
-    @test all(string.(prob.parameters) .== string.(pars))
-    @test all(string.(prob.system.expressions) .== string.(eqs))
 end
