@@ -33,6 +33,14 @@ Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 QuantumCumulants = "35bcea6d-e19f-57db-af74-8011de6c7255"
 SteadyStateDiffEq = "9672c7b4-1e72-59bd-8a11-6ac3964bc41f"
 
+[sources.HarmonicBalance]
+rev = "master"
+url = "https://github.com/QuantumEngineeredSystems/HarmonicBalance.jl"
+
+[sources.QuestBase]
+rev = "main"
+url = "https://github.com/QuantumEngineeredSystems/QuestBase.jl"
+
 [extensions]
 HarmonicBalanceExt = "HarmonicBalance"
 PlotsExt = ["Plots", "Latexify"]
@@ -69,7 +77,7 @@ PrecompileTools = "1.2"
 Printf = "1.10"
 ProgressMeter = "1.7.2"
 QuantumCumulants = "0.7"
-QuestBase = "0.5.3"
+QuestBase = "0.5.3, 0.5"
 Random = "1.10"
 RuntimeGeneratedFunctions = "0.5.5"
 SciMLBase = "3"
@@ -106,7 +114,3 @@ TestExtras = "5ed8adda-3752-4e41-b88a-e8b09835ee3a"
 
 [targets]
 test = ["Aqua", "JET", "CheckConcreteStructs", "SymbolicUtils", "Symbolics", "ExplicitImports", "Test", "Random", "OrdinaryDiffEqTsit5", "Documenter", "Plots", "SteadyStateDiffEq", "LinearSolve", "TestExtras", "ModelingToolkitBase", "OrdinaryDiffEqRosenbrock", "NonlinearSolve", "HarmonicBalance", "Peaks", "Latexify", "QuantumCumulants", "ForwardDiff"]
-
-[sources]
-QuestBase = {url = "https://github.com/QuantumEngineeredSystems/QuestBase.jl", rev = "main"}
-HarmonicBalance = {url = "https://github.com/QuantumEngineeredSystems/HarmonicBalance.jl", rev = "master"}
