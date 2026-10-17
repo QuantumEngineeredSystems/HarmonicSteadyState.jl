@@ -1,11 +1,20 @@
+using HarmonicSteadyState
+using Test
+using Aqua
+using CheckConcreteStructs: all_concrete
+using ExplicitImports
+using HarmonicSteadyState.HomotopyContinuation: ModelKit
+# Load the extension triggers so the extensions below are checked.
+using OrdinaryDiffEqTsit5: OrdinaryDiffEqTsit5
+using SteadyStateDiffEq: SteadyStateDiffEq
+using Plots: Plots
+using HarmonicBalance: HarmonicBalance
+using Latexify: Latexify
+
 @testset "Concretely typed" begin
     CI = get(ENV, "CI", nothing) == "true" || get(ENV, "GITHUB_TOKEN", nothing) !== nothing
     julia_version = VERSION >= v"1.11.0-DEV.0" # fails on 1.11
     if !CI && !julia_version
-        using HarmonicSteadyState
-
-        using CheckConcreteStructs
-
         all_concrete(HarmonicSteadyState.WarmUp)
         all_concrete(HarmonicSteadyState.TotalDegree)
         all_concrete(HarmonicSteadyState.Polyhedral)
@@ -21,8 +30,6 @@
 end
 
 @testset "ExplicitImports" begin
-    using ExplicitImports
-
     @test check_no_implicit_imports(HarmonicSteadyState) == nothing
     @test check_all_explicit_imports_via_owners(HarmonicSteadyState) == nothing
     # @test check_all_explicit_imports_are_public(HarmonicSteadyState) == nothing
@@ -33,17 +40,12 @@ end
 end
 
 @testset "Code quality" begin
-    using Aqua
-    using OrdinaryDiffEqTsit5, SteadyStateDiffEq, Plots, HarmonicBalance
-    using Latexify
-
     TimeEvolution = Base.get_extension(HarmonicSteadyState, :TimeEvolution)
     SteadyStateDiffEqExt = Base.get_extension(HarmonicSteadyState, :SteadyStateDiffEqExt)
     PlotsExt = Base.get_extension(HarmonicSteadyState, :PlotsExt)
     HarmonicBalanceExt = Base.get_extension(HarmonicSteadyState, :HarmonicBalanceExt)
 
     Aqua.test_ambiguities([HarmonicSteadyState])
-    using HarmonicSteadyState.HomotopyContinuation: ModelKit
     Aqua.test_all(
         HarmonicSteadyState;
         piracies=(treat_as_own=[ModelKit.Variable, ModelKit.System],),

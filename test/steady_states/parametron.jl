@@ -2,7 +2,7 @@ using HarmonicSteadyState
 using HarmonicBalance
 using HarmonicSteadyState: OrderedDict
 using Symbolics
-#using Test # do not use Test as this file is used for precompilation
+using Test
 
 @variables Ω γ λ F x θ η α ω0 ω t T ψ
 @variables x(t)
@@ -18,7 +18,7 @@ dEOM = DifferentialEquation(natural_equation + forces, x)
 add_harmonic!(dEOM, x, ω)
 harmonic_eq = get_harmonic_equations(dEOM; slow_time=T, fast_time=t);
 
-method = HarmonicSteadyState.WarmUp(; seed=SEED)
+method = HarmonicSteadyState.WarmUp(; seed=0x8f88209c)
 
 @testset "undriven parametron" begin
     fixed = OrderedDict(

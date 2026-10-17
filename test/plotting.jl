@@ -1,6 +1,9 @@
 using HarmonicSteadyState, Plots
+# PlotsExt loads only once both Plots and Latexify are loaded.
+using Latexify: Latexify
+using HarmonicBalance
 default(; show=false)
-#using Test #
+using Test
 
 @variables γ λ x η α ω0 ω
 @variables t x(t)
