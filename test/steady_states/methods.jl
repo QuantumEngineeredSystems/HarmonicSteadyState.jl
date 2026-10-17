@@ -1,5 +1,7 @@
 using HarmonicSteadyState
+using HarmonicBalance
 using HarmonicSteadyState: OrderedDict
+using Random: Random
 using Test
 
 @testset "WarmUp" begin
@@ -12,7 +14,7 @@ using Test
     method = WarmUp{ComplexF32}()
     @test typeof(method).parameters[1] == ComplexF32
 
-    gamma = ComplexF32(cis(2π * rand(ComplexF32)))
+    gamma = ComplexF32(cis(2π * rand(Random.Xoshiro(0x8f88209c), ComplexF32)))
     warmup_method = TotalDegree(; gamma=gamma)
     method = WarmUp(;
         warm_up_method=warmup_method, start_parameters=ComplexF32[0.0, 0.0, 0.0]
@@ -74,8 +76,7 @@ end
 end
 
 @testset "TotalDegree" begin
-    using Random
-    gamma = ComplexF32(cis(2π * rand(ComplexF32)))
+    gamma = ComplexF32(cis(2π * rand(Random.Xoshiro(0x8f88209c), ComplexF32)))
     method = TotalDegree(; gamma=gamma)
     @test typeof(method).parameters[1] == ComplexF32
 

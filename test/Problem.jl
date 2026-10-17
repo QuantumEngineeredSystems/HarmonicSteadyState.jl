@@ -1,4 +1,5 @@
 using HarmonicSteadyState
+using HarmonicBalance
 using HarmonicSteadyState: OrderedDict
 using Test
 

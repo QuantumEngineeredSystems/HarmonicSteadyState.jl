@@ -1,4 +1,5 @@
 using HarmonicSteadyState
+using HarmonicBalance
 using HarmonicSteadyState.QuestBase: substitute_all
 using HarmonicSteadyState: OrderedDict, HomotopyContinuationProblem, _free_symbols
 using Test, TestExtras

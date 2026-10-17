@@ -1,4 +1,5 @@
 using HarmonicSteadyState
+using HarmonicBalance
 using OrdinaryDiffEqTsit5
 using Test
 
