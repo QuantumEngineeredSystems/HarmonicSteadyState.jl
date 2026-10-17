@@ -1,5 +1,6 @@
 using HarmonicSteadyState, Symbolics, HarmonicBalance
 using Test
+using Plots: Plots
 HB = HarmonicSteadyState
 
 @testset "Lorentzian" begin
@@ -51,6 +52,23 @@ end
     @test M[1](ones(4)) isa Complex
 
     plot_linear_response(result, x, 1; Ω_range=range(0.9, 1.1, 10), logscale=true)
+end
+
+@testset "second order response for a partially stable branch" begin
+    fixed = (α => 1.0, ω0 => 1.0, γ => 0.005, F => 0.002)
+    varied = ω => range(0.95, 1.05, 40)
+    partial = get_steady_states(harmonic_eq, varied, fixed; show_progress=false)
+    stable = get_class(partial, 2, "stable")
+    @test 0 < count(stable) < length(stable)
+    @test last(findall(stable)) > count(stable)
+
+    frequencies = range(0.9, 1.1, 5)
+    response = get_linear_response(partial, x, frequencies, 2; show_progress=false)
+    @test size(response) == (length(frequencies), count(stable))
+    @test all(isfinite, response)
+    @test plot_linear_response(
+        partial, x, 2; Ω_range=frequencies, order=2, show_progress=false
+    ) isa Plots.Plot
 end
 
 @testset "second order krylov" begin
