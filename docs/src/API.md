@@ -34,6 +34,7 @@ Polyhedral
 
 ```@docs
 get_solutions
+get_branches
 get_single_solution
 attractors
 transform_solutions
