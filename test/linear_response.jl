@@ -89,7 +89,7 @@ end
     plot_eigenvalues(result, 1)
     plot_eigenvalues(result, 1; type=:re, class="all")
 
-    @testset "NaN Exception Error" begin
+    @testset "eigenvalue plot with physical filtering" begin
         @variables α λ ω0 ω ωₚ γ F t x(t)
         diff_eq = DifferentialEquation(
             d(x, t, 2) + (ω0^2 - λ * cos(2 * ω * t)) * x + α * x^3 + γ * d(x, t), x
@@ -102,14 +102,39 @@ end
         varied = (ω => range(0.995, 1.005, 20))
         result_ω = get_steady_states(harmonic_eq, varied, fixed)
         plot(result_ω; y="u1")
-        broken = true
-        @test try
-            plot_eigenvalues(result_ω; branch=1)
-            false
-        catch e
-            typeof(e) == ErrorException
-        end broken = true
-
-        # replace with system where branch has non-physical solution. I think coupled parametrons has this
+        @test plot_eigenvalues(result_ω, 1) isa Plots.Plot
     end
+end
+
+@testset "eigenvalue plots skip absent and excluded states" begin
+    using Symbolics: @variables, Num
+    using OrderedCollections: OrderedDict
+    using Plots: Plots
+    @variables u p
+    problem = HarmonicSteadyState.HomotopyContinuationProblem(
+        [p*u^2 + u + 1],
+        [u],
+        [p],
+        OrderedDict(p=>[0.0, -1.0, 1.0]),
+        OrderedDict{Num,Float64}(),
+    )
+    result = get_steady_states(problem, TotalDegree(); show_progress=false)
+    branch = findfirst(1:length(first(result.solutions))) do branch
+        any(solutions -> any(isnan, solutions[branch]), result.solutions)
+    end
+    @test !isnothing(branch)
+    physical = get_class(result, branch, "physical")
+    @test any(physical) && any(.!physical)
+    calls = Ref(0)
+    projection = vector -> begin
+        @test all(isfinite, vector)
+        calls[] += 1
+        1.0
+    end
+    @test plot_eigenvalues(result, branch; projection) isa Plots.Plot
+    @test calls[] == count(physical)
+    calls[] = 0
+    @test plot_eigenvalues(result, branch; class="all", projection) isa Plots.Plot
+    available = count(solutions -> all(isfinite, solutions[branch]), result.solutions)
+    @test calls[] == available
 end
