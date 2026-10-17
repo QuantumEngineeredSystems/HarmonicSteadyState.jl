@@ -115,3 +115,20 @@ end
     # The uniform direction is stable, but the orthogonal direction is unstable.
     @test !HarmonicSteadyState.is_stable(values, harmonics; timespan=(0.0, 10.0))
 end
+
+@testset "stability checks are independent of the amplitude scale" begin
+    using OrderedCollections: OrderedDict
+    using Symbolics: Symbolics
+    @variables τ q(τ) width
+    # Bistable flow: zero is unstable and relaxes onto the stable states ±width.
+    # With width far below one, both lie within any fixed absolute tolerance of zero.
+    equation = DifferentialEquation(d(q, τ) ~ q - q^3 / width^2, q)
+    add_harmonic!(equation, q, 0)
+    harmonics = get_harmonic_equations(equation)
+    variable = only(Symbolics.get_variables(harmonics))
+    for (state, stable) in ((0.0, false), (1e-2, true), (-1e-2, true))
+        values = OrderedDict(width => 1e-2, variable => state)
+        @test HarmonicSteadyState.is_stable(values, harmonics; timespan=(0.0, 20.0)) ==
+            stable
+    end
+end

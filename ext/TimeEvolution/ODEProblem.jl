@@ -70,11 +70,14 @@ end
 $(TYPEDSIGNATURES)
 
 Numerically investigate the stability of a solution `soln` of `eom` within `timespan`.
-Perturb each state coordinate in both directions by
-`perturb_initial * max(norm(reference), 1)`, including when the reference is zero.
-Return `true` when all final states remain within `tol * max(norm(reference), 1)`
-of the unperturbed reference. The default `algorithm` is `Tsit5()`.
-This is a finite-time numerical check, not a proof of asymptotic stability.
+Perturb each state coordinate in both directions by `δ = perturb_initial * norm(reference)`,
+or by `perturb_initial` itself when the reference is zero. Return `true` when no perturbation
+has grown beyond `(1 + tol) * δ` at the end of `timespan`: stable directions decay and
+neutral ones, such as a free phase, keep their size, while unstable ones grow. The criterion
+compares each deviation with its own perturbation, so it does not depend on the amplitude
+scale of the solution. The default `algorithm` is `Tsit5()`.
+This is a finite-time numerical check, not a proof of asymptotic stability: an instability
+too slow to grow within `timespan` is reported as stable.
 
 """
 function HarmonicSteadyState.is_stable(
@@ -88,18 +91,20 @@ function HarmonicSteadyState.is_stable(
     reference = initial_values(eom, steady_solution)
     all(is_real, reference) || error("the solution is complex!")
     reference = real.(reference)
-    scale = max(norm(reference), 1)
+    # Harmonic amplitudes are often far below one, so a fixed absolute scale would hide
+    # an unstable state that relaxes onto a nearby stable one.
+    displacement = perturb_initial * (iszero(reference) ? 1 : norm(reference))
     # Test both signs of every coordinate: one shared direction can lie entirely
     # in a stable subspace of an unstable reference state.
     problem = ODEProblem(eom, steady_solution; u0=reference, timespan)
     for coordinate in eachindex(reference), direction in (-1, 1)
         initial = copy(reference)
-        initial[coordinate] += direction * perturb_initial * scale
+        initial[coordinate] += direction * displacement
         solution = solve(remake(problem; u0=initial), algorithm)
         successful_retcode(solution) || return false
         final = solution.u[end]
         all(is_real, final) || error("the solution is complex!")
-        norm(final - reference) / scale < tol || return false
+        norm(final - reference) <= (1 + tol) * displacement || return false
     end
     return true
 end
