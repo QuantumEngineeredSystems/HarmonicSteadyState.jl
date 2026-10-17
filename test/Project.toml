@@ -32,7 +32,7 @@ TestExtras = "5ed8adda-3752-4e41-b88a-e8b09835ee3a"
 
 [sources]
 HarmonicBalance = {rev = "master", url = "https://github.com/QuantumEngineeredSystems/HarmonicBalance.jl"}
-HarmonicSteadyState = {path = "/home/oameye/Projects/HarmonicBalanceDev/HarmonicSteadyState.jl"}
+HarmonicSteadyState = {path = ".."}
 QuestBase = {rev = "main", url = "https://github.com/QuantumEngineeredSystems/QuestBase.jl"}
 
 [compat]
