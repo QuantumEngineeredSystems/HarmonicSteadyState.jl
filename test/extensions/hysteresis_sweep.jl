@@ -1,4 +1,7 @@
 using HarmonicSteadyState, OrdinaryDiffEqTsit5
+using Plots: Plots
+# PlotsExt loads only once both Plots and Latexify are loaded.
+using Latexify: Latexify
 using HarmonicBalance
 using Test
 
