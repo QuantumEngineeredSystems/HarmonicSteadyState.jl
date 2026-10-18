@@ -70,4 +70,4 @@ Symbolics = "7"
 julia = "~1.13"
 
 [sources]
-QuestBase = {url = "https://github.com/QuantumEngineeredSystems/QuestBase.jl", rev = "main"}
+QuestBase = {url = "https://github.com/QuantumEngineeredSystems/QuestBase.jl", rev = "refactor/harmonic-kind"}
