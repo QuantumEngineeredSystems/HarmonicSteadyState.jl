@@ -40,7 +40,7 @@ function _gaugefixed_Jacobian(
     eom::HarmonicEquation, fixed_var::HarmonicVariable, soltype::DataType; sym_order, rules
 )
     rules = Dict(rules)
-    setindex!(rules, 0, _remove_brackets(fixed_var))
+    setindex!(rules, 0, remove_brackets(fixed_var))
     jac = get_implicit_Jacobian(eom; rules, sym_order=sym_order)
     return JacobianFunction(soltype)(jac)
 end
@@ -158,10 +158,10 @@ function _fix_gauge!(eom::HarmonicEquation, ω_lc::Num, fixed_var::HarmonicVaria
     eom.equations = expand_derivatives.(substitute_all(eom.equations, rules))
     eom.parameters = setdiff(eom.parameters, [ω_lc]) # ω_lc is now NOT a parameter anymore
 
-    fixed_var.type = "Hopf"
+    fixed_var.kind = LimitCycleFrequency
     fixed_var.ω = Num(0) # not associated with any harmonic
     fixed_var.symbol = new_symbol
     return fixed_var.name = var_name(new_symbol)
 end
 
-_fix_gauge!(x::Num, fixed_var) = substitute_all(x, _remove_brackets(fixed_var) => 0)
+_fix_gauge!(x::Num, fixed_var) = substitute_all(x, remove_brackets(fixed_var) => 0)

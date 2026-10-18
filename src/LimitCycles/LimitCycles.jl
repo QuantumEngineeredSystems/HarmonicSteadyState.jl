@@ -2,6 +2,7 @@ module LimitCycles
 
 using QuestBase:
     QuestBase,
+    LimitCycleFrequency,
     get_all_terms,
     substitute_all,
     DifferentialEquation,
@@ -9,7 +10,7 @@ using QuestBase:
     HarmonicVariable,
     get_independent_variables,
     declare_variable,
-    _remove_brackets
+    remove_brackets
 
 using DocStringExtensions: TYPEDSIGNATURES
 

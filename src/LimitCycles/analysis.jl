@@ -6,7 +6,7 @@ function classify_unique!(res::Result, Δω; class_name="unique_cycle")
 
     # 2nd degeneracy: ambiguity in the fixed phase, manifests as the sign of var
     eom = HarmonicSteadyState._harmonic_equation(res, "classify unique limit cycles")
-    var = _remove_brackets(get_cycle_variables(eom, Δω)[1])
+    var = remove_brackets(get_cycle_variables(eom, Δω)[1])
     i2 = _symidx(var, res)
     c2 = classify_solutions(res, soln -> _is_physical(soln) && real(soln[i2]) >= 0)
 

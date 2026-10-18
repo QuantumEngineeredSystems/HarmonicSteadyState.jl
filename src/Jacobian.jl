@@ -30,7 +30,7 @@ function _compile_Jacobian(
     backend=nothing,
 )::JacobianFunction(soltype)
     sym_order = _free_symbols(eom, swept)
-    compiled_J = if "Hopf" ∈ getfield.(eom.variables, :type)
+    compiled_J = if any(hv -> hv.kind == LimitCycleFrequency, eom.variables)
         eom.jacobian # already a compiled gauge-fixed function, see LimitCycles
     elseif isnothing(backend)
         get_implicit_Jacobian(eom; sym_order, rules=fixed)
@@ -113,7 +113,7 @@ function _compile_residual(eom::HarmonicEquation, sym_order::Vector{Num}; rules=
     vars = get_variables(eom)
     n = length(vars)
     dsyms = [declare_variable("__du" * string(i)) for i in 1:n]
-    subs = merge(Dict(d(vars, T, 1) .=> dsyms), Dict(vars .=> _remove_brackets.(vars)))
+    subs = merge(Dict(d(vars, T, 1) .=> dsyms), Dict(vars .=> remove_brackets.(vars)))
     R = Num[
         substitute_all(Symbolics.expand_derivatives(eq.lhs - eq.rhs), subs) for
         eq in eom.equations
@@ -180,7 +180,7 @@ function _get_J_matrix(eom::HarmonicEquation; order=0)
     order > 1 && error("Cannot get a J matrix of order > 1 from the harmonic equations.\n
                        These are by definition missing higher derivatives")
 
-    vars_simp = Dict([var => _remove_brackets(var) for var in get_variables(eom)])
+    vars_simp = Dict([var => remove_brackets(var) for var in get_variables(eom)])
     T = get_independent_variables(eom)[1]
     # J = Symbolics.jacobian(eom.equations, d(get_variables(eom), T, order))
     J = get_Jacobian(eom.equations, d(get_variables(eom), T, order))

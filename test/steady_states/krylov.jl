@@ -25,7 +25,7 @@ harmonic_eq2 = get_krylov_equations(diff_eom; order=2)
 # @profview get_krylov_equations(diff_eom; order=2)
 
 @testset "show method" begin
-    print_variable = HB.QuestBase._show_ansatz(harmonic_eq1)
+    print_variable = HB.QuestBase.show_ansatz(harmonic_eq1)
     @test !(occursin("xˍt(t)", print_variable))
 end
 

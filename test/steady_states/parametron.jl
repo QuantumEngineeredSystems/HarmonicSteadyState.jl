@@ -102,7 +102,7 @@ end
         (2//1) * ω * Differential(T)(u1) - γ * ω * u1 - (1//4) * η * ω * (u1^3) -
         (1//4) * η * ω * (v1^2) * u1
 
-    averaged = HarmonicSteadyState._remove_brackets(harmonic_eq)
+    averaged = HarmonicSteadyState.remove_brackets(harmonic_eq)
     @test isequal(simplify(expand(averaged[1] - ref1)), 0)
     @test isequal(simplify(expand(averaged[2] - ref2)), 0)
 end

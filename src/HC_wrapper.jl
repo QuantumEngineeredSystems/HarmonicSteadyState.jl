@@ -5,7 +5,7 @@ using Symbolics: Num, expand_derivatives, get_variables
 using Symbolics.SymbolicUtils: isterm
 using LinearAlgebra: LinearAlgebra
 
-using QuestBase: _remove_brackets
+using QuestBase: remove_brackets
 
 using HomotopyContinuation: HomotopyContinuation
 HC = HomotopyContinuation
@@ -38,7 +38,7 @@ function parse_equations(eqs)
 end
 
 function HomotopyContinuation.ModelKit.System(eom::HarmonicEquation)
-    eqs = expand_derivatives.(_remove_brackets(eom))
+    eqs = expand_derivatives.(remove_brackets(eom))
     vars = get_variables(eom)
     pars = eom.parameters
     return HC.System(eqs, vars, pars)
