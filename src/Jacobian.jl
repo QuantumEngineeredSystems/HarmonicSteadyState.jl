@@ -168,6 +168,68 @@ function get_ad_Jacobian(eom::HarmonicEquation; sym_order, rules=Dict(), backend
     return jacfunc
 end
 
+"""
+$(TYPEDEF)
+
+The stability spectrum of a steady state of harmonic equations that are first order in the
+slow time: the eigenvalues of the Jacobian `jacobian`. These are the harmonic equations of
+a system that is itself first order, which carry no approximation, and those derived with
+the usual slow flow, which drops the second slow-time derivatives. The latter are reliable
+only for eigenvalues small next to the harmonic frequencies, see [`SecondOrderSpectrum`](@ref).
+
+# Fields
+$(TYPEDFIELDS)
+"""
+struct FirstOrderSpectrum{F}
+    "The Jacobian, called on `[variables..., swept parameters...]`."
+    jacobian::F
+end
+
+(s::FirstOrderSpectrum)(vals::Vector) = eigvals(real.(s.jacobian(vals)))
+
+"""
+$(TYPEDEF)
+
+The stability spectrum of a steady state of harmonic equations that keep the second
+slow-time derivatives of the harmonic variables, `J₂ ü + J₁ u̇ + G(u) = 0`. Linearising
+around the steady state gives the quadratic eigenvalue problem
+
+```math
+\\left(λ^2 J_2 + λ J_1 + J_0\\right) δ\\mathbf{u} = 0 \\,,
+```
+
+which is Hill's method restricted to the harmonics of the ansatz. Its eigenvalues converge
+to the Floquet exponents of the periodic orbit as harmonics are added. The first-order slow
+flow solves `(λ J₁ + J₀) δu = 0` instead, so it misjudges the stability whenever an
+eigenvalue is comparable to a harmonic frequency, and adding harmonics does not cure it.
+
+The problem is solved as the generalised eigenproblem of its companion pencil, so `J₂` may
+be singular: variables whose equations of motion are first order contribute infinite
+eigenvalues, which are dropped. `J₀ = -J₁ J` is recovered from the slow-flow Jacobian `J`,
+so only the derivative blocks are compiled here, whichever way `J` was obtained.
+
+# Fields
+$(TYPEDFIELDS)
+"""
+struct SecondOrderSpectrum{F,G1,G2}
+    "The slow-flow Jacobian `-J₁⁻¹J₀`, called on `[variables..., swept parameters...]`."
+    jacobian::F
+    "The coefficient `J₁` of the first slow-time derivatives."
+    J1::G1
+    "The coefficient `J₂` of the second slow-time derivatives."
+    J2::G2
+end
+
+function (s::SecondOrderSpectrum)(vals::Vector)
+    J = real.(s.jacobian(vals))
+    J1 = real.(s.J1(vals))
+    J2 = real.(s.J2(vals))
+    n = size(J, 1)
+    A = [zeros(n, n) LinearAlgebra.I; J1*J -J1]
+    B = [LinearAlgebra.I zeros(n, n); zeros(n, n) J2]
+    return filter(isfinite, eigvals(A, B))
+end
+
 function get_implicit_Jacobian(p::SteadyStateProblem)
     eom = _harmonic_equation(p, "compile an implicit Jacobian")
     return get_implicit_Jacobian(eom; sym_order=_free_symbols(p), rules=p.fixed_parameters)
@@ -176,8 +238,10 @@ end
 # for implicit evaluation, the numerical values precede the rearrangement
 # for limit cycles, the zero eigenvalue causes the rearrangement to fail -> filter it out
 # THIS SETS ALL DERIVATIVES TO ZERO - assumes use for steady states
+# `order=2` is the coefficient of the second slow-time derivatives, which the harmonic
+# equations keep only when derived with a slow flow of `degree=3`; it is zero otherwise
 function _get_J_matrix(eom::HarmonicEquation; order=0)
-    order > 1 && error("Cannot get a J matrix of order > 1 from the harmonic equations.\n
+    order > 2 && error("Cannot get a J matrix of order > 2 from the harmonic equations.\n
                        These are by definition missing higher derivatives")
 
     vars_simp = Dict([var => remove_brackets(var) for var in get_variables(eom)])

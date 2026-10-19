@@ -49,6 +49,14 @@ filter_result!
 phase_diagram
 ```
 
+### Stability
+
+```@docs
+HarmonicSteadyState.stability_spectrum
+HarmonicSteadyState.FirstOrderSpectrum
+HarmonicSteadyState.SecondOrderSpectrum
+```
+
 ### Steady state plotting
 
 To use these plotting functions, you need to have the `Plots` package installed in the same enverionment and loaded.
