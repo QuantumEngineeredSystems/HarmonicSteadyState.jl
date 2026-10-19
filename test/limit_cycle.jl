@@ -1,4 +1,7 @@
 using HarmonicSteadyState, Plots
+# PlotsExt loads only once both Plots and Latexify are loaded.
+using Latexify: Latexify
+using HarmonicBalance
 using HarmonicSteadyState: OrderedDict
 using Test
 

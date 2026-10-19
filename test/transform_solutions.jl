@@ -1,4 +1,6 @@
 using HarmonicSteadyState
+using HarmonicBalance
+using Test
 
 @variables Ω γ λ F x θ η α ω0 ω t T ψ
 @variables x(t) y(t)

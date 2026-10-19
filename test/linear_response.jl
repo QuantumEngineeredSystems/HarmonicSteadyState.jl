@@ -1,4 +1,6 @@
 using HarmonicSteadyState, Symbolics, HarmonicBalance
+# PlotsExt loads only once both Plots and Latexify are loaded.
+using Latexify: Latexify
 using Test
 using Plots: Plots
 HB = HarmonicSteadyState
@@ -101,7 +103,7 @@ end
         fixed = (γ => 0.002, ω0 => 1.0, α => 1.0, λ => 0.016)
         varied = (ω => range(0.995, 1.005, 20))
         result_ω = get_steady_states(harmonic_eq, varied, fixed)
-        plot(result_ω; y="u1")
+        Plots.plot(result_ω; y="u1")
         @test plot_eigenvalues(result_ω, 1) isa Plots.Plot
     end
 end
