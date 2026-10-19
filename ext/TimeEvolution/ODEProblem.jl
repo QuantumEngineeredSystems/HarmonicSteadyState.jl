@@ -1,11 +1,24 @@
 using OrdinaryDiffEqTsit5: ODEProblem, solve, ODESolution
 
+# Accept both the time-dependent harmonic symbols and the bracket-free symbols
+# returned by get_single_solution, preserving the equation's variable order.
+function initial_values(eom::HarmonicEquation, values)
+    return map(zip(get_variables(eom), declare_variables(eom))) do (variable, bare)
+        haskey(values, variable) && return values[variable]
+        haskey(values, bare) && return values[bare]
+        return throw(ArgumentError("No initial value for $bare; pass it or set `u0`."))
+    end
+end
+
 """
     $(TYPEDSIGNATURES)
 
 Creates an ODEProblem object used by OrdinaryDiffEqTsit5.jl from the equations in `eom` to simulate time-evolution within `timespan`.
 `fixed_parameters` must be a dictionary mapping parameters+variables to numbers (possible to use a solution index, e.g. solutions[x][y] for branch y of solution x).
-If `u0` is specified, it is used as an initial condition; otherwise the values from `fixed_parameters` are used.
+The right-hand side is compiled once; each evaluation only computes numerical sweep values.
+If `u0` is specified, it is used as an initial condition; otherwise state values are read in
+harmonic-variable order from `fixed_parameters`. Both harmonic symbols and the bracket-free
+symbols returned by `get_single_solution` are accepted.
 """
 function OrdinaryDiffEqTsit5.ODEProblem(
     eom::HarmonicEquation,
@@ -20,67 +33,35 @@ function OrdinaryDiffEqTsit5.ODEProblem(
         eom = rearrange_standard(eom)
     end
 
-    fixed = Dict(fixed_parameters)
-    # substitute fixed parameters
-    fixed = filter_duplicate_parameters(sweep, fixed)
-    p_values = [fixed[p] for p in keys(fixed)]
-    subeqs = substitute_all(
-        Num.(getfield.(eom.equations, :lhs)), Dict(zip(keys(fixed), p_values))
-    )
     vars = get_variables(eom)
-
-    # substitute the harmonic variables and sweep parameters; fold so the result is numeric
-    function eqs(v, T)
-        sub_dict = merge(
-            Dict(zip(vars, v)), Dict(zip(keys(sweep), [sweep[p](T) for p in keys(sweep)]))
-        )
-        return [
-            real(Symbolics.value(Symbolics.substitute(eq, sub_dict; fold=Val{true}()))) for
-            eq in subeqs
-        ]
+    fixed = filter_duplicate_parameters(sweep, Dict(fixed_parameters))
+    # State values initialize the trajectory; they must not freeze its variables.
+    for variable in vcat(vars, declare_variables(eom))
+        delete!(fixed, variable)
     end
+    rhs = real.(substitute_all(Num.(getfield.(eom.equations, :lhs)), fixed))
+    parameters = collect(keys(sweep))
+    functions = Tuple(sweep[parameter] for parameter in parameters)
+    time = only(get_independent_variables(eom))
+    _, compiled! = Symbolics.build_function(
+        rhs, vars, parameters, time; expression=Val(false)
+    )
 
-    function f!(du, u, p, T) # in-place
-        state = eqs(u, T)
-        for j in 1:length(vars)
-            du[j] = state[j]
+    function f!(du, u, p, T)
+        values = map(functions) do function_at_time
+            return function_at_time(T)
         end
+        compiled!(du, u, values, T)
+        return nothing
     end
 
-    # the initial condition is u0 if specified, taken from fixed_parameters otherwise
     initial = if isempty(u0)
-        real.(collect(values(fixed_parameters))[1:length(vars)]) * (1 - perturb_initial)
+        real.(initial_values(eom, fixed_parameters)) * (1 - perturb_initial)
     else
         u0
     end
 
     return ODEProblem(f!, initial, timespan; kwargs...)
-end
-
-"""
-$(TYPEDSIGNATURES)
-
-Numerically investigate the stability of a solution `soln` of `eom` within `timespan`.
-The initial condition is displaced by `perturb_initial`.
-
-Return `true` the solution evolves within `tol` of the initial value (interpreted as stable).
-
-"""
-function HarmonicSteadyState.is_stable(
-    steady_solution::StateDict,
-    eom::HarmonicEquation;
-    timespan,
-    tol=1e-1,
-    perturb_initial=1e-3,
-)
-    problem = ODEProblem(eom; steady_solution, timespan)
-    solution = solve(problem)
-    dist = norm(solution[end] - solution[1]) / (norm(solution[end]) + norm(solution[1]))
-    return if !is_real(solution[end]) || !is_real(solution[1])
-        error("the solution is complex!")
-    else
-        dist < tol
-    end
 end
 
 function HarmonicSteadyState.transform_solutions(
