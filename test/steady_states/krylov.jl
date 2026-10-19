@@ -57,7 +57,6 @@ res2 = get_steady_states(harmonic_eq2, varied, fixed; show_progress=false);
             solk = substitute(eqk, subs)
             solh = substitute(eqh, subs)
             @test Float64(solk - solh) ≈ 0.0 atol = 1e-10
-            # ^ different ansatz
         end
     end
 
@@ -80,7 +79,6 @@ res2 = get_steady_states(harmonic_eq2, varied, fixed; show_progress=false);
             solk = substitute(eqk, subs)
             solh = substitute(eqh, subs)
             @test Float64(solk - solh) ≈ 0.0 atol = 1e-10
-            # ^ different ansatz
         end
     end
 
@@ -109,8 +107,7 @@ res2 = get_steady_states(harmonic_eq2, varied, fixed; show_progress=false);
             subs = Dict([u1, v1, u2, v2, ω₁, ω₂, ω, F, J₂, J₁, α₁, α₂] .=> rand(12))
             solk = substitute(eqk, subs)
             solh = substitute(eqh, subs)
-            @test Float64(solk + solh) ≈ 0.0 broken = true
-            # ^ different ansatz
+            @test Float64(solk - solh) ≈ 0.0 atol = 1e-10
         end
     end
 end
