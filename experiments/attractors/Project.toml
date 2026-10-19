@@ -1,0 +1,29 @@
+[deps]
+QuestBase = "7e80f742-43d6-403d-a9ea-981410111d43"
+Attractors = "f3fd9213-ca85-4dba-9dfd-7fc91308fec7"
+BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
+HarmonicBalance = "e13b9ff6-59c3-11ec-14b1-f3d2cc6c135e"
+HarmonicSteadyState = "1158f75c-a779-4b85-8bfb-8fcf6bf02ced"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+OrdinaryDiffEqTsit5 = "b1df2697-797e-41e3-8120-5422d3b24e4a"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+Symbolics = "0c5d862f-8b57-4792-8d23-62f2024744c7"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[compat]
+QuestBase = "0.5.3"
+Attractors = "2"
+BenchmarkTools = "1"
+HarmonicBalance = "0.18"
+HarmonicSteadyState = "0.6"
+LinearAlgebra = "1.13"
+OrdinaryDiffEqTsit5 = "2"
+Random = "1"
+Symbolics = "7"
+Test = "1"
+julia = "~1.13"
+
+[sources]
+HarmonicSteadyState = {path = "../.."}
+HarmonicBalance = {url = "https://github.com/QuantumEngineeredSystems/HarmonicBalance.jl", rev = "master"}
+QuestBase = {url = "https://github.com/QuantumEngineeredSystems/QuestBase.jl", rev = "main"}
