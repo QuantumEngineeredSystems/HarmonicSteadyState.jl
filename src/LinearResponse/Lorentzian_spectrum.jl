@@ -86,7 +86,7 @@ function _pair_to_peaks(λ, eigvec_2d::Vector; ω)
 end
 
 "Return the indices of a-type variables (zero harmonics) from hvars."
-_get_as(hvars::Vector{HarmonicVariable}) = findall(x -> isequal(x.type, "a"), hvars)
+_get_as(hvars::Vector{HarmonicVariable}) = findall(x -> x.kind == ZeroHarmonic, hvars)
 
 #   Returns the spectra of all variables in `res` for `index` of `branch`.
 """

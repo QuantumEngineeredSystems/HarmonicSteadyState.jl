@@ -120,7 +120,7 @@ end
 function transform_solutions(
     soln::Vector{T}, f::String, harm_eq::HarmonicEquation
 ) where {T}
-    vars = _remove_brackets(get_variables(harm_eq))
+    vars = remove_brackets(get_variables(harm_eq))
     transformed = Vector{T}(undef, length(soln))
 
     # parse the input with Symbolics
@@ -314,16 +314,16 @@ function _to_lab_frame_velocity(soln, vars, times)
         val = real(
             SymbolicUtils.unwrap_const(
                 SymbolicUtils.unwrap(
-                    substitute_all(SymbolicUtils.unwrap(_remove_brackets(var)), soln)
+                    substitute_all(SymbolicUtils.unwrap(remove_brackets(var)), soln)
                 ),
             ),
         )
         ω = real(
             SymbolicUtils.unwrap_const(SymbolicUtils.unwrap(substitute_all(var.ω, soln)))
         )
-        if var.type == "u"
+        if var.kind == CosineQuadrature
             timetrace .+= -ω * val * sin.(ω * times)
-        elseif var.type == "v"
+        elseif var.kind == SineQuadrature
             timetrace .+= ω * val * cos.(ω * times)
         end
     end
@@ -337,18 +337,18 @@ function _to_lab_frame(soln, vars, times)::Vector{AbstractFloat}
         val = real(
             SymbolicUtils.unwrap_const(
                 SymbolicUtils.unwrap(
-                    substitute_all(SymbolicUtils.unwrap(_remove_brackets(var)), soln)
+                    substitute_all(SymbolicUtils.unwrap(remove_brackets(var)), soln)
                 ),
             ),
         )
         ω = real(
             SymbolicUtils.unwrap_const(SymbolicUtils.unwrap(substitute_all(var.ω, soln)))
         )
-        if var.type == "u"
+        if var.kind == CosineQuadrature
             timetrace .+= val * cos.(ω * times)
-        elseif var.type == "v"
+        elseif var.kind == SineQuadrature
             timetrace .+= val * sin.(ω * times)
-        elseif var.type == "a"
+        elseif var.kind == ZeroHarmonic
             timetrace .+= val
         end
     end

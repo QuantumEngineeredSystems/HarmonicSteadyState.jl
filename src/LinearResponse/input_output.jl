@@ -143,7 +143,7 @@ end
 # function make_D(eqs::HarmonicEquation, varied, fixed)
 #     jac = eqs.jacobian
 
-#     variables = QuestBase._remove_brackets(Symbolics.get_variables(eqs))
+#     variables = QuestBase.remove_brackets(Symbolics.get_variables(eqs))
 #     S, Sinv = make_S(length(variables))
 #     Duv = expand.(S * jac * Sinv)
 

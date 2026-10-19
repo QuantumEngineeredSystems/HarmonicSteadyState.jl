@@ -1,13 +1,13 @@
 "Return the indices of u,v pairs belonging to the same natural variable and harmonic from hvars."
 function _get_uv_pairs(hvars::Vector{HarmonicVariable})
-    u_idx = findall(x -> x.type == "u", hvars)
+    u_idx = findall(x -> x.kind == CosineQuadrature, hvars)
     pairs = Vector{Int}[]
     sizehint!(pairs, length(u_idx))
     for i in u_idx
         j = findall(
             x ->
                 isequal(x.ω, hvars[i].ω) &&
-                x.type == "v" &&
+                x.kind == SineQuadrature &&
                 isequal(hvars[i].natural_variable, x.natural_variable),
             hvars,
         )

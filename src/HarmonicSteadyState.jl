@@ -9,7 +9,11 @@ using QuestBase:
     substitute_all,
     get_independent_variables,
     d,
-    _remove_brackets,
+    remove_brackets,
+    CosineQuadrature,
+    SineQuadrature,
+    ZeroHarmonic,
+    LimitCycleFrequency,
     source,
     source_type
 
