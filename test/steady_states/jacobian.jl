@@ -108,6 +108,14 @@ end
 
     elapsed = @elapsed get_steady_states(harmonic_eq, swept, fixed; show_progress=false)
     @test elapsed < 10
+
+    # Issue #170: the random start point of the warm-up must not decide how many solutions
+    # are found. Seed 5 found 4 of the 9 when the start parameters ignored the target scale.
+    @testset "warm-up seed $seed" for seed in UInt32(1):UInt32(12)
+        method = WarmUp(; seed)
+        result = get_steady_states(harmonic_eq, method, swept, fixed; show_progress=false)
+        @test length(result.solutions[1]) == 9
+    end
 end
 
 @testset "autodiff backend gives the same Jacobian" begin

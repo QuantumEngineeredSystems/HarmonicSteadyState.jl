@@ -189,17 +189,32 @@ function _prepare_input_params(
     return unique_fixed, tuple_to_vector.(input_array)
 end
 
+"""
+Random complex start parameters for the warm-up, on the scale of the targets: a standard
+complex normal draw per parameter times the largest magnitude it takes in
+`parameter_values`. The parameter homotopy to every target is then a relative change of
+order one. Draws of order one towards targets of order ten or more make the path tracking
+ill-conditioned and lose solutions.
+"""
+function random_start_parameters(parameter_values::AbstractArray{<:AbstractVector})
+    example = first(parameter_values)
+    scale = map(eachindex(example)) do i
+        magnitude = maximum(p -> abs(p[i]), parameter_values)
+        return iszero(magnitude) ? one(magnitude) : magnitude
+    end
+    return randn(complex(eltype(example)), length(example)) .* scale
+end
+
 "Uses HomotopyContinuation to solve `problem` at specified `parameter_values`."
 function _get_raw_solution(
     problem::HomotopyContinuationProblem, method::WarmUp, parameter_values; show_progress
 )
     warm_up_method = method.warm_up_method
 
-    example_p = parameter_values[1]
-    if isempty(method.start_parameters)
-        start_parameters = randn(complex(eltype(example_p)), length(example_p))
+    start_parameters = if isempty(method.start_parameters)
+        random_start_parameters(parameter_values)
     else
-        start_parameters = method.start_parameters
+        method.start_parameters
     end
 
     warmup_solution = HC.solve(

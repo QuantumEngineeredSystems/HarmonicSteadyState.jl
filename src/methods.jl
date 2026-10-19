@@ -122,7 +122,8 @@ at `index` perturbed by `perturbation_size`. The warmup system is used to perfor
 using all other systems in the parameter sweep. It is very efficient for systems with minimal
 bifurcation in the parameter sweep. The Warm Up method should in theory guarantee to find all
 solutions, however, if the `start_parameters` is not proper (to close to the real line)
-it could miss some solutions.
+it could miss some solutions. Without explicit `start_parameters`, each one is drawn as a
+random complex number on the scale of the largest magnitude that parameter takes in the sweep.
 
 See[HomotopyContinuation.jl](https://www.juliahomotopycontinuation.org/guides/many-systems/)
 for more information.
