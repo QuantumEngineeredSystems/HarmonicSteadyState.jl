@@ -55,3 +55,25 @@ end
     @test all(string.(prob.parameters) .== string.(pars))
     @test all(string.(prob.system.expressions) .== string.(eqs))
 end
+
+@testset "explicit symbol order with Unicode subscripts" begin
+    using Symbolics: @variables
+    @variables a₂ᵣ b₁ᵢ p₁ᵣ
+    problem = HarmonicSteadyState.HomotopyContinuationProblem(
+        [a₂ᵣ - b₁ᵢ^2, b₁ᵢ - p₁ᵣ],
+        [a₂ᵣ, b₁ᵢ],
+        [p₁ᵣ],
+        OrderedDict(p₁ᵣ => [1.0, 2.0]),
+        OrderedDict{Num,Float64}(),
+    )
+    @test string.(problem.variables) == ["a₂ᵣ", "b₁ᵢ"]
+    @test string.(problem.parameters) == ["p₁ᵣ"]
+    result = get_steady_states(
+        problem, TotalDegree(); sorting=:none, classify_default=false, show_progress=false
+    )
+    for (solutions, expected) in zip(result.solutions, ([1.0, 1.0], [4.0, 2.0]))
+        finite = filter(solution -> all(isfinite, solution), solutions)
+        @test !isempty(finite)
+        @test all(solution -> isapprox(solution, expected; atol=1e-6), finite)
+    end
+end

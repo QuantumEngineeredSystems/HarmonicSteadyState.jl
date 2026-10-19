@@ -2,6 +2,25 @@ using QuantumCumulants, HarmonicSteadyState, Symbolics
 # using Plots
 using Test
 
+@testset "subscripted coupled modes" begin
+    h = FockSpace(:cavity) ⊗ FockSpace(:cavity)
+    @qnumbers a₁::Destroy(h, 1) a₂::Destroy(h, 2)
+    parameters = @variables ω₁::Real ω₂::Real ω::Real K₁::Real K₂::Real g::Real F::Real
+    H =
+        -(ω - ω₁) * a₁' * a₁ + K₁ * a₁'^2 * a₁^2 + F * (a₁' + a₁) - (ω - ω₂) * a₂' * a₂ +
+        K₂ * a₂'^2 * a₂^2 +
+        g * (a₁' * a₂ + a₂' * a₁)
+    equations = complete(meanfield([a₁, a₂], H; order=1))
+    problem = HarmonicSteadyState.HomotopyContinuationProblem(
+        equations,
+        parameters,
+        (ω => [0.9, 1.2], F => [0.01, 0.02]),
+        (g => 0.001, ω₁ => 1.0, ω₂ => 1.1, K₁ => 1.0, K₂ => 1.0),
+    )
+    @test length(problem.variables) == 4
+    @test Set(string.(problem.variables)) == Set(["a₁ᵣ", "a₁ᵢ", "a₂ᵣ", "a₂ᵢ"])
+end
+
 @testset "KPO" begin
     h = FockSpace(:cavity)
     @qnumbers a::Destroy(h)
