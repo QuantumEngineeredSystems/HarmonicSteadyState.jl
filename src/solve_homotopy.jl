@@ -220,8 +220,9 @@ function _get_raw_solution(
         alg_default_options(method)...,
     )
 
-    raw_solutions = reshape(result_full, size(parameter_values)...)
-    raw_solutions = HC.solutions.(getindex.(raw_solutions, 1))
+    raw_solutions = HC.solutions.(
+        getindex.(reshape(result_full, size(parameter_values)...), 1)
+    )
     # cache = HC.NewtonCache(F)
     if method.check_zero
         Threads.@threads for i in eachindex(parameter_values)
@@ -271,8 +272,9 @@ function _get_raw_solution(
         ]
     end
 
-    raw_solutions = reshape(result_full, size(parameter_values)...)
-    raw_solutions = HC.solutions.(getindex.(raw_solutions, 1))
+    raw_solutions = HC.solutions.(
+        getindex.(reshape(result_full, size(parameter_values)...), 1)
+    )
 
     # reshape back to the original shape
     return raw_solutions

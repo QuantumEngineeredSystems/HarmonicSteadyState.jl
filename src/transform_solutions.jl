@@ -1,4 +1,14 @@
 """
+The position of `index` among `solutions`: `index` itself if it has one entry per
+dimension, otherwise a single linear index.
+"""
+function solution_position(solutions::AbstractArray, index)
+    length(index) == ndims(solutions) && return CartesianIndex(index)
+    length(index) == 1 && return CartesianIndices(solutions)[only(index)]
+    return error("Index $index undefined for a solution of size $(size(solutions))")
+end
+
+"""
 $(TYPEDSIGNATURES)
 Return an ordered dictionary specifying all variables and parameters of the solution
 in `result` on `branch` at the position `index`.
@@ -6,24 +16,13 @@ in `result` on `branch` at the position `index`.
 function get_single_solution(
     res::Result{D,S,P}; branch::Int, index
 )::OrderedDict{Num,S} where {D,S,P}
+    position = solution_position(res.solutions, index)
 
-    # check if the dimensionality of index matches the solutions
-    if length(size(res.solutions)) !== length(index)
-        # if index is a number, use linear indexing
-        index = if length(index) == 1
-            CartesianIndices(res.solutions)[index]
-        else
-            error("Index ", index, " undefined for a solution of size ", size(res.solutions))
-        end
-    else
-        index = CartesianIndex(index)
-    end
-
-    vars = OrderedDict(zip(res.problem.variables, res.solutions[index][branch]))
+    vars = OrderedDict(zip(res.problem.variables, res.solutions[position][branch]))
 
     # collect the swept parameters required for this call
     swept_params = OrderedDict(
-        key => res.swept_parameters[key][index[i]] for
+        key => res.swept_parameters[key][position[i]] for
         (i, key) in enumerate(keys(res.swept_parameters))
     )
     full_solution = merge(vars, swept_params, res.fixed_parameters)
@@ -40,24 +39,13 @@ end
 function get_variable_solutions(
     res::Result{D,S,P}; branch::Int, index
 )::Vector{S} where {D,S,P}
+    position = solution_position(res.solutions, index)
 
-    # check if the dimensionality of index matches the solutions
-    if length(size(res.solutions)) !== length(index)
-        # if index is a number, use linear indexing
-        index = if length(index) == 1
-            CartesianIndices(res.solutions)[index]
-        else
-            error("Index ", index, " undefined for a solution of size ", size(res.solutions))
-        end
-    else
-        index = CartesianIndex(index)
-    end
-
-    sol = res.solutions[index][branch]
+    sol = res.solutions[position][branch]
 
     # collect the swept parameters required for this call
     swept_params = [
-        res.swept_parameters[key][index[i]] for
+        res.swept_parameters[key][position[i]] for
         (i, key) in enumerate(keys(res.swept_parameters))
     ]
     return vcat(sol, swept_params)
@@ -263,14 +251,15 @@ function get_branches(
     class=["physical", "stable"],
     not_class=[],
 )
-    Y = transform_solutions(res, y; branches, realify)
-    Y = _apply_mask(Y, _get_mask(res, class, not_class; branches))
+    Y = _apply_mask(
+        transform_solutions(res, y; branches, realify),
+        _get_mask(res, class, not_class; branches),
+    )
     if realify
-        branches = map(idx -> real(getindex.(Y, idx)), eachindex(first(Y)))
+        return map(idx -> real(getindex.(Y, idx)), eachindex(first(Y)))
     else
-        branches = map(idx -> getindex.(Y, idx), eachindex(first(Y)))
+        return map(idx -> getindex.(Y, idx), eachindex(first(Y)))
     end
-    return branches
 end
 
 ###
