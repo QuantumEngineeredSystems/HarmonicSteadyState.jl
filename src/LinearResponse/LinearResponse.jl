@@ -6,7 +6,7 @@ using ProgressMeter: ProgressMeter, Progress, next!
 
 using Symbolics: Symbolics, Num
 using SymbolicUtils: SymbolicUtils, unwrap
-using LinearAlgebra: LinearAlgebra, norm, eigen, eigvals, eigvecs, I
+using LinearAlgebra: LinearAlgebra, norm, eigen, I
 
 using HarmonicSteadyState:
     HarmonicSteadyState,
@@ -16,7 +16,11 @@ using HarmonicSteadyState:
     StateDict,
     get_single_solution,
     get_class,
-    swept_parameters
+    swept_parameters,
+    stability_spectrum,
+    eigenmodes,
+    FirstOrderSpectrum,
+    SecondOrderSpectrum
 
 using QuestBase:
     QuestBase,

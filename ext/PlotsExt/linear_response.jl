@@ -7,7 +7,10 @@ on `branch` identifier.
 
 # Keyword arguments
 - `Ω_range`: Range of frequency of the noise probe
-- `order`: Order of slow-time derivatives to keep (default: 1)
+- `order`: With `order=1` (default), the response is the sum of Lorentzians peaked at the
+  eigenvalues of the [`stability_spectrum`](@ref HarmonicSteadyState.stability_spectrum).
+  With `order=2`, it is solved from the response matrix of the natural equations, keeping
+  the second slow-time derivatives of the perturbation.
 - `logscale`: Whether to plot response in log scale (default: false)
 - `show_progress`: Show progress bar during computation (default: true)
 - `kwargs...`: Additional arguments passed to Plots.heatmap
@@ -60,7 +63,6 @@ on the `followed_branches` identifiers with the size of `Ω_range`.
 
 # Keyword arguments
 - `Ω_range`: Range of frequency of the noise probe
-- `order`: Order of slow-time derivatives to keep (default: 1)
 - `logscale`: Whether to plot response in log scale (default: false)
 - `show_progress`: Show progress bar during computation (default: true)
 - `kwargs...`: Additional arguments passed to Plots.heatmap
@@ -157,8 +159,11 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Visualize the eigenvalues of the Jacobian in the rotating frame for `branch` identifier in
-the [`Result`](@ref HarmonicSteadyState.Result) `res`.
+Visualize the eigenvalues of the
+[`stability_spectrum`](@ref HarmonicSteadyState.stability_spectrum) in the rotating frame for
+`branch` identifier in the [`Result`](@ref HarmonicSteadyState.Result) `res`. These are the
+eigenvalues of the slow-flow Jacobian, or of the quadratic eigenvalue problem if the harmonic
+equations keep the second slow-time derivatives.
 
 # Keyword arguments
 - `class`: Array of solution classes to include (default: ["physical"])
@@ -193,9 +198,8 @@ function HarmonicSteadyState.plot_eigenvalues(
     D == 1 || throw(ArgumentError("Eigenvalue plotting requires a one-dimensional sweep."))
     selected = _get_mask(res, class)
     varied = Vector{P}(swept_parameters(res))
-    count = length(get_variables(res))
-    eigenvalues = fill(ComplexF64(NaN), count, length(varied))
-    weights = fill(NaN, count, length(varied))
+    spectrum = HarmonicSteadyState.stability_spectrum(res)
+    points = Tuple{Int,Vector{ComplexF64},Vector{Float64}}[]
 
     for index in eachindex(varied)
         selected[index][branch] || continue
@@ -203,9 +207,18 @@ function HarmonicSteadyState.plot_eigenvalues(
         any(isnan, state) && continue # absent branches retain aligned plot gaps
         jacobian = res.jacobian(state)
         any(isnan, jacobian) && error("The Jacobian contains NaN at sweep point $index.")
-        decomposition = eigen(jacobian)
-        eigenvalues[:, index] .= decomposition.values
-        weights[:, index] .= map(projection, eachcol(decomposition.vectors))
+        decomposition = HarmonicSteadyState.eigenmodes(spectrum, state)
+        weight = map(projection, eachcol(decomposition.vectors))
+        push!(points, (index, decomposition.values, weight))
+    end
+
+    # a second-order spectrum holds up to two eigenvalues per variable
+    count = maximum(p -> length(p[2]), points; init=length(get_variables(res)))
+    eigenvalues = fill(ComplexF64(NaN), count, length(varied))
+    weights = fill(NaN, count, length(varied))
+    for (index, values, weight) in points
+        eigenvalues[eachindex(values), index] .= values
+        weights[eachindex(weight), index] .= weight
     end
 
     if type == :imag

@@ -18,7 +18,7 @@ using HarmonicSteadyState:
     _get_mask
 
 using Symbolics: Num, get_variables
-using LinearAlgebra: LinearAlgebra, eigen
+using LinearAlgebra: LinearAlgebra
 
 using HarmonicSteadyState.LinearResponse:
     get_jacobian_response, get_rotframe_jacobian_response

@@ -92,10 +92,18 @@ function stability_spectrum(res::Result, eom::HarmonicEquation)
     all(iszero, J2) && return FirstOrderSpectrum(res.jacobian)
     sym_order = _free_symbols(res)
     rules = res.fixed_parameters
+    # each natural variable has as many Floquet exponents as the order of its equation
+    natural = [hv.natural_variable for hv in eom.variables]
+    exponents = sum(unique(natural)) do x
+        return any(!iszero, J2[:, findall(isequal(x), natural)]) ? 2 : 1
+    end
+    harmonics = Num[hv.kind == ZeroHarmonic ? 0 : hv.ω for hv in eom.variables]
     return SecondOrderSpectrum(
         res.jacobian,
         compile_matrix(_get_J_matrix(eom; order=1), sym_order; rules),
         compile_matrix(J2, sym_order; rules),
+        compile_matrix(reshape(harmonics, :, 1), sym_order; rules),
+        exponents,
     )
 end
 
@@ -137,20 +145,14 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Returns true if the solution `soln` of the problem `prob` is Hopf-unstable.
-Hopf-unstable solutions are real and unstable, and the slow-flow Jacobian has exactly two
-eigenvalues with positive real parts, which are complex conjugates of each other.
-
-The count is taken on the slow flow because the [`SecondOrderSpectrum`](@ref) holds several
-copies of every Floquet exponent. The instability itself is decided by the
-[`stability_spectrum`](@ref), so that no solution is classified stable and Hopf-unstable.
+Returns true if the solution `soln` of the Result `res` is Hopf-unstable.
+Hopf-unstable solutions are real and unstable, with exactly two eigenvalues of their
+[`stability_spectrum`](@ref) in the right half-plane, which are complex conjugates of each other.
 
 `im_tol` : an absolute threshold to distinguish real/complex numbers.
 """
 function is_Hopf_unstable(soln::StateDict, res::Result)
-    vals = collect(values(soln))
-    return !_is_stable(vals, stability_spectrum(res)) &&
-           _is_Hopf_unstable(vals, res.jacobian)
+    return _is_Hopf_unstable(collect(values(soln)), stability_spectrum(res))
 end
 
 """
@@ -160,25 +162,21 @@ Returns a function that checks if a solution is Hopf-unstable.
 """
 function _is_Hopf_unstable(res::Result)
     spectrum = stability_spectrum(res)
-    return function _isit(soln)
-        return !_is_stable(soln, spectrum) && _is_Hopf_unstable(soln, res.jacobian)
-    end
+    return _isit(soln) = _is_Hopf_unstable(soln, spectrum)
 end
 
 """
 $(TYPEDSIGNATURES)
 
-Returns true if the solution `soln` is Hopf-unstable.
+Returns true if the solution `soln` is Hopf-unstable, with `spectrum` its stability spectrum.
+The instability is judged as for the `"stable"` class, so that no solution is both.
 """
-function _is_Hopf_unstable(soln, J)
+function _is_Hopf_unstable(soln, spectrum; rel_tol=1e-10)
     _is_physical(soln) || return false  # the solution is unphysical anyway
-    λs = eigvals(J(soln))
-    unstable = filter(x -> real(x) > 0, λs)
-    if length(unstable) == 2 && abs(conj(unstable[1]) - unstable[2]) < IM_TOL
-        return true
-    else
-        return false
-    end
+    λs = spectrum(soln)
+    scale = maximum(Iterators.map(abs, λs))
+    unstable = filter(x -> real(x) >= rel_tol * scale, λs)
+    return length(unstable) == 2 && abs(conj(unstable[1]) - unstable[2]) < IM_TOL
 end
 
 """
