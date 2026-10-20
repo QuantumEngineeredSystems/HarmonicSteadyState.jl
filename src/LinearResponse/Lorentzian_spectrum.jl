@@ -90,12 +90,18 @@ _get_as(hvars::Vector{HarmonicVariable}) = findall(x -> x.kind == ZeroHarmonic, 
 
 #   Returns the spectra of all variables in `res` for `index` of `branch`.
 """
-Here linear response is treated with the slow-flow approximation (SFA), see Chapter 5
-of JK's thesis. Linear response always appears as a sum of Lorentzians, but is inaccurate where
-these are peaked far from the drive frequency.
+Here linear response is a sum of Lorentzians, one pair for each eigenvalue of the
+[`stability_spectrum`](@ref HarmonicSteadyState.stability_spectrum) `spectrum`, weighted by its
+eigenvector, see Chapter 5 of JK's thesis. With the slow flow these are inaccurate where they
+are peaked far from the drive frequency; harmonic equations that keep the second slow-time
+derivatives place them at the eigenvalues of the quadratic problem instead.
 """
 function JacobianSpectrum(
-    res::Result{D,S,P}; index::Int, branch::Int, force=false
+    res::Result{D,S,P};
+    index::Int,
+    branch::Int,
+    force=false,
+    spectrum=stability_spectrum(res),
 ) where {D,S,P}
     eom = HarmonicSteadyState._harmonic_equation(res, "compute a Jacobian spectrum")
     hvars = eom.variables # fetch the vector of HarmonicVariable
@@ -113,7 +119,7 @@ function JacobianSpectrum(
 
     solution_dict = get_single_solution(res; branch=branch, index=index)
     solutions = get_variable_solutions(res; branch=branch, index=index)
-    λs, vs = eigen(res.jacobian(solutions))
+    λs, vs = eigenmodes(spectrum, solutions)
 
     uv_pairs = _get_uv_pairs(hvars)
     a_idxs = _get_as(hvars)

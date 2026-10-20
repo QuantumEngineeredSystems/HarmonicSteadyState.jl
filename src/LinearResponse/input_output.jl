@@ -58,29 +58,61 @@ function get_susceptibility(
 
     χ = Matrix{ComplexF64}(undef, length(Ω_range), length(inds))
 
+    spectrum = stability_spectrum(result)
     for (i, index) in enumerate(inds)
-        sol = get_single_solution(result; branch, index)
+        sol = collect(values(get_single_solution(result; branch, index)))
+        susceptibility!(view(χ, :, i), spectrum, sol, op_index, Ω_range, S, Sinv)
+    end
+    return χ
+end
 
-        jac = result.jacobian(collect(values(sol)))
+"""
+$(TYPEDSIGNATURES)
 
-        D = S * jac * Sinv
+Fill `χ` with the susceptibility of the variable `op_index` at the steady state `sol`, for each
+frequency in `Ω_range`. The probe enters the slow flow additively, `u̇ = J u + ξ`, so with
+`D = S J S⁻¹` the dynamical matrix, `χ(Ω) = [(iΩ - D)⁻¹]_{ii}`.
+"""
+function susceptibility!(χ, spectrum::FirstOrderSpectrum, sol, op_index, Ω_range, S, Sinv)
+    jac = spectrum.jacobian(sol)
 
-        eig = eigen(D)
+    D = S * jac * Sinv
 
-        # Pre-compute the matrix decomposition
-        V = eig.vectors
-        Vinv = inv(V)
-        λ = eig.values
+    eig = eigen(D)
 
-        # Extract only the needed element from the matrix multiplication
-        # χ_ij = -sum_k V[i,k] * (1/(λ[k] - im*Ω)) * Vinv[k,j]
-        for (j, Ω_val) in enumerate(Ω_range)
-            χ_val = zero(ComplexF64)
-            for k in eachindex(λ)
-                χ_val += V[op_index, k] * (1 / (λ[k] - im * Ω_val)) * Vinv[k, op_index]
-            end
-            @inbounds χ[j, i] = -χ_val
+    # Pre-compute the matrix decomposition
+    V = eig.vectors
+    Vinv = inv(V)
+    λ = eig.values
+
+    # Extract only the needed element from the matrix multiplication
+    # χ_ij = -sum_k V[i,k] * (1/(λ[k] - im*Ω)) * Vinv[k,j]
+    for (j, Ω_val) in enumerate(Ω_range)
+        χ_val = zero(ComplexF64)
+        for k in eachindex(λ)
+            χ_val += V[op_index, k] * (1 / (λ[k] - im * Ω_val)) * Vinv[k, op_index]
         end
+        @inbounds χ[j] = -χ_val
+    end
+    return χ
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+The same for harmonic equations that keep the second slow-time derivatives,
+`J₂ ü + J₁ u̇ + G(u) = 0`. The probe enters as the force `J₁ ξ`, which is how it enters the
+slow flow, so that `χ(Ω) = [S M(iΩ)⁻¹ J₁ S⁻¹]_{ii}` with `M(s) = s² J₂ + s J₁ + J₀`.
+This reduces to the first-order susceptibility when `J₂ = 0`.
+"""
+function susceptibility!(χ, spectrum::SecondOrderSpectrum, sol, op_index, Ω_range, S, Sinv)
+    J1 = spectrum.J1(sol)
+    J2 = spectrum.J2(sol)
+    J0 = -J1 * spectrum.jacobian(sol)
+    for (j, Ω_val) in enumerate(Ω_range)
+        s = im * Ω_val
+        R = (s^2 * J2 + s * J1 + J0) \ (J1 * Sinv)
+        @inbounds χ[j] = transpose(S[op_index, :]) * R[:, op_index]
     end
     return χ
 end
