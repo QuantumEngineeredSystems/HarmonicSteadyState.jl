@@ -26,7 +26,7 @@ end
 using DocStringExtensions: TYPEDSIGNATURES, TYPEDEF, TYPEDFIELDS
 using OrderedCollections: OrderedDict
 using ProgressMeter: ProgressMeter, Progress
-using LinearAlgebra: LinearAlgebra, eigvals, ldiv!, lu!
+using LinearAlgebra: LinearAlgebra, eigen, eigvals, ldiv!, lu!
 using Random: Random # for setting seed
 
 using DifferentiationInterface: DifferentiationInterface, Constant

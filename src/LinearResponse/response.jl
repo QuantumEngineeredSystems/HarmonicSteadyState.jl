@@ -19,7 +19,8 @@ function get_jacobian_response(
     stable = get_class(res, branch, "stable") # boolean array
     !any(stable) && error("Cannot generate a spectrum - no stable solutions!")
 
-    spectra = [JacobianSpectrum(res; branch=branch, index=i) for i in findall(stable)]
+    spectrum = stability_spectrum(res)
+    spectra = [JacobianSpectrum(res; branch, index=i, spectrum) for i in findall(stable)]
     C = Array{P,2}(undef, length(Ω_range), length(spectra))
 
     bar = if show_progress
@@ -44,8 +45,9 @@ function get_jacobian_response(
     show_progress=true,
     force=false,
 ) where {D,S,P}
+    spectrum = stability_spectrum(res)
     spectra = [
-        JacobianSpectrum(res; branch=branch, index=i, force=force) for
+        JacobianSpectrum(res; branch, index=i, force, spectrum) for
         (i, branch) in pairs(followed_branches)
     ]
     C = Array{P,2}(undef, length(Ω_range), length(spectra))
@@ -82,8 +84,9 @@ end
 $(TYPEDSIGNATURES)
 
 Calculate the rotating frame Jacobian response for a given branch.
-Computes the rotating frame Jacobian response by evaluating eigenvalues of the numerical
-Jacobian and calculating the response magnitude for each frequency in the range.
+Computes the rotating frame Jacobian response by evaluating the eigenvalues of the
+[`stability_spectrum`](@ref HarmonicSteadyState.stability_spectrum) and calculating the
+response magnitude for each frequency in the range.
 
 # Arguments
 - `res::Result`: Result object containing the system's solutions
@@ -115,10 +118,10 @@ function get_rotframe_jacobian_response(
         nothing
     end
 
+    spectrum = stability_spectrum(res)
     for i in 1:sum(stable)
         s = get_variable_solutions(res; branch=branch, index=stableidx[i])
-        jac = res.jacobian(s) #numerical Jacobian
-        λs, vs = eigen(jac)
+        λs = eigenmodes(spectrum, s).values
         for j in λs
             for k in 1:(size(C)[1])
                 C[k, i] +=
@@ -136,8 +139,10 @@ end
 """
     eigenvalues(res::Result, branch; class=["physical"])
 
-Calculate the eigenvalues of the Jacobian matrix of the harmonic equations of a `branch`
-for a one dimensional sweep in the [`Result`](@ref HarmonicSteadyState.Result) struct.
+Calculate the eigenvalues of the [`stability_spectrum`](@ref HarmonicSteadyState.stability_spectrum)
+of a `branch` for a one dimensional sweep in the [`Result`](@ref HarmonicSteadyState.Result)
+struct. These are the eigenvalues of the Jacobian of the slow flow, or those of the quadratic
+eigenvalue problem if the harmonic equations keep the second slow-time derivatives.
 
 # Arguments
 - `res::Result`: Result object containing solutions and jacobian information
@@ -159,9 +164,10 @@ function eigenvalues(res::Result{D,S,P}, branch; class=["physical"]) where {D,S,
     D != 1 && error("For the moment only 1 dimension sweep are supported.")
     varied = Vector{P}(swept_parameters(res))
 
+    spectrum = stability_spectrum(res)
     eigenvalues = map(eachindex(varied)) do i
-        jac = res.jacobian(get_variable_solutions(res; branch=branch, index=i))
-        if any(isnan, jac)
+        state = get_variable_solutions(res; branch=branch, index=i)
+        if any(isnan, state)
             throw(
                 ErrorException(
                     "The branch contains NaN values.
@@ -169,7 +175,7 @@ function eigenvalues(res::Result{D,S,P}, branch; class=["physical"]) where {D,S,
                 ),
             )
         end
-        return eigvals(jac)
+        return eigenmodes(spectrum, state).values
     end
     eigenvalues_filtered = map(.*, eigenvalues, filter_branch)
 
@@ -178,7 +184,14 @@ end
 
 """
     eigenvectors(res::Result, branch; class=["physical"])
-get_Jacobiannch to analyze
+
+Calculate the eigenvectors belonging to [`eigenvalues`](@ref) of a `branch` for a one
+dimensional sweep in the [`Result`](@ref HarmonicSteadyState.Result) struct. Each holds the
+perturbation of the harmonic variables and has unit length.
+
+# Arguments
+- `res::Result`: Result object containing solutions and jacobian information
+- `branch`: Index of the solution branch to analyze
 - `class=["physical"]`: Filter for solution classes to include, defaults to physical solutions
 
 # Returns
@@ -196,9 +209,10 @@ function eigenvectors(res::Result{D,S,P}, branch; class=["physical"]) where {D,S
     D != 1 && error("For the moment only 1 dimension sweep are supported.")
     varied = Vector{P}(swept_parameters(res))
 
+    spectrum = stability_spectrum(res)
     eigenvectors = map(eachindex(varied)) do i
-        jac = res.jacobian(get_variable_solutions(res; branch=branch, index=i))
-        if any(isnan, jac)
+        state = get_variable_solutions(res; branch=branch, index=i)
+        if any(isnan, state)
             throw(
                 ErrorException(
                     "The branch contains NaN values.
@@ -206,7 +220,7 @@ function eigenvectors(res::Result{D,S,P}, branch; class=["physical"]) where {D,S
                 ),
             )
         end
-        return eigvecs(jac)
+        return eigenmodes(spectrum, state).vectors
     end
     eigvecs_filtered = map(.*, eigenvectors, filter_branch)
 

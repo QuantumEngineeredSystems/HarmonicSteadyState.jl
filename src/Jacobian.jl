@@ -168,6 +168,147 @@ function get_ad_Jacobian(eom::HarmonicEquation; sym_order, rules=Dict(), backend
     return jacfunc
 end
 
+"""
+$(TYPEDEF)
+
+The stability spectrum of a steady state of harmonic equations that are first order in the
+slow time: the eigenvalues of the Jacobian `jacobian`. These are the harmonic equations of
+a system that is itself first order, which carry no approximation, and those derived with
+the usual slow flow, which drops the second slow-time derivatives. The latter are reliable
+only for eigenvalues small next to the harmonic frequencies, see [`SecondOrderSpectrum`](@ref).
+
+# Fields
+$(TYPEDFIELDS)
+"""
+struct FirstOrderSpectrum{F}
+    "The Jacobian, called on `[variables..., swept parameters...]`."
+    jacobian::F
+end
+
+(s::FirstOrderSpectrum)(vals::Vector) = eigvals(real.(s.jacobian(vals)))
+
+"""
+$(TYPEDSIGNATURES)
+
+The eigenvalues of `spectrum` at `vals` with the perturbations `δu` of the harmonic variables
+that belong to them, as a `LinearAlgebra.Eigen`. Each eigenvector has unit length.
+"""
+eigenmodes(s::FirstOrderSpectrum, vals::Vector) = eigen(s.jacobian(vals))
+
+"""
+$(TYPEDEF)
+
+The stability spectrum of a steady state of harmonic equations that keep the second
+slow-time derivatives of the harmonic variables, `J₂ ü + J₁ u̇ + G(u) = 0`. Linearising
+around the steady state gives the quadratic eigenvalue problem
+
+```math
+\\left(λ^2 J_2 + λ J_1 + J_0\\right) δ\\mathbf{u} = 0 \\,,
+```
+
+which is Hill's method restricted to the harmonics of the ansatz. The first-order slow flow
+solves `(λ J₁ + J₀) δu = 0` instead, so it misjudges the stability whenever an eigenvalue is
+comparable to a harmonic frequency, and adding harmonics does not cure it.
+
+The quadratic problem holds each Floquet exponent several times, shifted along the imaginary
+axis by multiples of the spacing `Δ` of the frequencies `±ωₖ` of the ansatz (`2ω` for
+`[ω, 3ω]`, `ω` for `[ω, 2ω, 3ω]`). Only the copy nearest the real axis is resolved by all
+harmonics; the others reach past the highest harmonic, and their real parts can be wrong, to
+the point of a spurious instability. The spectrum therefore keeps one eigenvalue for each
+Floquet exponent of the natural equations, `exponents` in total (two per second-order and one
+per first-order variable), taken in order of `|Im λ|`. Near the edge of the strip,
+`|Im λ| > Δ/4`, a conjugate pair is a single exponent seen from both sides, so only its member
+with `Im λ > 0` is kept. These eigenvalues converge to the Floquet exponents of the periodic
+orbit as harmonics are added.
+
+The problem is solved as the generalised eigenproblem of its companion pencil, so `J₂` may
+be singular: variables whose equations of motion are first order contribute infinite
+eigenvalues, which are dropped. `J₀ = -J₁ J` is recovered from the slow-flow Jacobian `J`,
+so only the derivative blocks are compiled here, whichever way `J` was obtained.
+
+# Fields
+$(TYPEDFIELDS)
+"""
+struct SecondOrderSpectrum{F,G1,G2,H}
+    "The slow-flow Jacobian `-J₁⁻¹J₀`, called on `[variables..., swept parameters...]`."
+    jacobian::F
+    "The coefficient `J₁` of the first slow-time derivatives."
+    J1::G1
+    "The coefficient `J₂` of the second slow-time derivatives."
+    J2::G2
+    "The frequencies of the harmonics of the ansatz, as an `n×1` matrix."
+    harmonics::H
+    "The number of Floquet exponents, the orders of the natural equations summed."
+    exponents::Int
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+The companion pencil `(A, B)` of `spectrum` at `vals`, whose generalised eigenvectors
+`[δu; λ δu]` linearise the quadratic eigenvalue problem.
+"""
+function companion_pencil(s::SecondOrderSpectrum, vals::Vector)
+    J = real.(s.jacobian(vals))
+    J1 = real.(s.J1(vals))
+    J2 = real.(s.J2(vals))
+    n = size(J, 1)
+    A = [zeros(n, n) LinearAlgebra.I; J1*J -J1]
+    B = [LinearAlgebra.I zeros(n, n); zeros(n, n) J2]
+    return A, B
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+The spacing of the copies of a Floquet exponent for the harmonic frequencies `ωs`: the
+greatest common divisor of the differences between the frequencies `±ωₖ`, and `0` for a zero
+harmonic. A zero harmonic alone has no copies, and frequencies without a common divisor give
+a spacing at the tolerance, so that every conjugate pair is represented by its upper member.
+"""
+function copy_spacing(ωs::Vector{<:Real})
+    hill = unique(vcat(ωs, -ωs))
+    tol = 1e-8 * maximum(abs, hill)
+    gaps = [abs(a - b) for a in hill for b in hill if abs(a - b) > tol]
+    isempty(gaps) && return Inf
+    return reduce(gaps) do a, b
+        while b > tol # Euclid's algorithm, with remainders within `tol` of zero rounded off
+            r = mod(a, b)
+            a, b = b, (r < tol || b - r < tol) ? zero(r) : r
+        end
+        return a
+    end
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+The indices of the eigenvalues `λs` of `spectrum` at `vals` that represent its Floquet
+exponents, one for each, see [`SecondOrderSpectrum`](@ref).
+"""
+function principal_exponents(s::SecondOrderSpectrum, λs::Vector, vals::Vector)
+    Δ = copy_spacing(vec(real.(s.harmonics(vals))))
+    finite = filter(j -> isfinite(λs[j]), eachindex(λs))
+    # in order of |Im λ|, upper members of conjugate pairs first
+    order = sort(finite; by=j -> (abs(imag(λs[j])), -imag(λs[j])))
+    edge(λ) = abs(imag(λ)) > Δ / 4 && imag(λ) < 0
+    return first(filter(j -> !edge(λs[j]), order), s.exponents)
+end
+
+function (s::SecondOrderSpectrum)(vals::Vector)
+    λs = eigvals(companion_pencil(s, vals)...)
+    return λs[principal_exponents(s, λs, vals)]
+end
+
+function eigenmodes(s::SecondOrderSpectrum, vals::Vector)
+    A, B = companion_pencil(s, vals)
+    F = eigen(A, B)
+    kept = principal_exponents(s, F.values, vals)
+    V = F.vectors[1:(size(A, 1) ÷ 2), kept] # the δu block
+    foreach(LinearAlgebra.normalize!, eachcol(V))
+    return LinearAlgebra.Eigen(F.values[kept], V)
+end
+
 function get_implicit_Jacobian(p::SteadyStateProblem)
     eom = _harmonic_equation(p, "compile an implicit Jacobian")
     return get_implicit_Jacobian(eom; sym_order=_free_symbols(p), rules=p.fixed_parameters)
@@ -176,8 +317,10 @@ end
 # for implicit evaluation, the numerical values precede the rearrangement
 # for limit cycles, the zero eigenvalue causes the rearrangement to fail -> filter it out
 # THIS SETS ALL DERIVATIVES TO ZERO - assumes use for steady states
+# `order=2` is the coefficient of the second slow-time derivatives, which the harmonic
+# equations keep only when derived with a slow flow of `degree=3`; it is zero otherwise
 function _get_J_matrix(eom::HarmonicEquation; order=0)
-    order > 1 && error("Cannot get a J matrix of order > 1 from the harmonic equations.\n
+    order > 2 && error("Cannot get a J matrix of order > 2 from the harmonic equations.\n
                        These are by definition missing higher derivatives")
 
     vars_simp = Dict([var => remove_brackets(var) for var in get_variables(eom)])
